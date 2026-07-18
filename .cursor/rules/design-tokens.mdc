@@ -1,0 +1,53 @@
+---
+description: Design token enforcement for Gifwoods color palette and typography
+globs: **/*.{ts,tsx,css}
+alwaysApply: false
+---
+
+# Design Tokens
+
+## Color Palette
+Never hardcode hex values. Use Tailwind token classes or CSS variables:
+
+| Token | Value | Tailwind Class |
+|---|---|---|
+| Primary Gold | `#e5a93c` | `text-gold`, `bg-gold`, `border-gold` |
+| Primary Dark | `#16130f` | `text-dark`, `bg-dark` |
+| Secondary Dark | `#2e271f` | `text-secondary-dark`, `bg-secondary-dark` |
+
+CSS variables available globally:
+```css
+var(--color-gold)           /* #e5a93c */
+var(--color-dark)           /* #16130f */
+var(--color-secondary-dark) /* #2e271f */
+```
+
+## Typography
+Use Tailwind typography classes only — never hardcode `font-family`, `font-size`, or `font-weight`:
+
+```tsx
+// ❌ BAD
+<h1 style={{ fontSize: '48px', fontWeight: 700, fontFamily: 'Playfair Display' }}>
+
+// ✅ GOOD
+<h1 className="font-display text-4xl font-bold text-dark">
+```
+
+## Spacing & Shadows
+Use the extended Tailwind scale defined in `tailwind.config.ts` — never raw px/rem values in className strings.
+
+## Examples
+
+```tsx
+// ❌ BAD — hardcoded color
+<button className="bg-[#e5a93c] text-[#16130f]">
+
+// ✅ GOOD — design token
+<button className="bg-gold text-dark">
+
+// ❌ BAD — inline style
+<div style={{ color: '#e5a93c' }}>
+
+// ✅ GOOD — CSS variable or token class
+<div className="text-gold">
+```

@@ -1,0 +1,153 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Gifwoods brand tokens */
+  --color-gold: #e5a93c;
+  --color-gold-light: #f0c26a;
+  --color-gold-dark: #c8882a;
+  --color-dark: #16130f;
+  --color-secondary-dark: #2e271f;
+  --color-cream: #faf7f2;
+  --color-warm-gray: #8b7d6b;
+
+  /* shadcn tokens mapped to Gifwoods palette */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: oklch(0.98 0.008 80);
+  --foreground: #16130f;
+  --card: oklch(1 0 0);
+  --card-foreground: #16130f;
+  --popover: oklch(1 0 0);
+  --popover-foreground: #16130f;
+  --primary: #e5a93c;
+  --primary-foreground: #16130f;
+  --secondary: #2e271f;
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.95 0.005 80);
+  --muted-foreground: #8b7d6b;
+  --accent: #f0c26a;
+  --accent-foreground: #16130f;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.88 0.01 80);
+  --input: oklch(0.88 0.01 80);
+  --ring: #e5a93c;
+  --chart-1: #e5a93c;
+  --chart-2: #c8882a;
+  --chart-3: #2e271f;
+  --chart-4: #8b7d6b;
+  --chart-5: #faf7f2;
+  --radius: 0.625rem;
+  --sidebar: #faf7f2;
+  --sidebar-foreground: #16130f;
+  --sidebar-primary: #e5a93c;
+  --sidebar-primary-foreground: #16130f;
+  --sidebar-accent: #f0c26a;
+  --sidebar-accent-foreground: #16130f;
+  --sidebar-border: oklch(0.88 0.01 80);
+  --sidebar-ring: #e5a93c;
+  /* Font variables */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans-stack: "Inter", system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans-stack);
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .bg-cream {
+    background-color: #faf7f2;
+  }
+  .text-warm-gray {
+    color: #8b7d6b;
+  }
+  /* Gold gradient used for CTAs */
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, #e5a93c 0%, #f0c26a 50%, #c8882a 100%);
+  }
+  /* Dark gradient for hero overlays */
+  .bg-dark-gradient {
+    background: linear-gradient(180deg, rgba(22, 19, 15, 0) 0%, rgba(22, 19, 15, 0.85) 100%);
+  }
+  /* Announcement bar */
+  .announcement-bar {
+    background: linear-gradient(90deg, #2e271f 0%, #16130f 50%, #2e271f 100%);
+  }
+  /* Scrollbar styling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}

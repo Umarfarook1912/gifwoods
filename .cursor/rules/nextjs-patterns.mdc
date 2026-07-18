@@ -1,0 +1,55 @@
+---
+description: Next.js 14 App Router conventions for Gifwoods
+globs: src/app/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Next.js App Router Patterns
+
+## Server vs Client Components
+- Default to **Server Components** — add `'use client'` only when needed (hooks, events, browser APIs).
+- Keep data fetching in Server Components or Route Handlers; pass data as props to Client Components.
+
+```tsx
+// ✅ Server Component — fetch at top level
+export default async function ProductsPage() {
+  const products = await getProducts();
+  return <ProductGrid products={products} />;
+}
+
+// ✅ Client Component — only when necessary
+'use client';
+export function AddToCartButton({ productId }: { productId: string }) {
+  const { addItem } = useCart();
+  return <button onClick={() => addItem(productId)}>Add to Cart</button>;
+}
+```
+
+## Route Handlers
+- All API routes live in `src/app/api/`.
+- Always validate request body with Zod before processing.
+- Return consistent `{ data, error }` shape.
+- Handle errors with proper HTTP status codes.
+
+```ts
+// ✅ Route handler pattern
+export async function POST(request: Request) {
+  const body = await request.json();
+  const parsed = schema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: parsed.error }, { status: 400 });
+  // ...
+}
+```
+
+## Metadata
+- Export `generateMetadata` from every page for SEO.
+- Use `src/constants/seo.ts` for default metadata values.
+
+## Loading & Error States
+- Create `loading.tsx` alongside every page for skeleton UI.
+- Create `error.tsx` for error boundaries at the segment level.
+
+## Route Groups
+- `(public)` — public shop pages
+- `(auth)` — login/register pages  
+- `(admin)` — admin dashboard (role-protected via middleware)

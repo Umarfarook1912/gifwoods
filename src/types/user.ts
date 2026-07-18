@@ -1,0 +1,24 @@
+export type UserRole = "user" | "admin";
+
+export interface UserProfile {
+  id: string;
+  name: string | null;
+  email: string;
+  role: UserRole;
+  avatar_url: string | null;
+  phone: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GuestUser {
+  id: string;
+  isGuest: true;
+}
+
+export interface AdminUserFilters {
+  role?: UserRole;
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}

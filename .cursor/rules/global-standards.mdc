@@ -1,0 +1,43 @@
+---
+description: Core global development standards for the Gifwoods project
+alwaysApply: true
+---
+
+# Global Development Standards
+
+## Code Structure
+- Understand existing code before writing new code.
+- Reuse existing components, functions, and utilities (DRY principle).
+- Keep every file under **200 lines**; split large files into smaller focused modules.
+- Follow SOLID principles and separation of concerns.
+- Keep components focused on a single responsibility; prefer composition over duplication.
+
+## No Magic Values
+- Never hardcode colors — use design tokens or theme variables.
+- Never hardcode font families, sizes, or weights — use typography tokens.
+- Never hardcode public asset paths — use centralized asset constants in `src/constants/assets.ts`.
+- Never hardcode UI strings, labels, dimensions, regex patterns, route paths, query keys, filenames, or default values — define in `src/constants/`.
+- Never hardcode application routes — use `src/constants/routes.ts`.
+- Never hardcode API base URLs — use environment variables.
+- Keep API endpoints centralized in `src/constants/api.ts`.
+
+## Styling
+- Never use inline styles — use Tailwind utility classes or design tokens.
+- Use `cn()` utility from `src/lib/utils/cn.ts` for conditional and dynamic class composition.
+- Use shadcn/ui for all common UI primitives.
+- Place reusable UI in `src/components/shared/`; feature-specific in `src/components/features/<feature>/`.
+- Follow mobile-first responsive design (base styles → sm → md → lg → xl).
+
+## TypeScript
+- Keep types, interfaces, enums, DTOs, and component props in `src/types/` — never inline in component files.
+- Use strict TypeScript; avoid `any`.
+
+## Data Fetching
+- Create reusable custom hooks in `src/hooks/` for data fetching and business logic.
+- Use TanStack Query for all client-side data fetching.
+
+## Quality
+- Follow accessibility best practices (semantic HTML, aria attributes, keyboard navigation).
+- Minimize unnecessary re-renders; avoid redundant computations.
+- Maintain consistent naming conventions across components, hooks, utilities, and constants.
+- Write clean, readable, maintainable, and scalable code.

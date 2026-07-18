@@ -1,0 +1,51 @@
+---
+description: React component structure conventions for Gifwoods
+globs: src/components/**/*.tsx
+alwaysApply: false
+---
+
+# Component Structure
+
+## Directory Layout
+```
+src/components/
+  ui/          # shadcn/ui primitives re-exported (Button, Input, Dialog, etc.)
+  layout/      # Header/, Footer/ — structural layout components
+  shared/      # Cross-feature reusable components (ProductCard, Rating, Badge)
+  features/    # Feature-scoped components
+    products/  # ProductGrid, ProductFilters, ProductDetail
+    cart/      # CartDrawer, CartItem, CartSummary
+    checkout/  # CheckoutForm, AddressForm, OrderSummary
+    reviews/   # ReviewCard, ReviewForm, StarRating
+    admin/     # DataTable, AdminSidebar, CrudModal
+```
+
+## File Naming
+- One component per file, named `ComponentName.tsx` (PascalCase).
+- Index file `index.ts` in each folder for clean imports.
+- Companion types in `src/types/`, styles via Tailwind only.
+
+## Component Template
+```tsx
+'use client'; // only if needed
+
+import { cn } from '@/lib/utils/cn';
+import type { ComponentNameProps } from '@/types/...';
+
+export function ComponentName({ prop1, prop2 }: ComponentNameProps) {
+  return (
+    <div className={cn('base-classes', { 'conditional-class': condition })}>
+      {/* content */}
+    </div>
+  );
+}
+```
+
+## Rules
+- Single responsibility — one component does one thing.
+- No inline styles — Tailwind utility classes only.
+- Use `cn()` for all conditional/dynamic class composition.
+- Prefer composition: build complex UI by composing small focused components.
+- Export named functions (not default exports) for better refactoring.
+- Keep component files under 200 lines; extract sub-components when needed.
+- Reuse shadcn/ui primitives before creating custom alternatives.

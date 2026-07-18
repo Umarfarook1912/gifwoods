@@ -1,0 +1,59 @@
+---
+description: TypeScript conventions for Gifwoods — types in dedicated files
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+
+# TypeScript Conventions
+
+## Types in Dedicated Files
+All types, interfaces, enums, and DTOs live in `src/types/` — never inline in component files.
+
+```
+src/types/
+  product.ts     # Product, ProductCard, ProductFilters, Category
+  order.ts       # Order, OrderItem, OrderStatus, ShippingAddress
+  user.ts        # UserProfile, UserRole, GuestUser
+  review.ts      # Review, ReviewForm, ReviewFilters
+  cart.ts        # CartItem, CartState
+  payment.ts     # CashfreeOrder, PaymentStatus
+  api.ts         # ApiResponse<T>, PaginatedResponse<T>
+  common.ts      # Pagination, SortOrder, DateRange
+```
+
+## Naming Conventions
+- Interfaces: `PascalCase` (e.g. `ProductCard`, `OrderItem`)
+- Enums: `PascalCase` with `SCREAMING_SNAKE_CASE` values (e.g. `OrderStatus.PENDING`)
+- Type aliases: `PascalCase` (e.g. `UserRole = 'user' | 'admin'`)
+- Generic wrappers: `ApiResponse<T>`, `PaginatedResponse<T>`
+
+## Strict Rules
+- Never use `any` — use `unknown` and narrow with type guards.
+- Always type function parameters and return values.
+- Use `Readonly<T>` for props that should not be mutated.
+
+```ts
+// ❌ BAD
+const handler = (data: any) => { ... }
+
+// ✅ GOOD
+const handler = (data: ApiResponse<Product>): void => { ... }
+```
+
+## Component Props
+- Define props as a named interface in the component file ONLY if < 5 props and not reused.
+- If reused across components, move to `src/types/`.
+
+```tsx
+// Props used only in this component — OK inline
+interface Props {
+  title: string;
+  isActive: boolean;
+}
+
+// Reused props — must go in src/types/product.ts
+export interface ProductCardProps {
+  product: Product;
+  onAddToCart: (id: string) => void;
+}
+```
