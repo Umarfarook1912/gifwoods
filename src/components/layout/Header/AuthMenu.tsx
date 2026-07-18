@@ -6,6 +6,7 @@ import { User, LogOut, Package, Settings } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -45,10 +46,12 @@ export function AuthMenu() {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuLabel className="font-normal">
-          <p className="font-semibold text-sm">{session.user.name}</p>
-          <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="font-normal">
+            <p className="font-semibold text-sm">{session.user.name}</p>
+            <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <Link href={ROUTES.PROFILE} className="flex items-center gap-2 w-full">

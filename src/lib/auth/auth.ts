@@ -28,16 +28,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async signIn({ user, account }) {
       if (account?.provider === "google" && user.email) {
         const supabase = createAdminClient();
-        const { error } = await supabase.from("profiles").upsert(
-          {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            avatar_url: user.image,
-          },
-          { onConflict: "email", ignoreDuplicates: false }
-        );
-        if (error) console.error("Profile sync error:", error.message);
+        // Look up the profile by email — the row's `id` is a UUID managed by
+        // Supabase (FK → auth.users) so we must NOT insert with Google's OAuth id.
+        const { data: existing } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("email", user.email)
+          .maybeSingle();
+
+        if (existing) {
+          // Row already exists — update mutable fields only.
+          const { error } = await supabase
+            .from("profiles")
+            .update({ name: user.name, avatar_url: user.image })
+            .eq("id", existing.id);
+          if (error) console.error("Profile sync error:", error.message);
+        }
+        // If no row exists yet, Supabase's own trigger creates it on first
+        // sign-up via Supabase Auth. Nothing to do here.
       }
       return true;
     },
