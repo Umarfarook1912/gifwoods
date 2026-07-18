@@ -1,6 +1,4 @@
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
+-- Use built-in gen_random_uuid() (available on Supabase / Postgres 13+)
 -- =============================================
 -- PROFILES
 -- =============================================
@@ -19,7 +17,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 -- CATEGORIES
 -- =============================================
 CREATE TABLE IF NOT EXISTS categories (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   image_url TEXT,
@@ -31,7 +29,7 @@ CREATE TABLE IF NOT EXISTS categories (
 -- PRODUCTS
 -- =============================================
 CREATE TABLE IF NOT EXISTS products (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   description TEXT NOT NULL,
@@ -57,7 +55,7 @@ CREATE INDEX idx_products_featured ON products(is_featured);
 -- CART ITEMS
 -- =============================================
 CREATE TABLE IF NOT EXISTS cart_items (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
   product_id UUID REFERENCES products(id) ON DELETE CASCADE NOT NULL,
   quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
@@ -72,7 +70,7 @@ CREATE INDEX idx_cart_user ON cart_items(user_id);
 -- ORDERS
 -- =============================================
 CREATE TABLE IF NOT EXISTS orders (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
   status TEXT NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending','paid','processing','shipped','delivered','cancelled')),
@@ -94,7 +92,7 @@ CREATE INDEX idx_orders_created ON orders(created_at DESC);
 -- ORDER ITEMS
 -- =============================================
 CREATE TABLE IF NOT EXISTS order_items (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   order_id UUID REFERENCES orders(id) ON DELETE CASCADE NOT NULL,
   product_id UUID REFERENCES products(id) ON DELETE SET NULL,
   quantity INTEGER NOT NULL CHECK (quantity > 0),
@@ -109,7 +107,7 @@ CREATE INDEX idx_order_items_order ON order_items(order_id);
 -- REVIEWS
 -- =============================================
 CREATE TABLE IF NOT EXISTS reviews (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
   product_id UUID REFERENCES products(id) ON DELETE CASCADE NOT NULL,
   order_id UUID REFERENCES orders(id) ON DELETE CASCADE NOT NULL,
@@ -129,7 +127,7 @@ CREATE INDEX idx_reviews_approved ON reviews(is_approved);
 -- WISHLISTS
 -- =============================================
 CREATE TABLE IF NOT EXISTS wishlists (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
   product_id UUID REFERENCES products(id) ON DELETE CASCADE NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
