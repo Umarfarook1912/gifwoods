@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 import { HeroSection } from "@/components/features/products/HeroSection";
-import { StatsBar } from "@/components/features/products/StatsBar";
 import { MediaLogos } from "@/components/features/products/MediaLogos";
 import { CategoriesGrid } from "@/components/features/products/CategoriesGrid";
 import { BestsellersSection } from "@/components/features/products/BestsellersSection";
 import { PersonalizeSection } from "@/components/features/products/PersonalizeSection";
 import { WhyUsSection } from "@/components/features/products/WhyUsSection";
 import { TestimonialsSection } from "@/components/features/products/TestimonialsSection";
-import { CorporateSection } from "@/components/features/products/CorporateSection";
-import { NewsletterSection } from "@/components/features/products/NewsletterSection";
 import { createClient } from "@/lib/supabase/server";
 import type { Product } from "@/types/product";
 import type { Category } from "@/types/product";
@@ -51,15 +48,12 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection />
-      <StatsBar />
       <MediaLogos />
       <CategoriesGrid categories={categories} />
       <BestsellersSection products={products} />
       <PersonalizeSection />
       <WhyUsSection />
       <TestimonialsSection />
-      <CorporateSection />
-      <NewsletterSection />
     </>
   );
 }

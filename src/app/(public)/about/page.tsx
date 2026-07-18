@@ -18,15 +18,15 @@ export default function AboutPage() {
           className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{ backgroundImage: `url('https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=1600')` }}
         />
-        <div className="relative container mx-auto px-4 text-center max-w-3xl">
+        <div className="relative page-container text-center max-w-3xl animate-fade-up">
           <p className="text-gold text-sm font-semibold tracking-[0.2em] uppercase mb-4">Our Story</p>
           <h1 className="font-display text-4xl md:text-5xl font-bold text-white mb-6">{SITE_NAME}</h1>
           <p className="text-white/70 text-xl">{SITE_TAGLINE}</p>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-16 max-w-3xl">
-        <div className="bg-white rounded-2xl p-8 md:p-12 border border-border space-y-8">
+      <div className="page-container py-16 max-w-3xl">
+        <div className="animate-fade-up anim-delay-100 bg-white rounded-2xl p-8 md:p-12 border border-border space-y-8">
           <div>
             <h2 className="font-display text-2xl font-bold text-dark mb-4">How it started</h2>
             <p className="text-warm-gray leading-relaxed">

@@ -13,10 +13,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
+import type { ReactNode } from "react";
 
-export function AuthMenu() {
+interface Props {
+  icon?: ReactNode;
+}
+
+export function AuthMenu({ icon }: Props) {
   const { data: session, status } = useSession();
 
   if (status === "loading") {
@@ -25,9 +29,13 @@ export function AuthMenu() {
 
   if (!session) {
     return (
-      <Button size="sm" className="bg-gold text-dark hover:bg-gold-dark font-semibold" asChild>
-        <Link href={ROUTES.LOGIN}>Login</Link>
-      </Button>
+      <Link
+        href={ROUTES.LOGIN}
+        aria-label="Login"
+        className="w-9 h-9 rounded-full flex items-center justify-center text-dark hover:bg-gold/10 transition-colors"
+      >
+        {icon ?? <User className="h-[18px] w-[18px]" />}
+      </Link>
     );
   }
 

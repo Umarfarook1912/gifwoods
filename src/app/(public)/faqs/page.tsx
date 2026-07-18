@@ -73,7 +73,7 @@ export default function FaqsPage() {
   return (
     <div className="min-h-screen bg-cream">
       <div className="bg-secondary-dark py-12">
-        <div className="container mx-auto px-4">
+        <div className="page-container animate-fade-up">
           <h1 className="font-display text-3xl md:text-4xl font-bold text-white">
             Frequently Asked Questions
           </h1>
@@ -83,7 +83,7 @@ export default function FaqsPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12 max-w-2xl">
+      <div className="page-container py-12 max-w-2xl">
         <div className="space-y-3">
           {FAQS.map((faq, i) => (
             <FaqItem key={i} q={faq.q} a={faq.a} />

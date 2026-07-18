@@ -97,7 +97,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-cream py-10">
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="page-container max-w-4xl">
         <h1 className="font-display text-3xl font-bold text-dark mb-8">Checkout</h1>
 
         {/* Step indicator */}

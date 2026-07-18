@@ -1,4 +1,5 @@
 import { ProductCard } from "@/components/shared/ProductCard";
+import { Reveal } from "@/components/shared/Reveal";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Product } from "@/types/product";
 
@@ -37,8 +38,10 @@ export function ProductGrid({ products, loading }: Props) {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+      {products.map((product, index) => (
+        <Reveal key={product.id} delay={(index % 3) as 0 | 1 | 2}>
+          <ProductCard product={product} />
+        </Reveal>
       ))}
     </div>
   );

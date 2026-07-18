@@ -112,6 +112,13 @@
   }
 }
 
+@layer components {
+  /* Boxed page content: generous side gutters like the reference design */
+  .page-container {
+    @apply mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-16;
+  }
+}
+
 @layer utilities {
   .font-display {
     font-family: var(--font-display);
@@ -133,10 +140,7 @@
   .bg-dark-gradient {
     background: linear-gradient(180deg, rgba(22, 19, 15, 0) 0%, rgba(22, 19, 15, 0.85) 100%);
   }
-  /* Announcement bar */
-  .announcement-bar {
-    background: linear-gradient(90deg, #2e271f 0%, #16130f 50%, #2e271f 100%);
-  }
+
   /* Scrollbar styling */
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -150,4 +154,71 @@
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@layer utilities {
+  /* Entrance animations (above-the-fold, play on load) */
+  .animate-fade-up { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .animate-fade-in { animation: fade-in 0.9s ease-out both; }
+  .animate-scale-in { animation: scale-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .animate-float { animation: float 5s ease-in-out infinite; }
+  .animate-float-slow { animation: float 7s ease-in-out infinite; }
+  .anim-delay-100 { animation-delay: 100ms; }
+  .anim-delay-200 { animation-delay: 200ms; }
+  .anim-delay-300 { animation-delay: 300ms; }
+  .anim-delay-400 { animation-delay: 400ms; }
+  .anim-delay-500 { animation-delay: 500ms; }
+
+  /* Scroll reveal (toggled by the Reveal component) */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 100ms; }
+  .reveal-delay-2 { transition-delay: 200ms; }
+  .reveal-delay-3 { transition-delay: 300ms; }
+  .reveal-delay-4 { transition-delay: 400ms; }
+  .reveal-delay-5 { transition-delay: 500ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-scale-in,
+  .animate-float,
+  .animate-float-slow {
+    animation: none;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

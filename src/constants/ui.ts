@@ -1,5 +1,4 @@
-export const ANNOUNCEMENT_TEXT =
-  "Festive edit is live — complimentary gift wrap on orders over ₹1,499";
+
 
 export const CURRENCY_SYMBOL = "₹";
 

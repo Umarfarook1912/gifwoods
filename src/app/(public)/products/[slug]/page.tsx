@@ -72,8 +72,10 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-10">
-        <ProductDetailClient product={product} />
+      <div className="page-container py-10">
+        <div className="animate-fade-up">
+          <ProductDetailClient product={product} />
+        </div>
 
         {/* Reviews */}
         <div className="mt-16">

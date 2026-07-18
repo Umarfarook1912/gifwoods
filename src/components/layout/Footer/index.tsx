@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Share2, Globe, Rss } from "lucide-react";
+import { Gift, Share2, Globe, Rss } from "lucide-react";
 import {
   SITE_NAME,
   SITE_TAGLINE,
@@ -16,7 +16,7 @@ function SocialIcon({ href, label, children }: { href: string; label: string; ch
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className="w-9 h-9 rounded-full border border-gold/30 flex items-center justify-center text-warm-gray hover:border-gold hover:text-gold transition-colors"
+      className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/60 hover:border-gold hover:text-gold transition-colors"
     >
       {children}
     </a>
@@ -26,13 +26,15 @@ function SocialIcon({ href, label, children }: { href: string; label: string; ch
 function FooterColumn({ title, links }: { title: string; links: readonly { label: string; href: string }[] }) {
   return (
     <div>
-      <h4 className="font-semibold text-sm text-dark mb-4">{title}</h4>
-      <ul className="space-y-2">
+      <h4 className="text-gold text-[11px] font-semibold tracking-[0.2em] uppercase mb-5">
+        {title}
+      </h4>
+      <ul className="space-y-3">
         {links.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              className="text-sm text-warm-gray hover:text-gold transition-colors"
+              className="text-sm text-white/60 hover:text-gold transition-colors"
             >
               {link.label}
             </Link>
@@ -45,15 +47,18 @@ function FooterColumn({ title, links }: { title: string; links: readonly { label
 
 export function Footer() {
   return (
-    <footer className="bg-cream border-t border-border">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
+    <footer className="bg-dark">
+      <div className="page-container py-14">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <Link href="/" className="inline-block mb-3">
-              <span className="font-display font-bold text-2xl text-dark">{SITE_NAME}</span>
+            <Link href="/" className="inline-flex items-center gap-2 mb-4">
+              <span className="w-9 h-9 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center">
+                <Gift className="h-4 w-4 text-gold" />
+              </span>
+              <span className="font-display font-bold text-2xl text-white">{SITE_NAME}</span>
             </Link>
-            <p className="text-sm text-warm-gray mb-6 max-w-xs">
+            <p className="text-sm text-white/60 mb-7 max-w-xs leading-relaxed">
               {SITE_TAGLINE} — crafting personalized, hand-finished gifts for the moments that matter.
             </p>
             <div className="flex gap-3">
@@ -75,16 +80,20 @@ export function Footer() {
           <FooterColumn title="Support" links={FOOTER_SUPPORT_LINKS} />
         </div>
 
-        <div className="border-t border-border mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-warm-gray">
+        <div className="border-t border-white/10 mt-12 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-white/50">
             © {new Date().getFullYear()} {SITE_NAME}. Crafted with care in India.
           </p>
-          <div className="flex items-center gap-2 text-xs text-warm-gray">
-            <span className="px-2 py-1 rounded border border-border font-medium">UPI</span>
-            <span className="px-2 py-1 rounded border border-border font-medium">Visa</span>
-            <span className="px-2 py-1 rounded border border-border font-medium">MC</span>
-            <span className="px-2 py-1 rounded border border-border font-medium">Amex</span>
-            <span className="px-2 py-1 rounded border border-border font-medium">COD</span>
+          <div className="flex items-center gap-2 text-xs text-white/50">
+            <span className="uppercase tracking-wider mr-1">We accept</span>
+            {["UPI", "Visa", "MC", "Amex", "COD"].map((method) => (
+              <span
+                key={method}
+                className="px-2.5 py-1 rounded-full border border-white/15 font-medium text-white/60"
+              >
+                {method}
+              </span>
+            ))}
           </div>
         </div>
       </div>

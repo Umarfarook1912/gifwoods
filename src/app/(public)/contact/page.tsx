@@ -43,13 +43,13 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-cream">
       <div className="bg-secondary-dark py-12">
-        <div className="container mx-auto px-4">
+        <div className="page-container animate-fade-up">
           <h1 className="font-display text-3xl md:text-4xl font-bold text-white">Contact Us</h1>
           <p className="text-white/60 mt-2">Real people, real fast — 7 days a week.</p>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <div className="page-container py-12 max-w-4xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Contact Info */}
           <div className="space-y-6">

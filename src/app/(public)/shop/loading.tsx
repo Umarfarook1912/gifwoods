@@ -4,12 +4,12 @@ export default function ShopLoading() {
   return (
     <div className="min-h-screen bg-white">
       <div className="bg-cream border-b border-border py-8">
-        <div className="container mx-auto px-4">
+        <div className="page-container">
           <Skeleton className="h-8 w-48 mb-2" />
           <Skeleton className="h-4 w-24" />
         </div>
       </div>
-      <div className="container mx-auto px-4 py-8">
+      <div className="page-container py-8">
         <div className="flex gap-8">
           <div className="hidden lg:block w-56 space-y-4">
             <Skeleton className="h-5 w-24" />

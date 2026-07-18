@@ -62,7 +62,7 @@ export default async function ShopPage({ searchParams }: PageProps) {
   return (
     <div className="min-h-screen bg-white">
       <div className="bg-cream border-b border-border py-8">
-        <div className="container mx-auto px-4">
+        <div className="page-container">
           <h1 className="font-display text-3xl font-bold text-dark">
             {params.category
               ? categories.find((c) => c.slug === params.category)?.name ?? "Products"
@@ -72,7 +72,7 @@ export default async function ShopPage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="page-container py-8">
         <div className="flex gap-8">
           <div className="hidden lg:block w-56 flex-shrink-0">
             <Suspense fallback={null}>

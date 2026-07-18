@@ -34,7 +34,7 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-cream py-10">
-      <div className="container mx-auto px-4">
+      <div className="page-container">
         <div className="flex items-center gap-3 mb-8">
           <Button variant="ghost" size="icon" asChild>
             <Link href={ROUTES.SHOP}>

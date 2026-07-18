@@ -1,69 +1,70 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Pen, Image as ImageIcon, Type, Sparkles, ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight } from "lucide-react";
+import { Reveal } from "@/components/shared/Reveal";
 
 const PERSONALIZE_OPTIONS = [
-  { icon: Type, label: "Name Engraving" },
-  { icon: ImageIcon, label: "Photo Gifts" },
-  { icon: Pen, label: "Wooden Name Boards" },
-  { icon: Sparkles, label: "Corporate Branding" },
+  "Name Engraving",
+  "Photo Gifts",
+  "Wooden Name Boards",
+  "Corporate Branding",
 ] as const;
+
+const PERSONALIZE_IMAGE =
+  "https://images.unsplash.com/photo-1544816155-12df9643f363?w=900&q=80";
 
 export function PersonalizeSection() {
   return (
-    <section className="py-16 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <p className="text-gold text-sm font-semibold tracking-wider uppercase mb-3">
-              Personalize
-            </p>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-dark mb-4">
-              Made just for them.
-            </h2>
-            <p className="text-warm-gray text-lg mb-8 leading-relaxed">
-              Engrave a name, embed a photo, choose the font, add a handwritten note
-              — we craft it in-house so every detail feels intentional.
-            </p>
-            <div className="grid grid-cols-2 gap-3 mb-8">
-              {PERSONALIZE_OPTIONS.map(({ icon: Icon, label }) => (
-                <div
-                  key={label}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gold/20 bg-gold/5"
-                >
-                  <Icon className="h-4 w-4 text-gold flex-shrink-0" />
-                  <span className="text-sm font-medium text-dark">{label}</span>
-                </div>
-              ))}
-            </div>
-            <Button
-              className="bg-gold text-dark hover:bg-gold-dark font-semibold"
-              asChild
-            >
-              <Link href="/shop?category=personalized">
-                Customize Now <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-
-          <div className="relative">
-            <div className="rounded-2xl overflow-hidden aspect-[4/3] bg-muted">
-              <div
-                className="w-full h-full bg-cover bg-center"
-                style={{
-                  backgroundImage: `url('https://images.unsplash.com/photo-1544816155-12df9643f363?w=800')`,
-                }}
-                role="img"
-                aria-label="Personalized leather journal"
-              />
-            </div>
-            <div className="absolute -bottom-4 -left-4 bg-gold rounded-xl p-4 shadow-lg max-w-[180px]">
-              <p className="text-dark font-display font-semibold text-sm leading-snug">
-                Crafted in-house, every detail intentional.
+    <section className="py-8 bg-cream">
+      <div className="page-container">
+        <Reveal>
+        <div className="rounded-[2rem] bg-gradient-to-br from-secondary-dark to-dark p-8 md:p-12 lg:p-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+            <div>
+              <p className="text-gold text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">
+                Personalize
               </p>
+              <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-5">
+                Made just{" "}
+                <em className="text-gold font-display italic">for them.</em>
+              </h2>
+              <p className="text-white/60 text-base md:text-lg mb-8 leading-relaxed max-w-md">
+                Engrave a name, embed a photo, choose the font, add a
+                handwritten note — we craft it in-house so every detail feels
+                intentional.
+              </p>
+
+              <div className="grid grid-cols-2 gap-3 mb-9 max-w-md">
+                {PERSONALIZE_OPTIONS.map((label) => (
+                  <div
+                    key={label}
+                    className="px-4 py-2.5 rounded-full border border-white/15 text-white/80 text-sm text-center"
+                  >
+                    {label}
+                  </div>
+                ))}
+              </div>
+
+              <Link
+                href="/shop?category=personalized"
+                className="inline-flex items-center gap-2 bg-gold text-dark font-semibold px-7 py-3.5 rounded-full hover:bg-gold-dark transition-colors"
+              >
+                Customize Now <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden">
+              <Image
+                src={PERSONALIZE_IMAGE}
+                alt="Personalized leather journal"
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
             </div>
           </div>
         </div>
+        </Reveal>
       </div>
     </section>
   );
