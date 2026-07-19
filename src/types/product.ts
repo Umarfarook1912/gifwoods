@@ -25,6 +25,7 @@ export interface Product {
   is_featured: boolean;
   badge: ProductBadge | null;
   status: ProductStatus;
+  specifications?: Array<{ key: string; value: string }>;
   avg_rating?: number;
   review_count?: number;
   created_at: string;
@@ -48,13 +49,14 @@ export interface ProductFormData {
   description: string;
   price: number;
   original_price?: number;
-  category_id: string;
+  category_id?: string | null;
   images: string[];
   tags: string[];
   stock: number;
   is_featured: boolean;
   badge?: ProductBadge;
   status: ProductStatus;
+  specifications?: Array<{ key: string; value: string }>;
 }
 
 export interface CustomizationOption {

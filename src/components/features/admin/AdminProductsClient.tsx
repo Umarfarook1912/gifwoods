@@ -27,6 +27,17 @@ const STATUS_COLORS: Record<ProductStatus, string> = {
   archived: "bg-gray-100 text-gray-700",
 };
 
+const HARDCODED_CATEGORIES = [
+  "Birthday",
+  "Anniversary",
+  "Wedding",
+  "Housewarming",
+  "Baby Shower",
+  "Corporate Gifting",
+  "New Arrivals",
+  "Best Sellers / Trending"
+];
+
 const EMPTY_FORM = {
   name: "",
   slug: "",
@@ -40,10 +51,12 @@ const EMPTY_FORM = {
   is_featured: false,
   badge: "",
   status: "active" as ProductStatus,
+  specifications: [] as Array<{ key: string; value: string }>,
 };
 
 export function AdminProductsClient({ initialProducts, categories }: Props) {
   const [products, setProducts] = useState(initialProducts);
+  const [categoriesState, setCategoriesState] = useState(categories);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -51,6 +64,23 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
   const [editing, setEditing] = useState<Product | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [selectedCategoryName, setSelectedCategoryName] = useState("");
+  const [newCategoryName, setNewCategoryName] = useState("");
+
+  const dropdownCategories = useMemo(() => {
+    const list = [...HARDCODED_CATEGORIES];
+    categoriesState.forEach((dbCat) => {
+      const isDuplicate = list.some(
+        (h) => h.toLowerCase() === dbCat.name.toLowerCase() || 
+               h.toLowerCase() === dbCat.name.replace(/s$/, "").toLowerCase() ||
+               dbCat.name.toLowerCase() === h.replace(/s$/, "").toLowerCase()
+      );
+      if (!isDuplicate) {
+        list.push(dbCat.name);
+      }
+    });
+    return list;
+  }, [categoriesState]);
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
@@ -63,12 +93,21 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
 
   const openCreate = () => {
     setEditing(null);
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, specifications: [] });
+    setSelectedCategoryName("");
+    setNewCategoryName("");
     setDialogOpen(true);
   };
 
   const openEdit = (product: Product) => {
     setEditing(product);
+    const currentCat = categoriesState.find((c) => c.id === product.category_id);
+    if (currentCat) {
+      setSelectedCategoryName(currentCat.name);
+    } else {
+      setSelectedCategoryName("");
+    }
+    setNewCategoryName("");
     setForm({
       name: product.name,
       slug: product.slug,
@@ -82,18 +121,63 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
       is_featured: product.is_featured,
       badge: product.badge ?? "",
       status: product.status,
+      specifications: product.specifications || [],
     });
     setDialogOpen(true);
+  };
+
+  const handleAddSpecification = () => {
+    setForm((prev) => ({
+      ...prev,
+      specifications: [...(prev.specifications || []), { key: "", value: "" }],
+    }));
+  };
+
+  const handleUpdateSpecification = (index: number, field: "key" | "value", val: string) => {
+    setForm((prev) => {
+      const specs = [...(prev.specifications || [])];
+      specs[index] = { ...specs[index], [field]: val };
+      return { ...prev, specifications: specs };
+    });
+  };
+
+  const handleRemoveSpecification = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      specifications: (prev.specifications || []).filter((_, i) => i !== index),
+    }));
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
+      let categoryIdToSend = form.category_id;
+      let newCategoryNameToSend = undefined;
+
+      if (selectedCategoryName === "other") {
+        if (!newCategoryName.trim()) {
+          throw new Error("Please enter a new category name");
+        }
+        newCategoryNameToSend = newCategoryName.trim();
+        categoryIdToSend = "";
+      } else {
+        const match = categoriesState.find((c) => c.name.toLowerCase() === selectedCategoryName.toLowerCase());
+        if (match) {
+          categoryIdToSend = match.id;
+        } else if (selectedCategoryName) {
+          newCategoryNameToSend = selectedCategoryName;
+          categoryIdToSend = "";
+        }
+      }
+
       const payload = {
         ...form,
+        category_id: categoryIdToSend || undefined,
+        new_category_name: newCategoryNameToSend,
         original_price: form.original_price || undefined,
         badge: form.badge || undefined,
         images: form.images.filter(Boolean),
+        specifications: (form.specifications || []).filter((s) => s.key.trim() || s.value.trim()),
       };
       const url = editing ? API_ENDPOINTS.PRODUCT(editing.id) : API_ENDPOINTS.PRODUCTS;
       const method = editing ? "PATCH" : "POST";
@@ -104,6 +188,14 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
       });
       const json = await res.json();
       if (!res.ok || json.error) throw new Error(json.error);
+
+      if (json.newCategory) {
+        setCategoriesState((prev) => {
+          if (prev.some((c) => c.id === json.newCategory.id)) return prev;
+          return [...prev, json.newCategory];
+        });
+      }
+
       toast.success(editing ? "Product updated!" : "Product created!");
       setDialogOpen(false);
       const updated = editing
@@ -150,7 +242,7 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
           <SelectTrigger className="w-40"><SelectValue placeholder="Category" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+            {categoriesState.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={(v) => v && setStatusFilter(v)}>
@@ -218,13 +310,42 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
             </div>
             <div>
               <Label>Category</Label>
-              <Select value={form.category_id} onValueChange={(v) => v && setForm({ ...form, category_id: v })}>
-                <SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger>
+              <Select
+                value={selectedCategoryName}
+                onValueChange={(val) => {
+                  setSelectedCategoryName(val || "");
+                  if (val && val !== "other") {
+                    const match = categoriesState.find((c) => c.name.toLowerCase() === val.toLowerCase());
+                    setForm({ ...form, category_id: match ? match.id : "" });
+                  } else {
+                    setForm({ ...form, category_id: "" });
+                  }
+                }}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select Category" />
+                </SelectTrigger>
                 <SelectContent>
-                  {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  {dropdownCategories.map((name) => (
+                    <SelectItem key={name} value={name}>
+                      {name}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="other">Other...</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            {selectedCategoryName === "other" && (
+              <div className="col-span-2">
+                <Label>Enter New Category</Label>
+                <Input
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="mt-1"
+                  placeholder="e.g. Valentine Gifting"
+                />
+              </div>
+            )}
             <div>
               <Label>Price (₹)</Label>
               <Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) })} className="mt-1" />
@@ -273,6 +394,55 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
               <Label>Tags (comma separated)</Label>
               <Input value={form.tags.join(", ")} onChange={(e) => setForm({ ...form, tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean) })} className="mt-1" placeholder="wood, personalized, luxury" />
             </div>
+            
+            {/* Product Specifications Section */}
+            <div className="col-span-2 border-t pt-4 mt-2">
+              <div className="flex items-center justify-between mb-3">
+                <Label className="text-base font-semibold text-dark">Product Specifications</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddSpecification}
+                  className="h-8 text-xs flex items-center gap-1 border-gold hover:bg-gold/10 hover:text-dark text-dark"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add Specification
+                </Button>
+              </div>
+              
+              {(form.specifications || []).length === 0 ? (
+                <p className="text-xs text-muted-foreground italic mb-2">No specifications added yet.</p>
+              ) : (
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {(form.specifications || []).map((spec, index) => (
+                    <div key={index} className="flex gap-2 items-center">
+                      <Input
+                        placeholder="Specification Key (e.g. Weight)"
+                        value={spec.key}
+                        onChange={(e) => handleUpdateSpecification(index, 'key', e.target.value)}
+                        className="flex-1 text-sm h-9"
+                      />
+                      <Input
+                        placeholder="Specification Value (e.g. 250g)"
+                        value={spec.value}
+                        onChange={(e) => handleUpdateSpecification(index, 'value', e.target.value)}
+                        className="flex-1 text-sm h-9"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveSpecification(index)}
+                        className="h-9 w-9 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="col-span-2 flex items-center gap-3">
               <Switch checked={form.is_featured} onCheckedChange={(v) => setForm({ ...form, is_featured: v })} />
               <Label>Featured product</Label>

@@ -32,13 +32,18 @@ export const productSchema = z.object({
   description: z.string().min(10),
   price: z.number().positive(),
   original_price: z.number().positive().optional(),
-  category_id: z.string().uuid(),
+  category_id: z.string().uuid().optional().nullable(),
+  new_category_name: z.string().optional(),
   images: z.array(z.string().url()).min(1),
   tags: z.array(z.string()),
   stock: z.number().int().min(0),
   is_featured: z.boolean(),
   badge: z.enum(["Personalize", "Bestseller", "New", "Limited"]).optional(),
   status: z.enum(["active", "draft", "archived"]),
+  specifications: z.array(z.object({
+    key: z.string(),
+    value: z.string()
+  })).optional(),
 });
 
 export const contactFormSchema = z.object({
