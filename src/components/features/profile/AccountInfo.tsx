@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Camera, Loader2, Save } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { PhoneNumberField } from "./PhoneNumberField";
 
 export function AccountInfo() {
   const { data: session, update } = useSession();
@@ -18,7 +19,7 @@ export function AccountInfo() {
   const [avatarUrl, setAvatarUrl] = useState(session?.user?.image || "");
 
   // Load existing details from API
-  useState(() => {
+  useEffect(() => {
     async function loadProfile() {
       if (!session?.user?.id) return;
       try {
@@ -35,7 +36,7 @@ export function AccountInfo() {
       }
     }
     loadProfile();
-  });
+  }, [session?.user?.id, session?.user?.supabaseId]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -136,9 +137,13 @@ export function AccountInfo() {
             <Label htmlFor="email">Email Address</Label>
             <Input id="email" type="email" value={session?.user?.email || ""} disabled className="bg-muted text-muted-foreground" />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 md:col-span-2">
             <Label htmlFor="phone">Phone Number</Label>
-            <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 99999 99999" />
+            <PhoneNumberField
+              value={phone}
+              onChange={setPhone}
+              disabled={loading}
+            />
           </div>
         </div>
 

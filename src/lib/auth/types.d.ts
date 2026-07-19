@@ -11,6 +11,7 @@ declare module "next-auth" {
       supabaseId?: string;
       role: string;
       isGuest: boolean;
+      authProvider?: string;
     };
   }
 
@@ -25,5 +26,6 @@ declare module "next-auth/jwt" {
     supabaseId?: string;
     role?: string;
     isGuest?: boolean;
+    authProvider?: string;
   }
 }

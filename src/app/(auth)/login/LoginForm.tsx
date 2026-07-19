@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { SITE_NAME, SITE_TAGLINE } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
-import { Globe, User2, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Globe, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function LoginForm() {
@@ -20,13 +20,11 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loadingEmail, setLoadingEmail] = useState(false);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
-  const [loadingGuest, setLoadingGuest] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? ROUTES.HOME;
 
-  // ── Email/Password login ───────────────────────────────────────────────────
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors: typeof fieldErrors = {};
@@ -51,7 +49,6 @@ export function LoginForm() {
     }
   };
 
-  // ── Google OAuth ───────────────────────────────────────────────────────────
   const handleGoogle = async () => {
     setLoadingGoogle(true);
     try {
@@ -59,17 +56,6 @@ export function LoginForm() {
     } catch {
       toast.error("Failed to sign in with Google");
       setLoadingGoogle(false);
-    }
-  };
-
-  // ── Guest ──────────────────────────────────────────────────────────────────
-  const handleGuest = async () => {
-    setLoadingGuest(true);
-    try {
-      await signIn("guest", { callbackUrl });
-    } catch {
-      toast.error("Failed to continue as guest");
-      setLoadingGuest(false);
     }
   };
 
@@ -202,21 +188,6 @@ export function LoginForm() {
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Redirecting…</>
             ) : (
               <><Globe className="h-4 w-4 mr-2" /> Continue with Google</>
-            )}
-          </Button>
-
-          {/* ── Guest ── */}
-          <Button
-            id="btn-guest-login"
-            variant="outline"
-            className="w-full border-border text-dark hover:border-gold h-10 font-medium mt-2"
-            onClick={handleGuest}
-            disabled={loadingGuest}
-          >
-            {loadingGuest ? (
-              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Setting up…</>
-            ) : (
-              <><User2 className="h-4 w-4 mr-2" /> Continue as Guest</>
             )}
           </Button>
 

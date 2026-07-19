@@ -10,6 +10,7 @@ export const QUERY_KEYS = {
   CART: ["cart"] as const,
   WISHLIST: ["wishlist"] as const,
   USER_PROFILE: ["user", "profile"] as const,
+  COUNTRY_CALLING_CODES: ["country-calling-codes"] as const,
   ADMIN_USERS: ["admin", "users"] as const,
   ADMIN_ORDERS: ["admin", "orders"] as const,
   ADMIN_PRODUCTS: ["admin", "products"] as const,

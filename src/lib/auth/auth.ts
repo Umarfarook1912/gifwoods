@@ -10,7 +10,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
 
-    // ── Email / Password ──────────────────────────────────────────────────────
     Credentials({
       id: "email-password",
       name: "Email & Password",
@@ -39,74 +38,88 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         };
       },
     }),
-
-    // ── Guest (anonymous) ─────────────────────────────────────────────────────
-    Credentials({
-      id: "guest",
-      name: "Guest",
-      credentials: {},
-      async authorize() {
-        const guestId = `guest_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-        return {
-          id: guestId,
-          name: "Guest User",
-          email: `${guestId}@guest.gifwoods.in`,
-          isGuest: true,
-        };
-      },
-    }),
   ],
 
   callbacks: {
-    // ── signIn ────────────────────────────────────────────────────────────────
     async signIn({ user, account }) {
-      // For Google OAuth: sync / update the profile row
       if (account?.provider === "google" && user.email) {
         const supabase = createAdminClient();
+        const email = user.email.toLowerCase().trim();
 
-        // Check if a profile row already exists for this email
         const { data: existing } = await supabase
           .from("profiles")
           .select("id")
-          .eq("email", user.email)
+          .eq("email", email)
           .maybeSingle();
 
         if (existing) {
-          // Update mutable fields only — do NOT touch the UUID primary key
           const { error } = await supabase
             .from("profiles")
             .update({ name: user.name, avatar_url: user.image })
             .eq("id", existing.id);
           if (error) console.error("Profile sync error (google):", error.message);
         } else {
-          // First ever Google sign-in for this email.
-          // We must create the auth.users row first via admin API, then the profile.
-          // (Some Supabase setups have a trigger that auto-creates profiles on auth.users insert.)
-          // As a fallback, we insert manually here using the Google sub as metadata only.
-          // The Supabase admin createUser call with the same email will fail if the user
-          // already exists in auth.users, so we catch gracefully.
-          console.log("No profile found for Google user — will be created on first password-less sign-in or by trigger.");
+          let supabaseUserId: string | null = null;
+
+          const { data: created, error: createError } =
+            await supabase.auth.admin.createUser({
+              email,
+              email_confirm: true,
+              user_metadata: {
+                name: user.name,
+                full_name: user.name,
+                avatar_url: user.image,
+              },
+            });
+
+          if (created?.user?.id) {
+            supabaseUserId = created.user.id;
+          } else {
+            const { data: linkData } = await supabase.auth.admin.generateLink({
+              type: "magiclink",
+              email,
+            });
+            supabaseUserId = linkData?.user?.id ?? null;
+            if (createError) {
+              console.error("Google createUser:", createError.message);
+            }
+          }
+
+          if (!supabaseUserId) {
+            console.error("Google sign-in: could not create/find Supabase user");
+            return false;
+          }
+
+          const { error: profileError } = await supabase.from("profiles").upsert(
+            {
+              id: supabaseUserId,
+              name: user.name ?? email,
+              email,
+              avatar_url: user.image ?? null,
+              role: "user",
+            },
+            { onConflict: "id", ignoreDuplicates: false }
+          );
+
+          if (profileError) {
+            console.error("Google profile upsert error:", profileError.message);
+            return false;
+          }
         }
       }
-
-      // For email/password: profile should already exist (created at /api/auth/register).
-      // Nothing extra to do here.
 
       return true;
     },
 
-    // ── jwt ───────────────────────────────────────────────────────────────────
     async jwt({ token, user, account, trigger }) {
-      // On initial sign-in, copy user.id into the token
       if (user) {
         token.id = user.id;
         token.isGuest = (user as { isGuest?: boolean }).isGuest ?? false;
       }
+      if (account) {
+        token.authProvider = account.provider;
+      }
 
-      // Fetch role from profiles table:
-      //   - always on first login (account is defined)
-      //   - always on session update trigger
-      //   - skip for guests (no profile row)
       const shouldFetchRole =
         !token.isGuest &&
         token.email &&
@@ -129,13 +142,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
 
-    // ── session ───────────────────────────────────────────────────────────────
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string;
         session.user.supabaseId = token.supabaseId as string | undefined;
         session.user.role = (token.role as string) ?? "user";
         session.user.isGuest = (token.isGuest as boolean) ?? false;
+        session.user.authProvider = token.authProvider as string | undefined;
       }
       return session;
     },

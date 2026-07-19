@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { User, Package, MapPin, CreditCard, Lock, LogOut } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils/cn";
+import { AUTH_PROVIDERS } from "@/constants/auth";
 import { AccountInfo } from "./AccountInfo";
 import { OrderHistory } from "./OrderHistory";
 import { AddressBook } from "./AddressBook";
@@ -13,14 +14,23 @@ import { SecuritySettings } from "./SecuritySettings";
 type Tab = "account" | "orders" | "addresses" | "payments" | "security";
 
 export function ProfileClient() {
+  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState<Tab>("account");
+  const isGoogleUser =
+    session?.user.authProvider === AUTH_PROVIDERS.GOOGLE ||
+    Boolean(
+      session?.user.supabaseId &&
+        session.user.id !== session.user.supabaseId
+    );
 
   const tabs = [
     { id: "account" as Tab, label: "Account Info", icon: User },
     { id: "orders" as Tab, label: "Order History", icon: Package },
     { id: "addresses" as Tab, label: "Address Book", icon: MapPin },
     { id: "payments" as Tab, label: "Payment Methods", icon: CreditCard },
-    { id: "security" as Tab, label: "Security Settings", icon: Lock },
+    ...(!isGoogleUser
+      ? [{ id: "security" as Tab, label: "Security Settings", icon: Lock }]
+      : []),
   ];
 
   return (
@@ -66,7 +76,7 @@ export function ProfileClient() {
             {activeTab === "orders" && <OrderHistory />}
             {activeTab === "addresses" && <AddressBook />}
             {activeTab === "payments" && <PaymentMethods />}
-            {activeTab === "security" && <SecuritySettings />}
+            {activeTab === "security" && !isGoogleUser && <SecuritySettings />}
           </div>
         </div>
       </div>
