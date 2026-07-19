@@ -23,7 +23,7 @@ export const reviewSchema = z.object({
   rating: z.number().min(1).max(5),
   comment: z.string().min(10, "Review must be at least 10 characters").max(1000),
   product_id: z.string().uuid(),
-  order_id: z.string().uuid(),
+  order_id: z.string().uuid().optional().nullable(),
 });
 
 export const productSchema = z.object({

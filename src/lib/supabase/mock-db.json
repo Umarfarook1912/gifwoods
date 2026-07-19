@@ -1,0 +1,33 @@
+{
+  "addresses": [],
+  "payment_methods": [],
+  "reviews": [
+    {
+      "id": "dc54f76e-05cc-4018-bbd2-815bd417cc89",
+      "user_id": "3f7acc65-f5c6-4086-a7fc-fbd47fbace0c",
+      "user": {
+        "id": "3f7acc65-f5c6-4086-a7fc-fbd47fbace0c",
+        "name": "Vidhya Sagar",
+        "email": "sagarsagar5029@gmail.com",
+        "role": "admin",
+        "avatar_url": null,
+        "phone": null,
+        "created_at": "2026-07-18T09:53:32.631625+00:00",
+        "updated_at": "2026-07-18T09:58:47.861263+00:00"
+      },
+      "product_id": "c55aa8c5-ba11-4a27-b070-fd04ccced748",
+      "product": {
+        "id": "c55aa8c5-ba11-4a27-b070-fd04ccced748",
+        "name": "Amber Glow Candle",
+        "slug": "amber-glow-candle"
+      },
+      "order_id": null,
+      "rating": 4,
+      "comment": "good product",
+      "is_approved": false,
+      "admin_reply": null,
+      "created_at": "2026-07-19T05:53:57.249Z",
+      "updated_at": "2026-07-19T05:53:57.249Z"
+    }
+  ]
+}

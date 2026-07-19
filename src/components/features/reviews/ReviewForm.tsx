@@ -14,7 +14,7 @@ import type { ReviewFormData } from "@/types/review";
 
 interface Props {
   productId: string;
-  orderId: string;
+  orderId?: string | null;
   onSuccess?: () => void;
 }
 
@@ -26,11 +26,17 @@ export function ReviewForm({ productId, orderId, onSuccess }: Props) {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<ReviewFormData>({
     resolver: zodResolver(reviewSchema),
-    defaultValues: { product_id: productId, order_id: orderId, rating: 0, comment: "" },
+    defaultValues: { product_id: productId, order_id: orderId || null, rating: 0, comment: "" },
   });
+
+  const handleRate = (val: number) => {
+    setRating(val);
+    setValue("rating", val, { shouldValidate: true });
+  };
 
   const onSubmit = async (data: ReviewFormData) => {
     if (rating === 0) {
@@ -67,7 +73,7 @@ export function ReviewForm({ productId, orderId, onSuccess }: Props) {
           rating={rating}
           size="lg"
           interactive
-          onRate={setRating}
+          onRate={handleRate}
         />
       </div>
       <div>

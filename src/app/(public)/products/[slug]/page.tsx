@@ -22,15 +22,10 @@ async function getProduct(slug: string): Promise<Product | null> {
   return (data as Product) ?? null;
 }
 
+import { getProductReviews } from "@/lib/supabase/reviews-db";
+
 async function getReviews(productId: string): Promise<Review[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("reviews")
-    .select("*, user:profiles(id, name, avatar_url)")
-    .eq("product_id", productId)
-    .eq("is_approved", true)
-    .order("created_at", { ascending: false });
-  return (data ?? []) as Review[];
+  return getProductReviews(productId, true);
 }
 
 async function getRelated(categoryId: string, currentId: string): Promise<Product[]> {

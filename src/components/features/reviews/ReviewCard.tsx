@@ -28,6 +28,12 @@ export function ReviewCard({ review }: Props) {
           </div>
           <StarRating rating={review.rating} size="sm" />
           <p className="text-sm text-secondary-dark leading-relaxed mt-2">{review.comment}</p>
+          {review.admin_reply && (
+            <div className="mt-3 bg-cream/70 border-l-2 border-gold p-3 rounded-r-lg text-xs">
+              <p className="font-semibold text-dark mb-1">Response from Gifwoods:</p>
+              <p className="text-secondary-dark/90 leading-relaxed">{review.admin_reply}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

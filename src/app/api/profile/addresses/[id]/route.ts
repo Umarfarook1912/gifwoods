@@ -1,20 +1,22 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
-import { updateReview, deleteReview } from "@/lib/supabase/reviews-db";
+import { updateAddress, deleteAddress } from "@/lib/supabase/profile-db";
 
-export async function PATCH(
+export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session || session.user.role !== "admin") {
+  if (!session) {
     return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const { id } = await params;
+    const userId = session.user.supabaseId ?? session.user.id;
     const body = await request.json();
-    const data = await updateReview(id, body);
+
+    const data = await updateAddress(userId, id, body);
     return NextResponse.json({ data, error: null });
   } catch (error: any) {
     return NextResponse.json({ data: null, error: error.message }, { status: 500 });
@@ -26,17 +28,19 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session || session.user.role !== "admin") {
+  if (!session) {
     return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const { id } = await params;
-    const success = await deleteReview(id);
+    const userId = session.user.supabaseId ?? session.user.id;
+    const success = await deleteAddress(userId, id);
+    
     if (!success) {
-      return NextResponse.json({ data: null, error: "Review not found" }, { status: 404 });
+      return NextResponse.json({ data: null, error: "Address not found or delete failed" }, { status: 444 });
     }
-    return NextResponse.json({ data: { id }, error: null });
+    return NextResponse.json({ data: { success: true }, error: null });
   } catch (error: any) {
     return NextResponse.json({ data: null, error: error.message }, { status: 500 });
   }
