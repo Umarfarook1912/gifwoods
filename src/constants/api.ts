@@ -3,6 +3,7 @@ export const API_ENDPOINTS = {
   PRODUCTS: "/api/products",
   PRODUCT: (id: string) => `/api/products/${id}`,
   CATEGORIES: "/api/categories",
+  CATEGORY: (id: string) => `/api/categories/${id}`,
   ORDERS: "/api/orders",
   ORDER: (id: string) => `/api/orders/${id}`,
   REVIEWS: "/api/reviews",

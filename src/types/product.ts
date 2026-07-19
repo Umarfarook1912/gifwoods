@@ -59,6 +59,27 @@ export interface ProductFormData {
   specifications?: Array<{ key: string; value: string }>;
 }
 
+export interface ProductSpecification {
+  key: string;
+  value: string;
+}
+
+export interface ProductFormState {
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  original_price: number;
+  category_id: string;
+  images: string[];
+  tags: string[];
+  stock: number;
+  is_featured: boolean;
+  badge: string;
+  status: ProductStatus;
+  specifications: ProductSpecification[];
+}
+
 export interface CustomizationOption {
   type: "text" | "image" | "select";
   label: string;

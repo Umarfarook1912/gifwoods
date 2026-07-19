@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDate } from "@/lib/utils/formatters";
 import { API_ENDPOINTS } from "@/constants/api";
+import { userRoleChangeConfirmation } from "@/constants/confirmations";
+import { useConfirm } from "@/hooks/useConfirm";
 import { toast } from "sonner";
 import { Search, Shield, ShieldOff } from "lucide-react";
 import type { UserProfile, UserRole } from "@/types/user";
@@ -18,6 +20,7 @@ interface Props {
 }
 
 export function AdminUsersClient({ initialUsers }: Props) {
+  const confirm = useConfirm();
   const [users, setUsers] = useState(initialUsers);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -35,7 +38,7 @@ export function AdminUsersClient({ initialUsers }: Props) {
 
   const toggleRole = async (user: UserProfile) => {
     const newRole: UserRole = user.role === "admin" ? "user" : "admin";
-    if (!confirm(`Change ${user.name ?? user.email} role to "${newRole}"?`)) return;
+    if (!(await confirm(userRoleChangeConfirmation(user.name ?? user.email, newRole)))) return;
     const res = await fetch(API_ENDPOINTS.USER_ROLE(user.id), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },

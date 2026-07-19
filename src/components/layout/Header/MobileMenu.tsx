@@ -5,12 +5,23 @@ import Link from "next/link";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { NAV_LINKS, OCCASIONS, SITE_NAME } from "@/constants/ui";
+import { NAV_LINKS, SITE_NAME } from "@/constants/ui";
 import { cn } from "@/lib/utils/cn";
+import { getCategoryHref, isCategoryLinkAvailable } from "./nav-utils";
+import type { Category } from "@/types/product";
 
-export function MobileMenu() {
+interface Props {
+  categories: Category[];
+}
+
+export function MobileMenu({ categories }: Props) {
   const [open, setOpen] = useState(false);
-  const [occasionsOpen, setOccasionsOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+
+  const closeAll = () => {
+    setOpen(false);
+    setCategoriesOpen(false);
+  };
 
   return (
     <>
@@ -35,10 +46,11 @@ export function MobileMenu() {
           <nav className="flex flex-col gap-1.5">
             {NAV_LINKS.map((link) => {
               if ("dropdown" in link && link.dropdown) {
+                if (categories.length === 0) return null;
                 return (
                   <div key={link.label} className="flex flex-col">
                     <button
-                      onClick={() => setOccasionsOpen(!occasionsOpen)}
+                      onClick={() => setCategoriesOpen(!categoriesOpen)}
                       className={cn(
                         "w-full px-4 py-3 rounded-lg text-sm font-medium text-secondary-dark flex items-center justify-between",
                         "hover:bg-gold/10 hover:text-gold transition-colors text-left cursor-pointer"
@@ -48,26 +60,23 @@ export function MobileMenu() {
                       <ChevronDown
                         className={cn(
                           "h-4 w-4 transition-transform duration-200",
-                          occasionsOpen && "rotate-180"
+                          categoriesOpen && "rotate-180"
                         )}
                       />
                     </button>
-                    {occasionsOpen && (
+                    {categoriesOpen && (
                       <div className="pl-4 flex flex-col gap-1 mt-1 border-l border-gold/20 ml-6">
-                        {OCCASIONS.map((occ) => (
+                        {categories.map((category) => (
                           <Link
-                            key={occ.href}
-                            href={occ.href}
-                            onClick={() => {
-                              setOpen(false);
-                              setOccasionsOpen(false);
-                            }}
+                            key={category.id}
+                            href={getCategoryHref(category.slug)}
+                            onClick={closeAll}
                             className={cn(
                               "px-4 py-2.5 rounded-lg text-sm font-medium text-secondary-dark/85",
                               "hover:bg-gold/10 hover:text-gold transition-colors"
                             )}
                           >
-                            {occ.label}
+                            {category.name}
                           </Link>
                         ))}
                       </div>
@@ -76,11 +85,13 @@ export function MobileMenu() {
                 );
               }
 
+              if (!isCategoryLinkAvailable(link.href, categories)) return null;
+
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={() => setOpen(false)}
+                  onClick={closeAll}
                   className={cn(
                     "px-4 py-3 rounded-lg text-sm font-medium text-secondary-dark",
                     "hover:bg-gold/10 hover:text-gold transition-colors"

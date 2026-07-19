@@ -19,7 +19,7 @@ export const NAV_LINKS = [
   { label: "Shop", href: "/shop" },
   { label: "New Arrivals", href: "/shop?sort=newest" },
   { label: "Best Sellers", href: "/shop?badge=Bestseller" },
-  { label: "Shop by Occasion", href: "#", dropdown: true },
+  { label: "Categories", href: "#", dropdown: true },
   { label: "Corporate Gifting", href: "/shop?category=corporate" },
   { label: "About", href: "/about" },
 ] as const;
@@ -108,6 +108,10 @@ export const ORDER_STATUSES = [
 ] as const;
 
 export const PRODUCT_BADGES = ["Personalize", "Bestseller", "New", "Limited"] as const;
+
+export const PRODUCT_STATUSES = ["active", "draft", "archived"] as const;
+
+export const NEW_CATEGORY_OPTION = "__new__";
 
 export const ITEMS_PER_PAGE = 12;
 export const ADMIN_ITEMS_PER_PAGE = 20;

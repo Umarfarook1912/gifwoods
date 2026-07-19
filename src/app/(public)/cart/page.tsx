@@ -10,9 +10,16 @@ import { useCartStore } from "@/hooks/useCartStore";
 import { formatPrice } from "@/lib/utils/formatters";
 import { ROUTES } from "@/constants/routes";
 import { MIN_ORDER_FOR_FREE_WRAP } from "@/constants/ui";
+import { CONFIRMATIONS } from "@/constants/confirmations";
+import { useConfirm } from "@/hooks/useConfirm";
 
 export default function CartPage() {
+  const confirm = useConfirm();
   const { items, removeItem, updateQuantity, getSubtotal, clearCart } = useCartStore();
+
+  const handleClearCart = async () => {
+    if (await confirm(CONFIRMATIONS.CART_CLEAR)) clearCart();
+  };
   const subtotal = getSubtotal();
   const shipping = subtotal >= MIN_ORDER_FOR_FREE_WRAP ? 0 : 99;
   const total = subtotal + shipping;
@@ -120,7 +127,7 @@ export default function CartPage() {
             ))}
 
             <button
-              onClick={clearCart}
+              onClick={handleClearCart}
               className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1 ml-1"
             >
               <Trash2 className="h-3 w-3" /> Clear entire cart

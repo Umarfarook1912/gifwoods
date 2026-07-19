@@ -17,6 +17,8 @@ import {
 import { StarRating } from "@/components/shared/StarRating";
 import { formatDate } from "@/lib/utils/formatters";
 import { API_ENDPOINTS } from "@/constants/api";
+import { CONFIRMATIONS } from "@/constants/confirmations";
+import { useConfirm } from "@/hooks/useConfirm";
 import { toast } from "sonner";
 import { Check, X, Trash2, Search, MessageSquare } from "lucide-react";
 import type { Review } from "@/types/review";
@@ -26,6 +28,7 @@ interface Props {
 }
 
 export function AdminReviewsClient({ initialReviews }: Props) {
+  const confirm = useConfirm();
   const [reviews, setReviews] = useState(initialReviews);
   const [search, setSearch] = useState("");
   const [approvalFilter, setApprovalFilter] = useState("all");
@@ -69,7 +72,7 @@ export function AdminReviewsClient({ initialReviews }: Props) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this review permanently?")) return;
+    if (!(await confirm(CONFIRMATIONS.REVIEW_DELETE))) return;
     const res = await fetch(API_ENDPOINTS.REVIEW(id), { method: "DELETE" });
     if (res.ok) {
       setReviews(reviews.filter((r) => r.id !== id));

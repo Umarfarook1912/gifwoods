@@ -4,7 +4,8 @@ import { ProductGrid } from "@/components/features/products/ProductGrid";
 import { ProductFilters } from "@/components/features/products/ProductFilters";
 import { ShopSortBar } from "@/components/features/products/ShopSortBar";
 import { createClient } from "@/lib/supabase/server";
-import type { Product, Category } from "@/types/product";
+import { getAvailableCategories } from "@/lib/supabase/categories-db";
+import type { Product } from "@/types/product";
 import { ITEMS_PER_PAGE } from "@/constants/ui";
 
 export const metadata: Metadata = {
@@ -68,17 +69,11 @@ async function getProducts(searchParams: Record<string, string>): Promise<{
   return { products: (data ?? []) as Product[], total: count ?? 0 };
 }
 
-async function getCategories(): Promise<Category[]> {
-  const supabase = await createClient();
-  const { data } = await supabase.from("categories").select("*").order("name");
-  return (data ?? []) as Category[];
-}
-
 export default async function ShopPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const [{ products, total }, categories] = await Promise.all([
     getProducts(params),
-    getCategories(),
+    getAvailableCategories(),
   ]);
 
   return (

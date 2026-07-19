@@ -7,9 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { CONFIRMATIONS } from "@/constants/confirmations";
+import { useConfirm } from "@/hooks/useConfirm";
 import type { Address } from "@/types/user";
 
 export function AddressBook() {
+  const confirm = useConfirm();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -112,7 +115,7 @@ export function AddressBook() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this address?")) return;
+    if (!(await confirm(CONFIRMATIONS.ADDRESS_DELETE))) return;
     try {
       const res = await fetch(`/api/profile/addresses/${id}`, { method: "DELETE" });
       const { error } = await res.json();

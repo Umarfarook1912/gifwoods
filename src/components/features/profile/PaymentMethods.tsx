@@ -7,9 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { CONFIRMATIONS } from "@/constants/confirmations";
+import { useConfirm } from "@/hooks/useConfirm";
 import type { SavedPaymentMethod } from "@/types/user";
 
 export function PaymentMethods() {
+  const confirm = useConfirm();
   const [methods, setMethods] = useState<SavedPaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -97,7 +100,7 @@ export function PaymentMethods() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Remove this payment method?")) return;
+    if (!(await confirm(CONFIRMATIONS.PAYMENT_METHOD_DELETE))) return;
     try {
       const res = await fetch(`/api/profile/payment-methods/${id}`, { method: "DELETE" });
       const { error } = await res.json();

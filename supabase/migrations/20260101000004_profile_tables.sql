@@ -20,9 +20,11 @@ CREATE INDEX IF NOT EXISTS idx_addresses_user ON public.addresses(user_id);
 
 ALTER TABLE public.addresses ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own addresses" ON public.addresses;
 CREATE POLICY "Users can manage their own addresses"
   ON public.addresses FOR ALL USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Admins can view all addresses" ON public.addresses;
 CREATE POLICY "Admins can view all addresses"
   ON public.addresses FOR SELECT USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
@@ -50,9 +52,11 @@ CREATE INDEX IF NOT EXISTS idx_payment_methods_user ON public.payment_methods(us
 
 ALTER TABLE public.payment_methods ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own payment methods" ON public.payment_methods;
 CREATE POLICY "Users can manage their own payment methods"
   ON public.payment_methods FOR ALL USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Admins can view all payment methods" ON public.payment_methods;
 CREATE POLICY "Admins can view all payment methods"
   ON public.payment_methods FOR SELECT USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')

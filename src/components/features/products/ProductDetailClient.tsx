@@ -47,11 +47,18 @@ export function ProductDetailClient({ product }: Props) {
 
       {/* Details */}
       <div>
-        {product.badge && (
-          <Badge className="mb-3 bg-gold/10 text-gold border-gold/30">
-            {product.badge}
-          </Badge>
-        )}
+        <div className="flex items-center gap-2 mb-3">
+          {product.category && (
+            <Badge variant="outline" className="text-warm-gray border-border">
+              {product.category.name}
+            </Badge>
+          )}
+          {product.badge && (
+            <Badge className="bg-gold/10 text-gold border-gold/30">
+              {product.badge}
+            </Badge>
+          )}
+        </div>
         <h1 className="font-display text-2xl md:text-3xl font-bold text-dark mb-3">
           {product.name}
         </h1>

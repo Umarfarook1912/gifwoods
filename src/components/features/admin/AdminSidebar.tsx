@@ -8,6 +8,7 @@ import {
   ShoppingBag,
   Users,
   Star,
+  Tags,
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -17,6 +18,7 @@ import { SITE_NAME } from "@/constants/ui";
 const NAV_ITEMS = [
   { href: ROUTES.ADMIN.DASHBOARD, label: "Dashboard", icon: LayoutDashboard },
   { href: ROUTES.ADMIN.PRODUCTS, label: "Products", icon: Package },
+  { href: ROUTES.ADMIN.CATEGORIES, label: "Categories", icon: Tags },
   { href: ROUTES.ADMIN.ORDERS, label: "Orders", icon: ShoppingBag },
   { href: ROUTES.ADMIN.USERS, label: "Users", icon: Users },
   { href: ROUTES.ADMIN.REVIEWS, label: "Reviews", icon: Star },

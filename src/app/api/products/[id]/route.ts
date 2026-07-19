@@ -81,7 +81,7 @@ export async function PATCH(
     }
   }
 
-  const updateData: any = { ...productData };
+  const updateData: Record<string, unknown> = { ...productData };
   if (finalCategoryId !== undefined) {
     updateData.category_id = finalCategoryId;
   }
@@ -112,14 +112,30 @@ export async function DELETE(
   const { id } = await params;
   const supabase = await createClient();
 
-  const { error } = await supabase
-    .from("products")
-    .update({ status: "archived" })
-    .eq("id", id);
+  // Products referenced by past orders are archived to preserve order
+  // history; everything else (cart items, wishlists, reviews) cascades.
+  const { count } = await supabase
+    .from("order_items")
+    .select("id", { count: "exact", head: true })
+    .eq("product_id", id);
+
+  if ((count ?? 0) > 0) {
+    const { error } = await supabase
+      .from("products")
+      .update({ status: "archived" })
+      .eq("id", id);
+
+    if (error) {
+      return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ data: { id, action: "archived" }, error: null });
+  }
+
+  const { error } = await supabase.from("products").delete().eq("id", id);
 
   if (error) {
     return NextResponse.json({ data: null, error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ data: { id }, error: null });
+  return NextResponse.json({ data: { id, action: "deleted" }, error: null });
 }
