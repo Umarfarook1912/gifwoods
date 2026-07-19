@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Gift, Search, Heart, User } from "lucide-react";
+import { Gift, Search, User } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { SITE_NAME } from "@/constants/ui";
 import { getAvailableCategories } from "@/lib/supabase/categories-db";
@@ -36,13 +36,6 @@ export async function Header() {
               className="hidden sm:flex w-9 h-9 rounded-full items-center justify-center text-dark hover:bg-gold/10 transition-colors"
             >
               <Search className="h-[18px] w-[18px]" />
-            </Link>
-            <Link
-              href={ROUTES.SHOP}
-              aria-label="Wishlist"
-              className="hidden sm:flex w-9 h-9 rounded-full items-center justify-center text-dark hover:bg-gold/10 transition-colors"
-            >
-              <Heart className="h-[18px] w-[18px]" />
             </Link>
             <span className="hidden sm:flex">
               <AuthMenu icon={<User className="h-[18px] w-[18px]" />} />

@@ -1,55 +1,54 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendOrderConfirmationEmail } from "@/lib/email/nodemailer";
+import {
+  getDatabaseOrderId,
+  verifyCashfreeWebhook,
+} from "@/lib/payment/cashfree";
+import { completePaidOrder } from "@/lib/orders/complete-payment";
 import type { CashfreeWebhookPayload } from "@/types/payment";
 
 export async function POST(request: Request) {
-  const body = await request.json() as CashfreeWebhookPayload;
+  const rawBody = await request.text();
+  const timestamp = request.headers.get("x-webhook-timestamp");
+  const signature = request.headers.get("x-webhook-signature");
 
-  if (body.type !== "PAYMENT_SUCCESS_WEBHOOK") {
+  if (
+    !timestamp ||
+    !signature ||
+    !verifyCashfreeWebhook(rawBody, timestamp, signature)
+  ) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
+
+  const body = JSON.parse(rawBody) as CashfreeWebhookPayload;
+
+  if (
+    body.type !== "PAYMENT_SUCCESS_WEBHOOK" &&
+    body.type !== "PAYMENT_FAILED_WEBHOOK"
+  ) {
     return NextResponse.json({ received: true });
   }
 
   const { order, payment } = body.data;
-  // Extract our DB order ID from the Cashfree order ID (GW_<8chars>)
   const cfOrderId = order.order_id;
-
   const supabase = createAdminClient();
-
-  // Find order by payment session reference
-  const { data: dbOrder } = await supabase
-    .from("orders")
-    .select("*, user:profiles(id, name, email)")
-    .ilike("id", `${cfOrderId.replace("GW_", "").toLowerCase()}%`)
-    .single();
+  const candidateId = getDatabaseOrderId(cfOrderId).toLowerCase();
+  const query = supabase.from("orders").select("id");
+  const { data: dbOrder } =
+    candidateId.length === 36
+      ? await query.eq("id", candidateId).single()
+      : await query.ilike("id", `${candidateId}%`).single();
 
   if (!dbOrder) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
   if (payment.payment_status === "SUCCESS") {
-    await supabase
-      .from("orders")
-      .update({
-        status: "paid",
-        payment_id: payment.cf_payment_id,
-        payment_method: "cashfree",
-      })
-      .eq("id", dbOrder.id);
-
-    const user = dbOrder.user as { name: string; email: string } | null;
-    if (user?.email) {
-      await sendOrderConfirmationEmail({
-        to: user.email,
-        userName: user.name,
-        orderId: dbOrder.id,
-        total: dbOrder.total,
-      });
-    }
+    await completePaidOrder(dbOrder.id, payment.cf_payment_id);
   } else if (payment.payment_status === "FAILED") {
     await supabase
       .from("orders")
-      .update({ status: "cancelled" })
+      .update({ status: "cancelled", payment_status: "failed" })
       .eq("id", dbOrder.id);
   }
 

@@ -4,8 +4,13 @@ import { formatPrice } from "@/lib/utils/formatters";
 import { ShoppingBag, Users, Star, Package, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
+import { OrderStatusBadges } from "@/components/shared/OrderStatusBadges";
+import type { OrderStatusSummary } from "@/lib/orders/status";
+import { getOrderProductSummary } from "@/lib/orders/display";
+import type { Order } from "@/types/order";
 
 export const metadata: Metadata = { title: "Admin Dashboard" };
+export const dynamic = "force-dynamic";
 
 async function getStats() {
   const supabase = createAdminClient();
@@ -14,7 +19,7 @@ async function getStats() {
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase.from("products").select("id", { count: "exact", head: true }).eq("status", "active"),
     supabase.from("reviews").select("id", { count: "exact", head: true }).eq("is_approved", false),
-    supabase.from("orders").select("total").eq("status", "delivered"),
+    supabase.from("orders").select("total").eq("payment_status", "paid"),
   ]);
 
   const totalRevenue = (revenue.data ?? []).reduce((s, o) => s + (o.total ?? 0), 0);
@@ -32,7 +37,9 @@ async function getRecentOrders() {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("orders")
-    .select("id, status, total, created_at, user:profiles(name, email)")
+    .select(
+      "id, status, payment_status, payment_id, total, created_at, user:profiles(name, email), order_items(id, product:products(name))"
+    )
     .order("created_at", { ascending: false })
     .limit(5);
   return data ?? [];
@@ -84,20 +91,20 @@ export default async function AdminDashboardPage() {
             return (
               <div key={order.id} className="p-4 flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium text-dark">{user?.name ?? user?.email ?? "Guest"}</p>
+                  <p className="text-sm font-medium text-dark">
+                    {getOrderProductSummary(order as unknown as Order)}
+                  </p>
                   <p className="text-xs text-warm-gray">
-                    #{order.id.slice(0, 8).toUpperCase()} · {new Date(order.created_at as string).toLocaleDateString("en-IN")}
+                    {user?.name ?? user?.email ?? "Guest"} ·{" "}
+                    {new Date(order.created_at as string).toLocaleDateString("en-IN")}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-semibold">{formatPrice(order.total as number)}</span>
-                  <span className={`text-xs capitalize px-2 py-0.5 rounded-full font-medium ${
-                    order.status === "delivered" ? "bg-emerald-100 text-emerald-700" :
-                    order.status === "paid" ? "bg-blue-100 text-blue-700" :
-                    "bg-yellow-100 text-yellow-700"
-                  }`}>
-                    {order.status as string}
-                  </span>
+                  <OrderStatusBadges
+                    order={order as unknown as OrderStatusSummary}
+                    compact
+                  />
                 </div>
               </div>
             );

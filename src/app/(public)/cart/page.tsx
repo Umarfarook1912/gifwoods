@@ -8,8 +8,9 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/hooks/useCartStore";
 import { formatPrice } from "@/lib/utils/formatters";
+import { calculateShipping } from "@/lib/orders/pricing";
 import { ROUTES } from "@/constants/routes";
-import { MIN_ORDER_FOR_FREE_WRAP } from "@/constants/ui";
+import { FREE_SHIPPING_THRESHOLD } from "@/constants/ui";
 import { CONFIRMATIONS } from "@/constants/confirmations";
 import { useConfirm } from "@/hooks/useConfirm";
 
@@ -21,7 +22,7 @@ export default function CartPage() {
     if (await confirm(CONFIRMATIONS.CART_CLEAR)) clearCart();
   };
   const subtotal = getSubtotal();
-  const shipping = subtotal >= MIN_ORDER_FOR_FREE_WRAP ? 0 : 99;
+  const shipping = calculateShipping(subtotal);
   const total = subtotal + shipping;
 
   if (items.length === 0) {
@@ -163,9 +164,9 @@ export default function CartPage() {
                 <span>Total</span>
                 <span className="text-xl">{formatPrice(total)}</span>
               </div>
-              {subtotal < MIN_ORDER_FOR_FREE_WRAP && (
+              {subtotal < FREE_SHIPPING_THRESHOLD && (
                 <p className="text-xs text-warm-gray mb-4 p-3 rounded-lg bg-cream border border-gold/20">
-                  Add {formatPrice(MIN_ORDER_FOR_FREE_WRAP - subtotal)} more for free shipping!
+                  Add {formatPrice(FREE_SHIPPING_THRESHOLD - subtotal)} more for free shipping!
                 </p>
               )}
               <Button

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice, formatDate, formatOrderId } from "@/lib/utils/formatters";
+import { getPaymentStatus } from "@/lib/orders/status";
 import type { Order } from "@/types/order";
 import { NextResponse } from "next/server";
 
@@ -87,7 +88,7 @@ export async function GET(
             </span>
             <p class="text-2xl font-semibold text-gray-900 mt-2">${formatOrderId(typedOrder.id)}</p>
             <p class="text-xs text-gray-400 mt-1">Date: ${formatDate(typedOrder.created_at)}</p>
-            <p class="text-xs text-gray-400">Payment: ${typedOrder.payment_method || "Paid"}</p>
+            <p class="text-xs text-gray-400">Payment: ${getPaymentStatus(typedOrder)}</p>
           </div>
         </div>
 
@@ -106,7 +107,7 @@ export async function GET(
           <div class="text-right">
             <h2 class="text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Delivery Information</h2>
             <p class="text-sm text-gray-500">Shipped via Gifwoods Express</p>
-            <p class="text-sm text-gray-500 mt-1">Status: <span class="capitalize font-semibold">${typedOrder.status}</span></p>
+            <p class="text-sm text-gray-500 mt-1">Order status: <span class="capitalize font-semibold">${typedOrder.status}</span></p>
           </div>
         </div>
 

@@ -89,8 +89,8 @@ export function AddressForm({ defaultValues, onSubmit }: Props) {
         </div>
       </div>
 
-      <Button type="submit" className="w-full bg-gold text-dark hover:bg-gold-dark font-semibold h-11">
-        Continue to Payment →
+      <Button type="submit" className="h-12 w-full rounded-full bg-gold font-semibold text-dark hover:bg-gold-dark">
+        Review order →
       </Button>
     </form>
   );

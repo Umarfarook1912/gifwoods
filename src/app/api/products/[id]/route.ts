@@ -113,7 +113,7 @@ export async function DELETE(
   const supabase = await createClient();
 
   // Products referenced by past orders are archived to preserve order
-  // history; everything else (cart items, wishlists, reviews) cascades.
+  // history; cart items and reviews cascade.
   const { count } = await supabase
     .from("order_items")
     .select("id", { count: "exact", head: true })

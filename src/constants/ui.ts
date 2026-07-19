@@ -100,7 +100,13 @@ export const WHY_US_ITEMS = [
 
 export const ORDER_STATUSES = [
   "pending",
-  "paid",
+  "processing",
+  "shipped",
+  "delivered",
+  "cancelled",
+] as const;
+
+export const FULFILLMENT_STATUSES = [
   "processing",
   "shipped",
   "delivered",
@@ -117,4 +123,6 @@ export const ITEMS_PER_PAGE = 12;
 export const ADMIN_ITEMS_PER_PAGE = 20;
 
 export const MIN_ORDER_FOR_FREE_WRAP = 1499;
+export const FREE_SHIPPING_THRESHOLD = 500;
+export const STANDARD_SHIPPING_FEE = 60;
 export const MIN_CORPORATE_ORDER = 25;

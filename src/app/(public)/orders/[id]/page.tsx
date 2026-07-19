@@ -3,36 +3,30 @@ import { auth } from "@/lib/auth/auth";
 import { redirect, notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { CreditCard } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ReviewForm } from "@/components/features/reviews/ReviewForm";
+import { PaymentReturnNotice } from "@/components/features/orders/PaymentReturnNotice";
+import { OrderStatusBadges } from "@/components/shared/OrderStatusBadges";
 import { formatPrice, formatDate, formatOrderId } from "@/lib/utils/formatters";
+import { getPaymentStatus } from "@/lib/orders/status";
 import { ROUTES } from "@/constants/routes";
-import { cn } from "@/lib/utils/cn";
 import type { Order, OrderItem } from "@/types/order";
 import type { Product } from "@/types/product";
 
-const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
-  paid: "bg-blue-50 text-blue-700 border-blue-200",
-  processing: "bg-purple-50 text-purple-700 border-purple-200",
-  shipped: "bg-indigo-50 text-indigo-700 border-indigo-200",
-  delivered: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  cancelled: "bg-red-50 text-red-700 border-red-200",
-};
-
 interface Props {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ payment?: string }>;
 }
 
 export const metadata: Metadata = { title: "Order Details" };
 
-export default async function OrderDetailPage({ params }: Props) {
+export default async function OrderDetailPage({ params, searchParams }: Props) {
   const session = await auth();
   if (!session) redirect(ROUTES.LOGIN);
 
-  const { id } = await params;
+  const [{ id }, query] = await Promise.all([params, searchParams]);
   const supabase = await createClient();
   const userId = session.user.supabaseId ?? session.user.id;
 
@@ -51,20 +45,16 @@ export default async function OrderDetailPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-cream py-10">
+      <PaymentReturnNotice paymentResult={query.payment} />
       <div className="page-container max-w-3xl">
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="font-display text-2xl font-bold text-dark">
               Order {formatOrderId(typedOrder.id)}
             </h1>
             <p className="text-warm-gray text-sm mt-1">{formatDate(typedOrder.created_at)}</p>
           </div>
-          <Badge
-            variant="outline"
-            className={cn("capitalize text-sm px-3 py-1", STATUS_STYLES[typedOrder.status])}
-          >
-            {typedOrder.status}
-          </Badge>
+          <OrderStatusBadges order={typedOrder} />
         </div>
 
         {/* Order items */}
@@ -120,6 +110,24 @@ export default async function OrderDetailPage({ params }: Props) {
             </div>
           </div>
         </div>
+
+        {typedOrder.payment_id && (
+          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-border bg-white p-5">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/15">
+              <CreditCard className="h-4 w-4 text-gold" />
+            </span>
+            <div>
+              <h2 className="font-semibold text-dark">Payment details</h2>
+              <p className="mt-1 text-sm capitalize text-warm-gray">
+                {typedOrder.payment_method ?? "Online payment"} ·{" "}
+                {getPaymentStatus(typedOrder)}
+              </p>
+              <p className="mt-1 break-all font-mono text-xs text-muted-foreground">
+                Transaction ID: {typedOrder.payment_id}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Shipping address */}
         <div className="bg-white rounded-2xl border border-border p-6 mb-6">

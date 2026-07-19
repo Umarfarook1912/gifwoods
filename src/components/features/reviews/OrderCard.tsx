@@ -1,20 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatPrice, formatDate, formatOrderId } from "@/lib/utils/formatters";
+import { OrderStatusBadges } from "@/components/shared/OrderStatusBadges";
+import { formatPrice, formatDate } from "@/lib/utils/formatters";
+import { getOrderProductSummary } from "@/lib/orders/display";
 import { ROUTES } from "@/constants/routes";
-import { cn } from "@/lib/utils/cn";
 import type { Order } from "@/types/order";
-
-const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
-  paid: "bg-blue-50 text-blue-700 border-blue-200",
-  processing: "bg-purple-50 text-purple-700 border-purple-200",
-  shipped: "bg-indigo-50 text-indigo-700 border-indigo-200",
-  delivered: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  cancelled: "bg-red-50 text-red-700 border-red-200",
-};
 
 interface Props {
   order: Order;
@@ -40,23 +31,15 @@ export function OrderCard({ order }: Props) {
             </div>
           )}
           <div>
-            <p className="font-semibold text-dark text-sm">{formatOrderId(order.id)}</p>
+            <p className="font-semibold text-dark text-sm">
+              {getOrderProductSummary(order)}
+            </p>
             <p className="text-xs text-warm-gray mt-0.5">{formatDate(order.created_at)}</p>
-            {order.order_items && order.order_items.length > 1 && (
-              <p className="text-xs text-muted-foreground">
-                +{order.order_items.length - 1} more item{order.order_items.length > 2 ? "s" : ""}
-              </p>
-            )}
           </div>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           <span className="font-bold text-dark">{formatPrice(order.total)}</span>
-          <Badge
-            variant="outline"
-            className={cn("capitalize text-xs", STATUS_STYLES[order.status])}
-          >
-            {order.status}
-          </Badge>
+          <OrderStatusBadges order={order} compact />
         </div>
       </div>
 

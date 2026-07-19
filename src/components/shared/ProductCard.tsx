@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, Heart, Star } from "lucide-react";
+import { ShoppingBag, Star } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { formatPrice } from "@/lib/utils/formatters";
 import { ROUTES } from "@/constants/routes";
@@ -58,15 +58,6 @@ export function ProductCard({ product, className }: Props) {
               {BADGE_LABELS[product.badge] ?? product.badge}
             </span>
           )}
-
-          {/* Wishlist */}
-          <button
-            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-dark hover:text-gold transition-colors"
-            aria-label="Add to wishlist"
-            onClick={(e) => e.preventDefault()}
-          >
-            <Heart className="h-4 w-4" />
-          </button>
 
           {/* Add to cart overlay */}
           <button

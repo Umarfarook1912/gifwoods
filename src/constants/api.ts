@@ -16,7 +16,7 @@ export const API_ENDPOINTS = {
   USERS: "/api/users",
   USER: (id: string) => `/api/users/${id}`,
   USER_ROLE: (id: string) => `/api/users/${id}/role`,
-  WISHLIST: "/api/wishlist",
+  PROFILE_ADDRESSES: "/api/profile/addresses",
   UPLOAD: "/api/upload",
   COUNTRY_CALLING_CODES:
     "https://countriesnow.space/api/v0.1/countries/codes",

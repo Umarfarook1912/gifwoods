@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import { PolicyPage } from "@/components/shared/PolicyPage";
+import {
+  FREE_SHIPPING_THRESHOLD,
+  STANDARD_SHIPPING_FEE,
+} from "@/constants/ui";
+import { formatPrice } from "@/lib/utils/formatters";
 
 export const metadata: Metadata = {
   title: "Shipping Policy",
@@ -19,8 +24,14 @@ export default function ShippingPage() {
 
       <h2>Shipping Costs</h2>
       <ul>
-        <li>Orders above ₹1,499: <strong>Free shipping</strong></li>
-        <li>Orders below ₹1,499: ₹99 flat fee</li>
+        <li>
+          Orders of {formatPrice(FREE_SHIPPING_THRESHOLD)} or more:{" "}
+          <strong>Free shipping</strong>
+        </li>
+        <li>
+          Orders below {formatPrice(FREE_SHIPPING_THRESHOLD)}:{" "}
+          {formatPrice(STANDARD_SHIPPING_FEE)} flat fee
+        </li>
         <li>Corporate orders: Free shipping on all bulk orders</li>
       </ul>
 

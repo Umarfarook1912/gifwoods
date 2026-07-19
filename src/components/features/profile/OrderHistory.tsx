@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatPrice, formatDate, formatOrderId } from "@/lib/utils/formatters";
+import { formatPrice, formatDate } from "@/lib/utils/formatters";
+import { getOrderProductSummary } from "@/lib/orders/display";
 import { Download, ExternalLink, Loader2, Package, Truck, CheckCircle2 } from "lucide-react";
 import type { Order } from "@/types/order";
 import { Button } from "@/components/ui/button";
+import { OrderStatusBadges } from "@/components/shared/OrderStatusBadges";
 
 const STEPS = ["processing", "shipped", "delivered"] as const;
 
@@ -28,7 +30,7 @@ export function OrderHistory() {
   }, []);
 
   const getStatusIndex = (status: string) => {
-    if (status === "pending" || status === "paid" || status === "processing") return 0;
+    if (status === "pending" || status === "processing") return 0;
     if (status === "shipped") return 1;
     if (status === "delivered") return 2;
     return -1; // e.g. cancelled
@@ -61,9 +63,12 @@ export function OrderHistory() {
           <div key={order.id} className="bg-white rounded-2xl border border-border p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-border mb-6">
               <div>
-                <span className="text-xs text-warm-gray font-semibold">ORDER ID</span>
-                <h3 className="font-mono font-bold text-dark text-sm">{formatOrderId(order.id)}</h3>
+                <span className="text-xs text-warm-gray font-semibold">PRODUCT</span>
+                <h3 className="font-bold text-dark text-sm">
+                  {getOrderProductSummary(order)}
+                </h3>
                 <p className="text-xs text-warm-gray mt-1">Placed on {formatDate(order.created_at)}</p>
+                <OrderStatusBadges order={order} compact className="mt-2" />
               </div>
               <div className="flex flex-row gap-2">
                 <Button variant="outline" size="sm" asChild className="gap-2 text-xs">

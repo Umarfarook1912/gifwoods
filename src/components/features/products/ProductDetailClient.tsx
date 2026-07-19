@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingBag, Heart, Share2, Star, Truck, Shield } from "lucide-react";
+import { ShoppingBag, Share2, Truck, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -164,9 +164,6 @@ export function ProductDetailClient({ product }: Props) {
           >
             <ShoppingBag className="h-4 w-4 mr-2" />
             {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
-          </Button>
-          <Button variant="outline" size="icon" className="h-12 w-12 border-border hover:border-gold">
-            <Heart className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="icon" className="h-12 w-12 border-border hover:border-gold">
             <Share2 className="h-4 w-4" />

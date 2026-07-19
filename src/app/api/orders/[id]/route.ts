@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 import { createClient } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/nodemailer";
+import { FULFILLMENT_STATUSES } from "@/constants/ui";
+import { z } from "zod";
+
+const orderStatusSchema = z.enum(FULFILLMENT_STATUSES);
 
 export async function GET(
   _request: Request,
@@ -43,7 +47,14 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const { status } = await request.json();
+  const parsedStatus = orderStatusSchema.safeParse((await request.json()).status);
+  if (!parsedStatus.success) {
+    return NextResponse.json(
+      { data: null, error: "Invalid order status" },
+      { status: 400 }
+    );
+  }
+  const status = parsedStatus.data;
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -57,12 +68,16 @@ export async function PATCH(
 
   const user = (data as { user: { name: string; email: string } | null }).user;
   if (user?.email) {
-    await sendOrderStatusEmail({
-      to: user.email,
-      userName: user.name,
-      orderId: id,
-      status,
-    });
+    try {
+      await sendOrderStatusEmail({
+        to: user.email,
+        userName: user.name,
+        orderId: id,
+        status,
+      });
+    } catch (emailError) {
+      console.error("Order status email failed:", emailError);
+    }
   }
 
   return NextResponse.json({ data, error: null });

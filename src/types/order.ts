@@ -3,11 +3,14 @@ import type { UserProfile } from "./user";
 
 export type OrderStatus =
   | "pending"
-  | "paid"
   | "processing"
   | "shipped"
   | "delivered"
   | "cancelled";
+
+export type OrderPaymentStatus = "pending" | "paid" | "failed" | "refunded";
+
+export type CheckoutStep = "address" | "review" | "payment";
 
 export interface ShippingAddress {
   name: string;
@@ -35,12 +38,14 @@ export interface Order {
   user_id: string;
   user?: UserProfile;
   status: OrderStatus;
+  payment_status: OrderPaymentStatus;
   subtotal: number;
   shipping_cost: number;
   total: number;
   shipping_address: ShippingAddress;
   payment_id: string | null;
   payment_method: string | null;
+  confirmation_email_sent_at?: string | null;
   order_items?: OrderItem[];
   created_at: string;
   updated_at: string;

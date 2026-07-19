@@ -31,7 +31,7 @@ export async function sendOrderConfirmationEmail({
   const shortId = `#${orderId.slice(0, 8).toUpperCase()}`;
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM ?? `${SITE_NAME} <noreply@gifwoods.in>`,
+    from: process.env.EMAIL_FROM ?? `${SITE_NAME} <${process.env.SMTP_USER}>`,
     to,
     subject: `Order Confirmed ${shortId} — ${SITE_NAME}`,
     html: `
@@ -101,7 +101,7 @@ export async function sendOrderStatusEmail({
   const message = STATUS_MESSAGES[status] ?? `Your order status has been updated to: ${status}`;
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM ?? `${SITE_NAME} <noreply@gifwoods.in>`,
+    from: process.env.EMAIL_FROM ?? `${SITE_NAME} <${process.env.SMTP_USER}>`,
     to,
     subject: `Order Update ${shortId} — ${status.charAt(0).toUpperCase() + status.slice(1)} | ${SITE_NAME}`,
     html: `
@@ -140,7 +140,7 @@ export async function sendWelcomeEmail({ to, userName }: WelcomeEmailProps) {
   const name = userName ?? "Gifter";
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM ?? `${SITE_NAME} <noreply@gifwoods.in>`,
+    from: process.env.EMAIL_FROM ?? `${SITE_NAME} <${process.env.SMTP_USER}>`,
     to,
     subject: `Welcome to ${SITE_NAME} — Your first gift awaits`,
     html: `
@@ -174,7 +174,7 @@ export async function sendContactEmail({ name, email, phone, message }: ContactE
   const transporter = createTransporter();
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM ?? `${SITE_NAME} <noreply@gifwoods.in>`,
+    from: process.env.EMAIL_FROM ?? `${SITE_NAME} <${process.env.SMTP_USER}>`,
     to: process.env.SMTP_USER,
     replyTo: email,
     subject: `Contact Form: Message from ${name}`,

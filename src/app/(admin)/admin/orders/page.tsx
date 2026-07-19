@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { Order } from "@/types/order";
 
 export const metadata: Metadata = { title: "Order Management" };
+export const dynamic = "force-dynamic";
 
 async function getOrders(): Promise<Order[]> {
   const supabase = createAdminClient();
