@@ -187,9 +187,38 @@ export function ProductDetailClient({ product }: Props) {
           <p className="text-sm text-warm-gray leading-relaxed">{product.description}</p>
         </div>
 
+        {/* Specifications */}
+        {product.specifications && product.specifications.length > 0 && (
+          <div className="mt-6 border-t border-border pt-6">
+            <h3 className="font-semibold text-dark mb-3">Specifications</h3>
+            <div className="border border-border rounded-2xl overflow-hidden bg-cream/30">
+              <table className="w-full text-sm border-collapse">
+                <tbody>
+                  {product.specifications.map((spec, i) => (
+                    <tr
+                      key={i}
+                      className={cn(
+                        "border-b border-border last:border-0",
+                        i % 2 === 0 ? "bg-white" : "bg-cream/10"
+                      )}
+                    >
+                      <td className="px-4 py-2.5 font-medium text-dark w-1/3 border-r border-border bg-cream/20">
+                        {spec.key}
+                      </td>
+                      <td className="px-4 py-2.5 text-warm-gray">
+                        {spec.value}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {/* Tags */}
         {product.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-4">
+          <div className="flex flex-wrap gap-2 mt-6">
             {product.tags.map((tag) => (
               <Badge key={tag} variant="outline" className="text-xs text-warm-gray">
                 #{tag}

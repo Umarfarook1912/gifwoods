@@ -22,7 +22,7 @@ async function getProducts(searchParams: Record<string, string>): Promise<{
   total: number;
 }> {
   const supabase = await createClient();
-  const { category, search, sort, minPrice, maxPrice, page = "1" } = searchParams;
+  const { category, search, sort, minPrice, maxPrice, page = "1", badge } = searchParams;
   const pageNum = parseInt(page);
   const from = (pageNum - 1) * ITEMS_PER_PAGE;
 
@@ -31,7 +31,29 @@ async function getProducts(searchParams: Record<string, string>): Promise<{
     .select("*, category:categories(id, name, slug)", { count: "exact" })
     .eq("status", "active");
 
-  if (category) query = query.eq("category_id", category);
+  if (category) {
+    const { data: catData } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("slug", category)
+      .maybeSingle();
+
+    if (catData) {
+      query = query.eq("category_id", catData.id);
+    } else {
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(category);
+      if (isUUID) {
+        query = query.eq("category_id", category);
+      } else {
+        return { products: [], total: 0 };
+      }
+    }
+  }
+
+  if (badge) {
+    query = query.eq("badge", badge);
+  }
+
   if (minPrice) query = query.gte("price", parseFloat(minPrice));
   if (maxPrice) query = query.lte("price", parseFloat(maxPrice));
   if (search) query = query.ilike("name", `%${search}%`);

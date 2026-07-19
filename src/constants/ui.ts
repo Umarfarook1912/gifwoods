@@ -7,12 +7,20 @@ export const SITE_TAGLINE = "A luxury gifting atelier";
 export const SITE_DESCRIPTION =
   "Premium personalized gifts crafted to celebrate every special moment — engraved, hand-packed, and delivered with intention.";
 
+export const OCCASIONS = [
+  { label: "Birthday", href: "/shop?category=birthdays" },
+  { label: "Anniversary", href: "/shop?category=anniversary" },
+  { label: "Wedding", href: "/shop?category=weddings" },
+  { label: "Housewarming", href: "/shop?category=housewarming" },
+  { label: "Baby Shower", href: "/shop?category=baby-shower" },
+] as const;
+
 export const NAV_LINKS = [
   { label: "Shop", href: "/shop" },
-  { label: "Categories", href: "/shop?view=categories" },
-  { label: "Customized", href: "/shop?category=personalized" },
-  { label: "Corporate", href: "/shop?category=corporate" },
-  { label: "Occasions", href: "/shop?view=occasions" },
+  { label: "New Arrivals", href: "/shop?sort=newest" },
+  { label: "Best Sellers", href: "/shop?badge=Bestseller" },
+  { label: "Shop by Occasion", href: "#", dropdown: true },
+  { label: "Corporate Gifting", href: "/shop?category=corporate" },
   { label: "About", href: "/about" },
 ] as const;
 

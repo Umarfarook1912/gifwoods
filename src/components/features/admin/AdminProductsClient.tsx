@@ -382,10 +382,56 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="col-span-2">
-              <Label>Image URL</Label>
-              <Input value={form.images[0]} onChange={(e) => setForm({ ...form, images: [e.target.value] })} className="mt-1" placeholder="https://..." />
+            
+            {/* Product Images Section */}
+            <div className="col-span-2 border-t pt-4 mt-2">
+              <div className="flex items-center justify-between mb-3">
+                <Label className="text-base font-semibold text-dark">Product Images</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setForm((prev) => ({ ...prev, images: [...prev.images, ""] }))}
+                  className="h-8 text-xs flex items-center gap-1 border-gold hover:bg-gold/10 hover:text-dark text-dark"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add Image URL
+                </Button>
+              </div>
+              
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                {form.images.map((img, index) => (
+                  <div key={index} className="flex gap-2 items-center">
+                    <Input
+                      placeholder="https://example.com/image.jpg"
+                      value={img}
+                      onChange={(e) => {
+                        const newImages = [...form.images];
+                        newImages[index] = e.target.value;
+                        setForm({ ...form, images: newImages });
+                      }}
+                      className="flex-1 text-sm h-9"
+                    />
+                    {form.images.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setForm((prev) => ({
+                            ...prev,
+                            images: prev.images.filter((_, i) => i !== index),
+                          }));
+                        }}
+                        className="h-9 w-9 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
+
             <div className="col-span-2">
               <Label>Description</Label>
               <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="mt-1" rows={3} />
