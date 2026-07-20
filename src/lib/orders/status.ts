@@ -16,3 +16,7 @@ export function getPaymentStatus(order: OrderStatusSummary): OrderPaymentStatus 
   if (order.payment_id || PAID_FULFILLMENT_STATUSES.has(order.status)) return "paid";
   return order.status === "cancelled" ? "failed" : "pending";
 }
+
+export function canDownloadInvoice(order: OrderStatusSummary): boolean {
+  return getPaymentStatus(order) === "paid" && order.status === "delivered";
+}

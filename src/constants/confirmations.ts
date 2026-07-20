@@ -31,12 +31,6 @@ export const CONFIRMATIONS = {
     confirmLabel: "Clear Cart",
     variant: "destructive",
   },
-  PAYMENT_METHOD_DELETE: {
-    title: "Remove payment method?",
-    description: "This saved payment method will be removed from your account.",
-    confirmLabel: "Remove",
-    variant: "destructive",
-  },
 } as const satisfies Record<string, ConfirmOptions>;
 
 export function categoryDeleteConfirmation(name: string): ConfirmOptions {

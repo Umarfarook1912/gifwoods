@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { formatPrice, formatDate } from "@/lib/utils/formatters";
 import { getOrderProductSummary } from "@/lib/orders/display";
+import { canDownloadInvoice } from "@/lib/orders/status";
 import { Download, ExternalLink, Loader2, Package, Truck, CheckCircle2 } from "lucide-react";
 import type { Order } from "@/types/order";
 import { Button } from "@/components/ui/button";
@@ -71,12 +72,14 @@ export function OrderHistory() {
                 <OrderStatusBadges order={order} compact className="mt-2" />
               </div>
               <div className="flex flex-row gap-2">
-                <Button variant="outline" size="sm" asChild className="gap-2 text-xs">
-                  <a href={`/api/orders/${order.id}/invoice`} target="_blank" rel="noopener noreferrer">
-                    <Download className="w-3.5 h-3.5" />
-                    Invoice
-                  </a>
-                </Button>
+                {canDownloadInvoice(order) && (
+                  <Button variant="outline" size="sm" asChild className="gap-2 text-xs">
+                    <a href={`/api/orders/${order.id}/invoice`} target="_blank" rel="noopener noreferrer">
+                      <Download className="w-3.5 h-3.5" />
+                      Invoice
+                    </a>
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" asChild className="gap-2 text-xs">
                   <a href={`/orders/${order.id}`}>
                     <ExternalLink className="w-3.5 h-3.5" />

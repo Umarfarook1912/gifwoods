@@ -1,21 +1,36 @@
 "use client";
 
-import { useState } from "react";
-import { User, Package, MapPin, CreditCard, Lock, LogOut } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { User, Package, MapPin, Lock, LogOut } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils/cn";
 import { AUTH_PROVIDERS } from "@/constants/auth";
 import { AccountInfo } from "./AccountInfo";
 import { OrderHistory } from "./OrderHistory";
 import { AddressBook } from "./AddressBook";
-import { PaymentMethods } from "./PaymentMethods";
 import { SecuritySettings } from "./SecuritySettings";
 
-type Tab = "account" | "orders" | "addresses" | "payments" | "security";
+type Tab = "account" | "orders" | "addresses" | "security";
+
+const PROFILE_TABS = new Set<Tab>(["account", "orders", "addresses", "security"]);
+
+function parseProfileTab(value: string | null): Tab {
+  if (value && PROFILE_TABS.has(value as Tab)) return value as Tab;
+  return "account";
+}
 
 export function ProfileClient() {
   const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState<Tab>("account");
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<Tab>(() =>
+    parseProfileTab(searchParams.get("tab"))
+  );
+
+  useEffect(() => {
+    setActiveTab(parseProfileTab(searchParams.get("tab")));
+  }, [searchParams]);
+
   const isGoogleUser =
     session?.user.authProvider === AUTH_PROVIDERS.GOOGLE ||
     Boolean(
@@ -27,7 +42,6 @@ export function ProfileClient() {
     { id: "account" as Tab, label: "Account Info", icon: User },
     { id: "orders" as Tab, label: "Order History", icon: Package },
     { id: "addresses" as Tab, label: "Address Book", icon: MapPin },
-    { id: "payments" as Tab, label: "Payment Methods", icon: CreditCard },
     ...(!isGoogleUser
       ? [{ id: "security" as Tab, label: "Security Settings", icon: Lock }]
       : []),
@@ -75,7 +89,6 @@ export function ProfileClient() {
             {activeTab === "account" && <AccountInfo />}
             {activeTab === "orders" && <OrderHistory />}
             {activeTab === "addresses" && <AddressBook />}
-            {activeTab === "payments" && <PaymentMethods />}
             {activeTab === "security" && !isGoogleUser && <SecuritySettings />}
           </div>
         </div>

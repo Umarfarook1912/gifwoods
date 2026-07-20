@@ -122,6 +122,12 @@ export const NEW_CATEGORY_OPTION = "__new__";
 export const ITEMS_PER_PAGE = 12;
 export const ADMIN_ITEMS_PER_PAGE = 20;
 
+export const HOME_EXPLORE_PRODUCTS_DESKTOP = 8;
+export const HOME_EXPLORE_PRODUCTS_MOBILE = 6;
+export const HOME_VIEW_ALL_PRODUCTS_LABEL = "View All Products";
+
+export const SHOP_FILTERS_LABEL = "Filters";
+
 export const MIN_ORDER_FOR_FREE_WRAP = 1499;
 export const FREE_SHIPPING_THRESHOLD = 500;
 export const STANDARD_SHIPPING_FEE = 60;

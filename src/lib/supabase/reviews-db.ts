@@ -9,7 +9,6 @@ const MOCK_DB_PATH = path.join(process.cwd(), "src/lib/supabase/mock-db.json");
 
 interface MockStore {
   addresses: any[];
-  payment_methods: any[];
   reviews: Review[];
 }
 
@@ -20,7 +19,7 @@ async function getMockStore(): Promise<MockStore> {
     if (!parsed.reviews) parsed.reviews = [];
     return parsed;
   } catch {
-    const defaultStore: MockStore = { addresses: [], payment_methods: [], reviews: [] };
+    const defaultStore: MockStore = { addresses: [], reviews: [] };
     await fs.writeFile(MOCK_DB_PATH, JSON.stringify(defaultStore, null, 2));
     return defaultStore;
   }

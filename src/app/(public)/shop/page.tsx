@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ProductGrid } from "@/components/features/products/ProductGrid";
 import { ProductFilters } from "@/components/features/products/ProductFilters";
+import { MobileProductFilters } from "@/components/features/products/MobileProductFilters";
 import { ShopSortBar } from "@/components/features/products/ShopSortBar";
 import { createClient } from "@/lib/supabase/server";
 import { getAvailableCategories } from "@/lib/supabase/categories-db";
@@ -98,6 +99,9 @@ export default async function ShopPage({ searchParams }: PageProps) {
           </div>
           <div className="flex-1 min-w-0">
             <Suspense fallback={null}>
+              <div className="mb-4 lg:hidden">
+                <MobileProductFilters categories={categories} />
+              </div>
               <ShopSortBar total={total} />
             </Suspense>
             <div className="mt-6">

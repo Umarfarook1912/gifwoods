@@ -33,3 +33,11 @@ export function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return `${text.slice(0, maxLength)}...`;
 }
+
+export function formatHomeProductsShowing(
+  from: number,
+  to: number,
+  total: number
+): string {
+  return `Showing ${from}–${to} of ${total} products`;
+}

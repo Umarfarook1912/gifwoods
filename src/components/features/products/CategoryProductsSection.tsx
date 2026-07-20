@@ -2,10 +2,18 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Grid } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { Reveal } from "@/components/shared/Reveal";
+import { CategoryFilterBar } from "./CategoryFilterBar";
+import { ViewAllProductsPagination } from "./ViewAllProductsPagination";
 import { cn } from "@/lib/utils/cn";
+import { ROUTES } from "@/constants/routes";
+import {
+  HOME_EXPLORE_PRODUCTS_DESKTOP,
+  HOME_EXPLORE_PRODUCTS_MOBILE,
+  HOME_VIEW_ALL_PRODUCTS_LABEL,
+} from "@/constants/ui";
 import type { Category, Product } from "@/types/product";
 
 interface CategoryProductsSectionProps {
@@ -49,6 +57,21 @@ export function CategoryProductsSection({
     return categories.find((c) => c.id === selectedCategoryId) ?? null;
   }, [selectedCategoryId, categories]);
 
+  const displayedProducts = useMemo(
+    () => filteredProducts.slice(0, HOME_EXPLORE_PRODUCTS_DESKTOP),
+    [filteredProducts]
+  );
+
+  const showViewAllRow =
+    filteredProducts.length > HOME_EXPLORE_PRODUCTS_MOBILE;
+
+  const viewAllHref = selectedCategoryObj
+    ? `${ROUTES.SHOP}?category=${selectedCategoryObj.slug}`
+    : ROUTES.SHOP;
+
+  const mobileShown = Math.min(HOME_EXPLORE_PRODUCTS_MOBILE, filteredProducts.length);
+  const desktopShown = Math.min(HOME_EXPLORE_PRODUCTS_DESKTOP, filteredProducts.length);
+
   return (
     <section className="py-16 lg:py-20 bg-white border-t border-border/60">
       <div className="page-container">
@@ -82,77 +105,40 @@ export function CategoryProductsSection({
           )}
         </Reveal>
 
-        {/* Categories Selector in Row Order (Text format boxes) */}
-        <Reveal delay={1} className="mb-10">
-          <div className="flex flex-row items-center gap-2.5 sm:gap-3 overflow-x-auto pb-3 pt-1 px-0.5 scrollbar-hide snap-x">
-            {/* All Products Box */}
-            <button
-              type="button"
-              onClick={() => setSelectedCategoryId("all")}
-              className={cn(
-                "snap-start inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl text-sm font-medium transition-all duration-200 shrink-0 border cursor-pointer select-none",
-                selectedCategoryId === "all"
-                  ? "bg-dark text-white border-dark shadow-md ring-2 ring-gold/40"
-                  : "bg-cream/50 text-dark border-border hover:border-gold/50 hover:bg-cream"
-              )}
-            >
-              <Grid className="h-4 w-4 opacity-70" />
-              <span>All Products</span>
-              <span
-                className={cn(
-                  "px-2 py-0.5 rounded-full text-xs font-semibold transition-colors",
-                  selectedCategoryId === "all"
-                    ? "bg-gold text-dark font-bold"
-                    : "bg-white/80 text-warm-gray border border-border/80"
-                )}
-              >
-                {products.length}
-              </span>
-            </button>
+        <CategoryFilterBar
+          categories={categories}
+          categoryCounts={categoryCounts}
+          totalCount={products.length}
+          selectedCategoryId={selectedCategoryId}
+          onSelect={setSelectedCategoryId}
+        />
 
-            {/* Category Text Format Boxes */}
-            {categories.map((category) => {
-              const isSelected = selectedCategoryId === category.id;
-              const count = categoryCounts[category.id] || 0;
-
-              return (
-                <button
-                  key={category.id}
-                  type="button"
-                  onClick={() => setSelectedCategoryId(category.id)}
+        {filteredProducts.length > 0 ? (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              {displayedProducts.map((product, index) => (
+                <Reveal
+                  key={product.id}
+                  delay={(index % 4) as 0 | 1 | 2 | 3}
                   className={cn(
-                    "snap-start inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl text-sm font-medium transition-all duration-200 shrink-0 border cursor-pointer select-none",
-                    isSelected
-                      ? "bg-dark text-white border-dark shadow-md ring-2 ring-gold/40"
-                      : "bg-cream/50 text-dark border-border hover:border-gold/50 hover:bg-cream"
+                    index >= HOME_EXPLORE_PRODUCTS_MOBILE && "hidden lg:block"
                   )}
                 >
-                  <span>{category.name}</span>
-                  <span
-                    className={cn(
-                      "px-2 py-0.5 rounded-full text-xs font-semibold transition-colors",
-                      isSelected
-                        ? "bg-gold text-dark font-bold"
-                        : "bg-white/80 text-warm-gray border border-border/80"
-                    )}
-                  >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </Reveal>
-
-        {/* Product Grid */}
-        {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {filteredProducts.map((product, index) => (
-              <Reveal key={product.id} delay={(index % 4) as 0 | 1 | 2 | 3}>
-                <ProductCard product={product} className="h-full" />
+                  <ProductCard product={product} className="h-full" />
+                </Reveal>
+              ))}
+            </div>
+            {showViewAllRow && (
+              <Reveal delay={3}>
+                <ViewAllProductsPagination
+                  href={viewAllHref}
+                  totalCount={filteredProducts.length}
+                  mobileShown={mobileShown}
+                  desktopShown={desktopShown}
+                />
               </Reveal>
-            ))}
-          </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-16 px-4 bg-cream/40 rounded-3xl border border-dashed border-border/80">
             <p className="text-dark font-display font-semibold text-lg">
@@ -166,7 +152,7 @@ export function CategoryProductsSection({
               onClick={() => setSelectedCategoryId("all")}
               className="mt-4 inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold bg-gold text-dark hover:bg-gold-dark transition-colors cursor-pointer"
             >
-              View All Products
+              {HOME_VIEW_ALL_PRODUCTS_LABEL}
             </button>
           </div>
         )}

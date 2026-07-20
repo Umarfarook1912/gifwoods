@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice, formatDate, formatOrderId } from "@/lib/utils/formatters";
-import { getPaymentStatus } from "@/lib/orders/status";
+import { getPaymentStatus, canDownloadInvoice } from "@/lib/orders/status";
 import type { Order } from "@/types/order";
 import { NextResponse } from "next/server";
 
@@ -32,6 +32,12 @@ export async function GET(
 
   if (typedOrder.user_id !== userId && session.user.role !== "admin") {
     return new Response("Forbidden", { status: 403 });
+  }
+
+  if (!canDownloadInvoice(typedOrder)) {
+    return new Response("Invoice is available only after payment is completed and the order is delivered.", {
+      status: 403,
+    });
   }
 
   const addr = typedOrder.shipping_address;

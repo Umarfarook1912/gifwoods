@@ -37,9 +37,7 @@ export async function Header() {
             >
               <Search className="h-[18px] w-[18px]" />
             </Link>
-            <span className="hidden sm:flex">
-              <AuthMenu icon={<User className="h-[18px] w-[18px]" />} />
-            </span>
+            <AuthMenu icon={<User className="h-[18px] w-[18px]" />} />
             <CartButton />
           </div>
         </div>

@@ -40,20 +40,3 @@ export interface Address {
   updated_at: string;
 }
 
-export interface SavedPaymentMethod {
-  id: string;
-  user_id: string;
-  provider: string;
-  method_type: string;
-  last4?: string | null;
-  brand?: string | null;
-  upi_id?: string | null;
-  wallet_name?: string | null;
-  expiry_month?: number | null;
-  expiry_year?: number | null;
-  token: string;
-  is_default: boolean;
-  created_at: string;
-  updated_at: string;
-}
-

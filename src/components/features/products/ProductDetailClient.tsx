@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ShoppingBag, Share2, Truck, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ProductImageGallery } from "./ProductImageGallery";
@@ -14,7 +13,6 @@ import { formatPrice, formatDiscount } from "@/lib/utils/formatters";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils/cn";
 import type { Product } from "@/types/product";
-import type { Customization } from "@/types/product";
 
 interface Props {
   product: Product;
@@ -22,14 +20,11 @@ interface Props {
 
 export function ProductDetailClient({ product }: Props) {
   const [quantity, setQuantity] = useState(1);
-  const [customization, setCustomization] = useState<Customization>({});
   const { addItem, openCart } = useCartStore();
-
-  const hasPersonalization = product.badge === "Personalize";
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
-      addItem(product, 1, hasPersonalization ? customization : undefined);
+      addItem(product, 1);
     }
     openCart();
     toast.success(`${product.name} added to cart!`);
@@ -92,39 +87,6 @@ export function ProductDetailClient({ product }: Props) {
         </div>
 
         <Separator className="mb-6" />
-
-        {/* Personalization */}
-        {hasPersonalization && (
-          <div className="mb-6 p-4 rounded-xl border border-gold/20 bg-gold/5 space-y-3">
-            <h3 className="font-semibold text-dark text-sm">Personalize this gift</h3>
-            <div>
-              <Label htmlFor="custom-name" className="text-xs font-medium text-warm-gray mb-1">
-                Name to engrave
-              </Label>
-              <Input
-                id="custom-name"
-                placeholder="e.g. Priya & Arjun"
-                maxLength={50}
-                value={customization.name ?? ""}
-                onChange={(e) => setCustomization({ ...customization, name: e.target.value })}
-                className="border-gold/30 focus-visible:ring-gold bg-white"
-              />
-            </div>
-            <div>
-              <Label htmlFor="custom-message" className="text-xs font-medium text-warm-gray mb-1">
-                Message (optional)
-              </Label>
-              <Input
-                id="custom-message"
-                placeholder="Your heartfelt message..."
-                maxLength={100}
-                value={customization.message ?? ""}
-                onChange={(e) => setCustomization({ ...customization, message: e.target.value })}
-                className="border-gold/30 focus-visible:ring-gold bg-white"
-              />
-            </div>
-          </div>
-        )}
 
         {/* Quantity */}
         <div className="flex items-center gap-3 mb-6">

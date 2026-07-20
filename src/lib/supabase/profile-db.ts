@@ -1,13 +1,12 @@
 import { createClient } from "./server";
 import fs from "fs/promises";
 import path from "path";
-import type { Address, SavedPaymentMethod } from "@/types/user";
+import type { Address } from "@/types/user";
 
 const MOCK_DB_PATH = path.join(process.cwd(), "src/lib/supabase/mock-db.json");
 
 interface MockStore {
   addresses: Address[];
-  payment_methods: SavedPaymentMethod[];
 }
 
 async function getMockStore(): Promise<MockStore> {
@@ -15,7 +14,7 @@ async function getMockStore(): Promise<MockStore> {
     const data = await fs.readFile(MOCK_DB_PATH, "utf-8");
     return JSON.parse(data);
   } catch {
-    const defaultStore: MockStore = { addresses: [], payment_methods: [] };
+    const defaultStore: MockStore = { addresses: [] };
     await fs.writeFile(MOCK_DB_PATH, JSON.stringify(defaultStore, null, 2));
     return defaultStore;
   }
@@ -170,86 +169,6 @@ export async function deleteAddress(userId: string, addressId: string): Promise<
       store.addresses = store.addresses.filter((a) => !(a.id === addressId && a.user_id === userId));
       await saveMockStore(store);
       return store.addresses.length < lengthBefore;
-    }
-    throw error;
-  }
-  return true;
-}
-
-// Saved Payment Methods
-export async function getPaymentMethods(userId: string): Promise<SavedPaymentMethod[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("payment_methods")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    if (isTableMissingError(error)) {
-      console.warn("Supabase 'payment_methods' table missing, falling back to local JSON store.");
-      const store = await getMockStore();
-      return store.payment_methods.filter((p) => p.user_id === userId);
-    }
-    throw error;
-  }
-
-  return (data ?? []) as SavedPaymentMethod[];
-}
-
-export async function createPaymentMethod(
-  userId: string,
-  payload: Omit<SavedPaymentMethod, "id" | "user_id" | "created_at" | "updated_at">
-): Promise<SavedPaymentMethod> {
-  const supabase = await createClient();
-
-  if (payload.is_default) {
-    try {
-      await supabase.from("payment_methods").update({ is_default: false }).eq("user_id", userId);
-    } catch {}
-  }
-
-  const { data, error } = await supabase
-    .from("payment_methods")
-    .insert({ ...payload, user_id: userId })
-    .select()
-    .single();
-
-  if (error) {
-    if (isTableMissingError(error)) {
-      const store = await getMockStore();
-      if (payload.is_default) {
-        store.payment_methods.forEach((p) => { if (p.user_id === userId) p.is_default = false; });
-      }
-
-      const newMethod: SavedPaymentMethod = {
-        ...payload,
-        id: crypto.randomUUID(),
-        user_id: userId,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      store.payment_methods.push(newMethod);
-      await saveMockStore(store);
-      return newMethod;
-    }
-    throw error;
-  }
-
-  return data as SavedPaymentMethod;
-}
-
-export async function deletePaymentMethod(userId: string, methodId: string): Promise<boolean> {
-  const supabase = await createClient();
-  const { error } = await supabase.from("payment_methods").delete().eq("id", methodId).eq("user_id", userId);
-
-  if (error) {
-    if (isTableMissingError(error)) {
-      const store = await getMockStore();
-      const lengthBefore = store.payment_methods.length;
-      store.payment_methods = store.payment_methods.filter((p) => !(p.id === methodId && p.user_id === userId));
-      await saveMockStore(store);
-      return store.payment_methods.length < lengthBefore;
     }
     throw error;
   }

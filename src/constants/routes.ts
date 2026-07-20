@@ -7,6 +7,8 @@ export const ROUTES = {
   ORDERS: "/orders",
   ORDER_DETAIL: (id: string) => `/orders/${id}`,
   PROFILE: "/profile",
+  PROFILE_TAB: (tab: "account" | "orders" | "addresses" | "security") =>
+    `/profile?tab=${tab}`,
   LOGIN: "/login",
   REGISTER: "/register",
   ABOUT: "/about",
