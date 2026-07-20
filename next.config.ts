@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
+import path from "path";
 
-const nextConfig: NextConfig = {
+const nextConfig = {
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
+  experimental: {
+    serverActions: {
+      allowedOrigins: ["localhost:3000"],
+    },
+  },
   images: {
     remotePatterns: [
       {
@@ -18,11 +27,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  experimental: {
-    serverActions: {
-      allowedOrigins: ["localhost:3000"],
-    },
-  },
-};
+} satisfies NextConfig as NextConfig & { turbopack?: { root?: string } };
 
 export default nextConfig;

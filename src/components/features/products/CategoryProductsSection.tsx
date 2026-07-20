@@ -39,6 +39,11 @@ export function CategoryProductsSection({
     return counts;
   }, [products]);
 
+  // Only keep categories that have at least one product
+  const availableCategories = useMemo(() => {
+    return categories.filter((c) => (categoryCounts[c.id] || 0) > 0);
+  }, [categories, categoryCounts]);
+
   // Filter products based on selected category
   const filteredProducts = useMemo(() => {
     if (selectedCategoryId === "all") {
@@ -106,7 +111,7 @@ export function CategoryProductsSection({
         </Reveal>
 
         <CategoryFilterBar
-          categories={categories}
+          categories={availableCategories}
           categoryCounts={categoryCounts}
           totalCount={products.length}
           selectedCategoryId={selectedCategoryId}

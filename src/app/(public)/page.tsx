@@ -6,6 +6,7 @@ import { PersonalizeSection } from "@/components/features/products/PersonalizeSe
 import { WhyUsSection } from "@/components/features/products/WhyUsSection";
 import { TestimonialsSection } from "@/components/features/products/TestimonialsSection";
 import { createClient } from "@/lib/supabase/server";
+import { getAvailableCategories } from "@/lib/supabase/categories-db";
 import type { Category, Product } from "@/types/product";
 
 export const metadata: Metadata = {
@@ -39,16 +40,6 @@ async function getNewArrivals(): Promise<Product[]> {
   return (data ?? []) as Product[];
 }
 
-async function getCategories(): Promise<Category[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("categories")
-    .select("id, name, slug, image_url, description, created_at")
-    .order("name");
-
-  return (data ?? []) as Category[];
-}
-
 async function getAllActiveProducts(): Promise<Product[]> {
   const supabase = await createClient();
   const { data } = await supabase
@@ -64,7 +55,7 @@ export default async function HomePage() {
   const [bestsellers, newArrivals, categories, allProducts] = await Promise.all([
     getBestsellers(),
     getNewArrivals(),
-    getCategories(),
+    getAvailableCategories(),
     getAllActiveProducts(),
   ]);
 

@@ -10,12 +10,19 @@ export async function getAvailableCategories(): Promise<Category[]> {
     .eq("products.status", "active")
     .order("name");
 
-  return (data ?? []).map((row) => {
+  if (!data) return [];
+
+  const categoryMap = new Map<string, Category>();
+  for (const row of data) {
     const { products: _products, ...category } = row as Category & {
       products: unknown;
     };
-    return category;
-  });
+    if (!categoryMap.has(category.id)) {
+      categoryMap.set(category.id, category);
+    }
+  }
+
+  return Array.from(categoryMap.values());
 }
 
 /** All categories with their product counts (for admin management). */
