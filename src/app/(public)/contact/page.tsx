@@ -59,7 +59,7 @@ export default function ContactPage() {
                 {[
                   { icon: Mail, label: "Email", value: "hello@gifwoods.in" },
                   { icon: Phone, label: "WhatsApp", value: "+91-99999-99999" },
-                  { icon: MapPin, label: "Studio", value: "Bengaluru, Karnataka, India" },
+                  { icon: MapPin, label: "Manufacturing Atelier", value: "G1A, VOC Nagar, Parisutham Nagar, Thanjavur, Tamil Nadu 613007" },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-gold/10 flex items-center justify-center flex-shrink-0">

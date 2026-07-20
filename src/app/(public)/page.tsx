@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { HeroSection } from "@/components/features/products/HeroSection";
-import { MediaLogos } from "@/components/features/products/MediaLogos";
 import { ProductSectionCarousel } from "@/components/features/products/ProductSectionCarousel";
-import { OccasionsCarousel } from "@/components/features/products/OccasionsCarousel";
+import { CategoryProductsSection } from "@/components/features/products/CategoryProductsSection";
 import { PersonalizeSection } from "@/components/features/products/PersonalizeSection";
 import { WhyUsSection } from "@/components/features/products/WhyUsSection";
 import { TestimonialsSection } from "@/components/features/products/TestimonialsSection";
 import { createClient } from "@/lib/supabase/server";
-import type { Product } from "@/types/product";
+import type { Category, Product } from "@/types/product";
 
 export const metadata: Metadata = {
   title: "Gifwoods — Premium Personalized Gifts for Every Occasion",
@@ -40,16 +39,38 @@ async function getNewArrivals(): Promise<Product[]> {
   return (data ?? []) as Product[];
 }
 
+async function getCategories(): Promise<Category[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("categories")
+    .select("id, name, slug, image_url, description, created_at")
+    .order("name");
+
+  return (data ?? []) as Category[];
+}
+
+async function getAllActiveProducts(): Promise<Product[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("products")
+    .select("*, category:categories(id, name, slug)")
+    .eq("status", "active")
+    .order("created_at", { ascending: false });
+
+  return (data ?? []) as Product[];
+}
+
 export default async function HomePage() {
-  const [bestsellers, newArrivals] = await Promise.all([
+  const [bestsellers, newArrivals, categories, allProducts] = await Promise.all([
     getBestsellers(),
     getNewArrivals(),
+    getCategories(),
+    getAllActiveProducts(),
   ]);
 
   return (
     <>
       <HeroSection />
-      <MediaLogos />
       
       {/* Section 1: Best Sellers */}
       <ProductSectionCarousel
@@ -71,8 +92,8 @@ export default async function HomePage() {
         badgeLabel="Freshly Crafted"
       />
 
-      {/* Section 3: Shop by Occasion / Celebration Collections */}
-      <OccasionsCarousel />
+      {/* Section 3: Category Filter & Products Grid */}
+      <CategoryProductsSection categories={categories} products={allProducts} />
 
       <PersonalizeSection />
       <WhyUsSection />
