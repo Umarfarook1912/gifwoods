@@ -56,11 +56,17 @@ export function ProductFormFields({
       <div>
         <Label>Category</Label>
         <Select
-          value={form.category_id}
+          value={form.category_id || undefined}
           onValueChange={(v) => v && setForm({ ...form, category_id: v })}
         >
           <SelectTrigger className="mt-1 w-full">
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder="Select category">
+              {(value) => {
+                if (!value) return null;
+                if (value === NEW_CATEGORY_OPTION) return "+ Add new category…";
+                return categories.find((c) => c.id === value)?.name ?? "Select category";
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {categories.map((c) => (
@@ -85,12 +91,20 @@ export function ProductFormFields({
       ) : (
         <div>
           <Label>Badge</Label>
-          <Select value={form.badge} onValueChange={(v) => setForm({ ...form, badge: v ?? "" })}>
+          <Select
+            value={form.badge || "none"}
+            onValueChange={(v) => setForm({ ...form, badge: !v || v === "none" ? "" : v })}
+          >
             <SelectTrigger className="mt-1 w-full">
-              <SelectValue placeholder="None" />
+              <SelectValue placeholder="None">
+                {(value) => {
+                  if (!value || value === "none") return "None";
+                  return String(value);
+                }}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               {PRODUCT_BADGES.map((badge) => (
                 <SelectItem key={badge} value={badge}>
                   {badge}

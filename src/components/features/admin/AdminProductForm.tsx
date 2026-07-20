@@ -13,7 +13,7 @@ import {
 import { ProductFormFields } from "./ProductFormFields";
 import { ImageListField, SpecificationListField } from "./ProductFormLists";
 import { API_ENDPOINTS } from "@/constants/api";
-import { NEW_CATEGORY_OPTION } from "@/constants/ui";
+import { NEW_CATEGORY_OPTION, PRODUCT_HOME_TOGGLE_LABELS } from "@/constants/ui";
 import { toast } from "sonner";
 import { RefreshCw } from "lucide-react";
 import type { Category, Product, ProductFormState } from "@/types/product";
@@ -28,7 +28,8 @@ const EMPTY_FORM: ProductFormState = {
   images: [""],
   tags: [],
   stock: 0,
-  is_featured: false,
+  is_bestseller: false,
+  is_new_arrival: false,
   badge: "",
   status: "active",
   specifications: [],
@@ -64,7 +65,8 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
             images: editing.images.length > 0 ? editing.images : [""],
             tags: editing.tags,
             stock: editing.stock,
-            is_featured: editing.is_featured,
+            is_bestseller: editing.is_bestseller ?? false,
+            is_new_arrival: editing.is_new_arrival ?? false,
             badge: editing.badge ?? "",
             status: editing.status,
             specifications: editing.specifications ?? [],
@@ -135,12 +137,21 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
             onChange={(specifications) => setForm({ ...form, specifications })}
           />
 
-          <div className="md:col-span-2 flex items-center gap-3">
-            <Switch
-              checked={form.is_featured}
-              onCheckedChange={(v) => setForm({ ...form, is_featured: v })}
-            />
-            <Label>Featured product</Label>
+          <div className="md:col-span-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-8">
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={form.is_bestseller}
+                onCheckedChange={(v) => setForm({ ...form, is_bestseller: v })}
+              />
+              <Label>{PRODUCT_HOME_TOGGLE_LABELS.BESTSELLER}</Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={form.is_new_arrival}
+                onCheckedChange={(v) => setForm({ ...form, is_new_arrival: v })}
+              />
+              <Label>{PRODUCT_HOME_TOGGLE_LABELS.NEW_ARRIVAL}</Label>
+            </div>
           </div>
         </div>
 

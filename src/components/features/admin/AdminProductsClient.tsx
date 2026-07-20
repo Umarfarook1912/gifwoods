@@ -153,8 +153,15 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
               {p.status}
             </span>
           )},
-          { key: "is_featured", label: "Featured", render: (p) => (
-            p.is_featured ? <Badge className="bg-gold/10 text-gold border-gold/30 text-xs">Featured</Badge> : null
+          { key: "is_bestseller", label: "Home", render: (p) => (
+            <div className="flex flex-wrap gap-1">
+              {p.is_bestseller ? (
+                <Badge className="bg-gold/10 text-gold border-gold/30 text-xs">Bestseller</Badge>
+              ) : null}
+              {p.is_new_arrival ? (
+                <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">New</Badge>
+              ) : null}
+            </div>
           )},
           { key: "actions", label: "", render: (p) => (
             <div className="flex gap-2">

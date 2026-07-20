@@ -17,8 +17,8 @@ export const OCCASIONS = [
 
 export const NAV_LINKS = [
   { label: "Shop", href: "/shop" },
-  { label: "New Arrivals", href: "/shop?sort=newest" },
-  { label: "Best Sellers", href: "/shop?badge=Bestseller" },
+  { label: "New Arrivals", href: "/shop?newArrival=true" },
+  { label: "Best Sellers", href: "/shop?bestseller=true" },
   { label: "Categories", href: "#", dropdown: true },
   { label: "Corporate Gifting", href: "/shop?category=corporate" },
   { label: "About", href: "/about" },
@@ -29,7 +29,7 @@ export const FOOTER_SHOP_LINKS = [
   { label: "Weddings", href: "/shop?category=weddings" },
   { label: "Corporate", href: "/shop?category=corporate" },
   { label: "Hampers", href: "/shop?category=hampers" },
-  { label: "New Arrivals", href: "/shop?sort=newest" },
+  { label: "New Arrivals", href: "/shop?newArrival=true" },
 ] as const;
 
 export const FOOTER_COMPANY_LINKS = [
@@ -113,7 +113,12 @@ export const FULFILLMENT_STATUSES = [
   "cancelled",
 ] as const;
 
-export const PRODUCT_BADGES = ["Personalize", "Bestseller", "New", "Limited"] as const;
+export const PRODUCT_HOME_TOGGLE_LABELS = {
+  BESTSELLER: "Bestseller",
+  NEW_ARRIVAL: "New Arrival",
+} as const;
+
+export const PRODUCT_BADGES = ["Personalize", "Limited"] as const;
 
 export const PRODUCT_STATUSES = ["active", "draft", "archived"] as const;
 

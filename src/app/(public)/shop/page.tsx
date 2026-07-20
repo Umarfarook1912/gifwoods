@@ -24,7 +24,8 @@ async function getProducts(searchParams: Record<string, string>): Promise<{
   total: number;
 }> {
   const supabase = await createClient();
-  const { category, search, sort, minPrice, maxPrice, page = "1", badge } = searchParams;
+  const { category, search, sort, minPrice, maxPrice, page = "1", badge, bestseller, newArrival } =
+    searchParams;
   const pageNum = parseInt(page);
   const from = (pageNum - 1) * ITEMS_PER_PAGE;
 
@@ -54,6 +55,14 @@ async function getProducts(searchParams: Record<string, string>): Promise<{
 
   if (badge) {
     query = query.eq("badge", badge);
+  }
+
+  if (bestseller === "true") {
+    query = query.eq("is_bestseller", true);
+  }
+
+  if (newArrival === "true") {
+    query = query.eq("is_new_arrival", true);
   }
 
   if (minPrice) query = query.gte("price", parseFloat(minPrice));

@@ -12,6 +12,8 @@ export async function GET(request: Request) {
   const search = searchParams.get("search");
   const sort = searchParams.get("sort") ?? "newest";
   const featured = searchParams.get("featured");
+  const bestseller = searchParams.get("bestseller");
+  const newArrival = searchParams.get("newArrival");
   const page = parseInt(searchParams.get("page") ?? "1");
   const limit = parseInt(searchParams.get("limit") ?? String(ITEMS_PER_PAGE));
   const minPrice = searchParams.get("minPrice");
@@ -29,7 +31,8 @@ export async function GET(request: Request) {
     .eq("status", "active");
 
   if (category) query = query.eq("categories.slug", category);
-  if (featured === "true") query = query.eq("is_featured", true);
+  if (featured === "true" || bestseller === "true") query = query.eq("is_bestseller", true);
+  if (newArrival === "true") query = query.eq("is_new_arrival", true);
   if (minPrice) query = query.gte("price", parseFloat(minPrice));
   if (maxPrice) query = query.lte("price", parseFloat(maxPrice));
   if (search) query = query.ilike("name", `%${search}%`);

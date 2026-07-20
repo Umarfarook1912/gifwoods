@@ -22,7 +22,9 @@ export interface Product {
   images: string[];
   tags: string[];
   stock: number;
-  is_featured: boolean;
+  is_featured?: boolean;
+  is_bestseller: boolean;
+  is_new_arrival: boolean;
   badge: ProductBadge | null;
   status: ProductStatus;
   specifications?: Array<{ key: string; value: string }>;
@@ -53,7 +55,8 @@ export interface ProductFormData {
   images: string[];
   tags: string[];
   stock: number;
-  is_featured: boolean;
+  is_bestseller: boolean;
+  is_new_arrival: boolean;
   badge?: ProductBadge;
   status: ProductStatus;
   specifications?: Array<{ key: string; value: string }>;
@@ -74,7 +77,8 @@ export interface ProductFormState {
   images: string[];
   tags: string[];
   stock: number;
-  is_featured: boolean;
+  is_bestseller: boolean;
+  is_new_arrival: boolean;
   badge: string;
   status: ProductStatus;
   specifications: ProductSpecification[];

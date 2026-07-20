@@ -40,7 +40,8 @@ export const productSchema = z.object({
   images: z.array(z.string().url()).min(1),
   tags: z.array(z.string()),
   stock: z.number().int().min(0),
-  is_featured: z.boolean(),
+  is_bestseller: z.boolean(),
+  is_new_arrival: z.boolean(),
   badge: z.enum(["Personalize", "Bestseller", "New", "Limited"]).optional(),
   status: z.enum(["active", "draft", "archived"]),
   specifications: z.array(z.object({

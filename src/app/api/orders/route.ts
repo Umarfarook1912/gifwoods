@@ -17,7 +17,6 @@ export async function GET(request: Request) {
 
   const supabase = await createClient();
   const userId = session.user.supabaseId ?? session.user.id;
-  const isAdmin = session.user.role === "admin";
 
   let query = supabase
     .from("orders")
@@ -25,11 +24,8 @@ export async function GET(request: Request) {
       "*, order_items(*, product:products(id, name, images, slug)), user:profiles(id, name, email)",
       { count: "exact" }
     )
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
-
-  if (!isAdmin) {
-    query = query.eq("user_id", userId);
-  }
 
   if (status) query = query.eq("status", status);
 

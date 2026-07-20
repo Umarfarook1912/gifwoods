@@ -21,7 +21,7 @@ async function getBestsellers(): Promise<Product[]> {
     .from("products")
     .select("*, category:categories(id, name, slug)")
     .eq("status", "active")
-    .or("badge.eq.Bestseller,is_featured.eq.true")
+    .eq("is_bestseller", true)
     .order("created_at", { ascending: false })
     .limit(8);
 
@@ -34,6 +34,7 @@ async function getNewArrivals(): Promise<Product[]> {
     .from("products")
     .select("*, category:categories(id, name, slug)")
     .eq("status", "active")
+    .eq("is_new_arrival", true)
     .order("created_at", { ascending: false })
     .limit(8);
 
@@ -68,7 +69,7 @@ export default async function HomePage() {
         title="Bestsellers"
         subtitle="Our most loved and requested signature personalized gifts."
         products={bestsellers}
-        viewAllHref="/shop?badge=Bestseller"
+        viewAllHref="/shop?bestseller=true"
         bgClass="bg-white"
         badgeLabel="Loved by our gifters"
       />
@@ -78,7 +79,7 @@ export default async function HomePage() {
         title="New Arrivals"
         subtitle="Explore our latest custom creations finished by hand in our atelier."
         products={newArrivals}
-        viewAllHref="/shop?sort=newest"
+        viewAllHref="/shop?newArrival=true"
         bgClass="bg-cream/40"
         badgeLabel="Freshly Crafted"
       />
