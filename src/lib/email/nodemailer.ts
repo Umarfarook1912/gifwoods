@@ -172,20 +172,33 @@ interface ContactEmailProps {
 
 export async function sendContactEmail({ name, email, phone, message }: ContactEmailProps) {
   const transporter = createTransporter();
+  const recipient = process.env.ADMIN_EMAIL ?? "gifwoodsoffice@gmail.com";
 
   await transporter.sendMail({
     from: process.env.EMAIL_FROM ?? `${SITE_NAME} <${process.env.SMTP_USER}>`,
-    to: process.env.SMTP_USER,
+    to: recipient,
     replyTo: email,
-    subject: `Contact Form: Message from ${name}`,
+    subject: `Contact Form Submission from ${name} (${SITE_NAME})`,
     html: `
-      <div style="font-family: sans-serif; padding: 24px;">
-        <h2 style="color: #16130f;">New Contact Form Submission</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ""}
-        <p><strong>Message:</strong></p>
-        <p style="background: #faf7f2; padding: 16px; border-radius: 8px;">${message}</p>
+      <div style="font-family: Georgia, serif; padding: 24px; background: #faf7f2; color: #16130f;">
+        <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e8e0d8; overflow: hidden;">
+          <div style="background: #16130f; padding: 20px 28px; text-align: center;">
+            <h2 style="color: #e5a93c; margin: 0; font-family: Georgia, serif; font-size: 22px;">New Contact Message</h2>
+            <p style="color: rgba(255,255,255,0.6); font-size: 12px; margin: 4px 0 0;">${SITE_NAME} Atelier Inquiry</p>
+          </div>
+          <div style="padding: 28px; font-family: sans-serif; font-size: 14px; line-height: 1.6; color: #333333;">
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+            ${phone ? `<p><strong>Phone:</strong> <a href="tel:${phone}">${phone}</a></p>` : ""}
+            <div style="margin-top: 16px; padding: 16px; background: #faf7f2; border-radius: 12px; border: 1px solid #e8e0d8;">
+              <p style="margin: 0 0 6px; font-weight: bold; color: #16130f;">Message:</p>
+              <p style="margin: 0; white-space: pre-wrap; color: #4a4a4a;">${message}</p>
+            </div>
+            <p style="margin-top: 20px; font-size: 12px; color: #888888;">
+              Tip: You can hit <strong>Reply</strong> directly in your email client to reply to ${name} (${email}).
+            </p>
+          </div>
+        </div>
       </div>
     `,
   });
