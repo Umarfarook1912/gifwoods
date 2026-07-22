@@ -22,6 +22,7 @@ export const NAV_LINKS = [
   { label: "Categories", href: "#", dropdown: true },
   { label: "Corporate Gifting", href: "/shop?category=corporate" },
   { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ] as const;
 
 export const FOOTER_SHOP_LINKS = [
@@ -48,11 +49,21 @@ export const FOOTER_SUPPORT_LINKS = [
   { label: "Track Order", href: "/orders" },
 ] as const;
 
+export const CONTACT_INFO = {
+  phone: "7010969348",
+  phoneFormatted: "+91 7010969348",
+  email: "gifwoodsoffice@gmail.com",
+  address: "G1A, VOC Nagar, Parisutham Nagar, Thanjavur, Tamil Nadu 613007",
+  mapUrl: "https://maps.google.com/?q=G1A,+VOC+Nagar,+Parisutham+Nagar,+Thanjavur,+Tamil+Nadu+613007",
+  mapEmbedUrl: "https://maps.google.com/maps?q=G1A,+VOC+Nagar,+Parisutham+Nagar,+Thanjavur,+Tamil+Nadu+613007&t=&z=16&ie=UTF8&iwloc=&output=embed",
+} as const;
+
 export const SOCIAL_LINKS = {
-  instagram: "https://instagram.com/gifwoods",
-  facebook: "https://facebook.com/gifwoods",
-  pinterest: "https://pinterest.com/gifwoods",
-  whatsapp: "https://wa.me/919999999999",
+  instagram: "https://www.instagram.com/gifwoods_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+  youtube: "https://www.youtube.com/channel/UCOXu-Pw7731tU0h0AjG4A2g",
+  email: "mailto:gifwoodsoffice@gmail.com",
+  phone: "tel:+917010969348",
+  whatsapp: "https://wa.me/917010969348",
 } as const;
 
 export const MEDIA_LOGOS = [

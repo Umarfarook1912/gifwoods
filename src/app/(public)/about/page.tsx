@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { SITE_NAME, SITE_TAGLINE } from "@/constants/ui";
+import { SITE_NAME, CONTACT_INFO, SOCIAL_LINKS } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
-import { MapPin, Navigation } from "lucide-react";
+import { MapPin, Navigation, Mail, Phone, ArrowRight } from "lucide-react";
+import { InstagramIcon, YoutubeIcon } from "@/components/ui/SocialIcons";
 
 export const metadata: Metadata = {
   title: "About Gifwoods — Gift Manufacturer & Custom Gifting Atelier",
@@ -106,6 +107,93 @@ export default function AboutPage() {
           </div>
         </div>
 
+        {/* Social Media & Direct Contact Section */}
+        <div className="animate-fade-up anim-delay-150 bg-white rounded-3xl p-8 md:p-10 border border-border shadow-xs space-y-6">
+          <div>
+            <h2 className="font-display text-2xl font-bold text-dark mb-2">
+              Connect With Us
+            </h2>
+            <p className="text-warm-gray text-sm">
+              Follow our official social media channels for new product launches, workshop videos, and gifting ideas.
+            </p>
+          </div>
+
+          {/* Social Badges Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Instagram */}
+            <a
+              href={SOCIAL_LINKS.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 p-4.5 rounded-2xl bg-cream/50 border border-border hover:border-gold/60 hover:bg-gold/10 transition-all group"
+            >
+              <div className="w-11 h-11 rounded-2xl bg-gold/15 border border-gold/30 text-dark flex items-center justify-center shrink-0 group-hover:text-[#E4405F] transition-colors">
+                <InstagramIcon className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-dark text-sm group-hover:text-gold-dark transition-colors">
+                  Instagram
+                </p>
+                <p className="text-xs text-warm-gray truncate">@gifwoods_</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-warm-gray group-hover:translate-x-1 group-hover:text-gold-dark transition-transform" />
+            </a>
+
+            {/* YouTube */}
+            <a
+              href={SOCIAL_LINKS.youtube}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 p-4.5 rounded-2xl bg-cream/50 border border-border hover:border-gold/60 hover:bg-gold/10 transition-all group"
+            >
+              <div className="w-11 h-11 rounded-2xl bg-gold/15 border border-gold/30 text-dark flex items-center justify-center shrink-0 group-hover:text-[#FF0000] transition-colors">
+                <YoutubeIcon className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-dark text-sm group-hover:text-gold-dark transition-colors">
+                  YouTube Channel
+                </p>
+                <p className="text-xs text-warm-gray truncate">Watch Atelier & Demos</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-warm-gray group-hover:translate-x-1 group-hover:text-gold-dark transition-transform" />
+            </a>
+
+            {/* Email */}
+            <a
+              href={SOCIAL_LINKS.email}
+              className="flex items-center gap-4 p-4.5 rounded-2xl bg-cream/50 border border-border hover:border-gold/60 hover:bg-gold/10 transition-all group"
+            >
+              <div className="w-11 h-11 rounded-2xl bg-gold/15 border border-gold/30 text-dark flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <Mail className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-dark text-sm group-hover:text-gold-dark transition-colors">
+                  Email Support
+                </p>
+                <p className="text-xs text-warm-gray truncate">{CONTACT_INFO.email}</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-warm-gray group-hover:translate-x-1 group-hover:text-gold-dark transition-transform" />
+            </a>
+
+            {/* Phone */}
+            <a
+              href={SOCIAL_LINKS.phone}
+              className="flex items-center gap-4 p-4.5 rounded-2xl bg-cream/50 border border-border hover:border-gold/60 hover:bg-gold/10 transition-all group"
+            >
+              <div className="w-11 h-11 rounded-2xl bg-gold/15 border border-gold/30 text-dark flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <Phone className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-dark text-sm group-hover:text-gold-dark transition-colors">
+                  Call / Phone
+                </p>
+                <p className="text-xs text-warm-gray truncate">{CONTACT_INFO.phoneFormatted}</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-warm-gray group-hover:translate-x-1 group-hover:text-gold-dark transition-transform" />
+            </a>
+          </div>
+        </div>
+
         {/* Address & Google Maps Location */}
         <div className="animate-fade-up anim-delay-200 bg-white rounded-3xl p-8 md:p-10 border border-border shadow-xs space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -121,7 +209,7 @@ export default function AboutPage() {
               </p>
             </div>
             <a
-              href="https://maps.google.com/?q=G1A,+VOC+Nagar,+Parisutham+Nagar,+Thanjavur,+Tamil+Nadu+613007"
+              href={CONTACT_INFO.mapUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-dark text-white text-xs font-semibold hover:bg-gold hover:text-dark transition-all self-start md:self-auto shrink-0"
@@ -136,7 +224,7 @@ export default function AboutPage() {
               Gifwoods — Headquarters & Manufacturing Facility
             </p>
             <p className="text-sm text-dark font-medium leading-relaxed">
-              G1A, VOC Nagar, Parisutham Nagar, Thanjavur, Tamil Nadu 613007
+              {CONTACT_INFO.address}
             </p>
           </div>
 
@@ -149,7 +237,7 @@ export default function AboutPage() {
               style={{ border: 0 }}
               loading="lazy"
               allowFullScreen
-              src="https://maps.google.com/maps?q=G1A,+VOC+Nagar,+Parisutham+Nagar,+Thanjavur,+Tamil+Nadu+613007&t=&z=16&ie=UTF8&iwloc=&output=embed"
+              src={CONTACT_INFO.mapEmbedUrl}
             />
           </div>
         </div>
@@ -167,3 +255,4 @@ export default function AboutPage() {
     </div>
   );
 }
+
