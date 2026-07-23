@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Reveal } from "@/components/shared/Reveal";
+import { ROUTES } from "@/constants/routes";
 
 const PERSONALIZE_OPTIONS = [
   "Name Engraving",
@@ -46,7 +47,7 @@ export function PersonalizeSection() {
               </div>
 
               <Link
-                href="/shop?category=personalized"
+                href={ROUTES.CATEGORY("personalized")}
                 className="inline-flex items-center gap-2 bg-gold text-dark font-semibold px-7 py-3.5 rounded-full hover:bg-gold-dark transition-colors"
               >
                 Customize Now <ArrowRight className="h-4 w-4" />

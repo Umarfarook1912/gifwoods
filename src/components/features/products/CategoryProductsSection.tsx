@@ -71,7 +71,7 @@ export function CategoryProductsSection({
     filteredProducts.length > HOME_EXPLORE_PRODUCTS_MOBILE;
 
   const viewAllHref = selectedCategoryObj
-    ? `${ROUTES.SHOP}?category=${selectedCategoryObj.slug}`
+    ? ROUTES.CATEGORY(selectedCategoryObj.slug)
     : ROUTES.SHOP;
 
   const mobileShown = Math.min(HOME_EXPLORE_PRODUCTS_MOBILE, filteredProducts.length);
@@ -89,20 +89,20 @@ export function CategoryProductsSection({
             <h2 className="font-display text-3xl md:text-4xl font-bold text-dark">
               Explore Our Products
             </h2>
-            <p className="text-warm-gray text-sm mt-2 max-w-xl">
+            <p className="text-warm-gray text-base md:text-lg mt-3 max-w-xl leading-relaxed">
               Choose a category below to explore personalized gifts crafted with care.
             </p>
           </div>
           {selectedCategoryObj ? (
             <Link
-              href={`/shop?category=${selectedCategoryObj.slug}`}
+              href={ROUTES.CATEGORY(selectedCategoryObj.slug)}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-dark hover:text-gold transition-colors whitespace-nowrap self-start sm:self-auto"
             >
               View all {selectedCategoryObj.name} gifts <ArrowRight className="h-4 w-4" />
             </Link>
           ) : (
             <Link
-              href="/shop"
+              href={ROUTES.SHOP}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-dark hover:text-gold transition-colors whitespace-nowrap self-start sm:self-auto"
             >
               Explore full shop <ArrowRight className="h-4 w-4" />

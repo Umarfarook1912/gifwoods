@@ -8,29 +8,30 @@ export const SITE_DESCRIPTION =
   "Premium personalized gifts crafted to celebrate every special moment — engraved, hand-packed, and delivered with intention.";
 
 export const OCCASIONS = [
-  { label: "Birthday", href: "/shop?category=birthdays" },
-  { label: "Anniversary", href: "/shop?category=anniversary" },
-  { label: "Wedding", href: "/shop?category=weddings" },
-  { label: "Housewarming", href: "/shop?category=housewarming" },
-  { label: "Baby Shower", href: "/shop?category=baby-shower" },
+  { label: "Birthday", href: "/categories/birthdays" },
+  { label: "Anniversary", href: "/categories/anniversary" },
+  { label: "Wedding", href: "/categories/weddings" },
+  { label: "Housewarming", href: "/categories/housewarming" },
+  { label: "Baby Shower", href: "/categories/baby-shower" },
 ] as const;
 
 export const NAV_LINKS = [
+  { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
-  { label: "New Arrivals", href: "/shop?newArrival=true" },
-  { label: "Best Sellers", href: "/shop?bestseller=true" },
+  { label: "New Arrivals", href: "/new-arrivals" },
+  { label: "Best Sellers", href: "/bestsellers" },
   { label: "Categories", href: "#", dropdown: true },
-  { label: "Corporate Gifting", href: "/shop?category=corporate" },
+  { label: "Corporate Gifting", href: "/categories/corporate" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ] as const;
 
 export const FOOTER_SHOP_LINKS = [
-  { label: "Personalized", href: "/shop?category=personalized" },
-  { label: "Weddings", href: "/shop?category=weddings" },
-  { label: "Corporate", href: "/shop?category=corporate" },
-  { label: "Hampers", href: "/shop?category=hampers" },
-  { label: "New Arrivals", href: "/shop?newArrival=true" },
+  { label: "Personalized", href: "/categories/personalized" },
+  { label: "Weddings", href: "/categories/weddings" },
+  { label: "Corporate", href: "/categories/corporate" },
+  { label: "Hampers", href: "/categories/hampers" },
+  { label: "New Arrivals", href: "/new-arrivals" },
 ] as const;
 
 export const FOOTER_COMPANY_LINKS = [
@@ -46,8 +47,21 @@ export const FOOTER_SUPPORT_LINKS = [
   { label: "Refund Policy", href: "/refund" },
   { label: "Terms", href: "/terms" },
   { label: "Shipping", href: "/shipping" },
-  { label: "Track Order", href: "/orders" },
 ] as const;
+
+export const SUPPORT_NAV_LINKS = [
+  { label: "Shipping", href: "/shipping" },
+  { label: "Refunds", href: "/refund" },
+  { label: "Privacy", href: "/privacy" },
+  { label: "Terms", href: "/terms" },
+] as const;
+
+export const SUPPORT_PAGE_EYEBROW = "Support";
+export const SUPPORT_CONTACT_CTA_TITLE = "Still need help?";
+export const SUPPORT_CONTACT_CTA_DESCRIPTION =
+  "Our team is available 7 days a week for order and gift questions.";
+export const SUPPORT_CONTACT_CTA_LABEL = "Contact Us";
+export const SUPPORT_LAST_UPDATED_PREFIX = "Last updated";
 
 export const CONTACT_INFO = {
   phone: "7010969348",
@@ -143,6 +157,10 @@ export const HOME_EXPLORE_PRODUCTS_MOBILE = 6;
 export const HOME_VIEW_ALL_PRODUCTS_LABEL = "View All Products";
 
 export const SHOP_FILTERS_LABEL = "Filters";
+
+/** Primary brand gold — matches CSS `--color-gold` */
+export const BRAND_GOLD = "#e5a93c";
+export const LOADER_SIZE = "medium" as const;
 
 export const MIN_ORDER_FOR_FREE_WRAP = 1499;
 export const FREE_SHIPPING_THRESHOLD = 500;

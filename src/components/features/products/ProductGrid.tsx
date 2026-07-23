@@ -11,8 +11,8 @@ interface Props {
 export function ProductGrid({ products, loading }: Props) {
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-        {Array.from({ length: 6 }, (_, i) => (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        {Array.from({ length: 8 }, (_, i) => (
           <div key={i} className="rounded-2xl overflow-hidden border border-border">
             <Skeleton className="aspect-square w-full" />
             <div className="p-4 space-y-2">
@@ -37,9 +37,9 @@ export function ProductGrid({ products, loading }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
       {products.map((product, index) => (
-        <Reveal key={product.id} delay={(index % 3) as 0 | 1 | 2}>
+        <Reveal key={product.id} delay={(index % 4) as 0 | 1 | 2 | 3}>
           <ProductCard product={product} />
         </Reveal>
       ))}

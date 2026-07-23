@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { Reveal } from "@/components/shared/Reveal";
+import { ROUTES } from "@/constants/routes";
 import type { Product } from "@/types/product";
 
 interface Props {
@@ -9,6 +10,8 @@ interface Props {
 }
 
 export function BestsellersSection({ products }: Props) {
+  if (!products.length) return null;
+
   return (
     <section className="py-16 lg:py-20 bg-white">
       <div className="page-container">
@@ -22,7 +25,7 @@ export function BestsellersSection({ products }: Props) {
             </h2>
           </div>
           <Link
-            href="/shop"
+            href={ROUTES.BESTSELLERS}
             className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-dark hover:text-gold transition-colors"
           >
             Shop all <ArrowRight className="h-4 w-4" />
@@ -39,7 +42,7 @@ export function BestsellersSection({ products }: Props) {
 
         <div className="text-center mt-8 sm:hidden">
           <Link
-            href="/shop"
+            href={ROUTES.BESTSELLERS}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-gold"
           >
             Shop all <ArrowRight className="h-4 w-4" />

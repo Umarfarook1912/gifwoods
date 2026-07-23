@@ -38,7 +38,7 @@ export function ProductSectionCarousel({
             <h2 className="font-display text-3xl md:text-4xl font-bold text-dark">
               {title}
             </h2>
-            <p className="text-warm-gray text-sm mt-2 max-w-xl">
+            <p className="text-warm-gray text-base md:text-lg mt-3 max-w-xl leading-relaxed">
               {subtitle}
             </p>
           </div>

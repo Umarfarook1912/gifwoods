@@ -6,6 +6,7 @@ import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Reveal } from "@/components/shared/Reveal";
+import { ROUTES } from "@/constants/routes";
 
 const OCCASIONS_DATA = [
   {
@@ -93,7 +94,7 @@ export function OccasionsCarousel() {
             <h2 className="font-display text-3xl md:text-4xl font-bold text-dark">
               Shop by Occasion
             </h2>
-            <p className="text-warm-gray text-sm mt-2 max-w-xl">
+            <p className="text-warm-gray text-base md:text-lg mt-3 max-w-xl leading-relaxed">
               Find the perfect personalized tokens to celebrate life's most precious milestones.
             </p>
           </div>
@@ -114,7 +115,7 @@ export function OccasionsCarousel() {
                   className="flex-[0_0_80%] sm:flex-[0_0_45%] md:flex-[0_0_33.33%] pl-4 md:pl-5 min-w-0"
                 >
                   <Link
-                    href={`/shop?category=${cat.slug}`}
+                    href={ROUTES.CATEGORY(cat.slug)}
                     className="group/card relative rounded-3xl overflow-hidden aspect-[4/5] bg-muted block shadow-sm hover:shadow-md transition-shadow duration-300"
                   >
                     <Image

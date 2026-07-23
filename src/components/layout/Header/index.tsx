@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Gift, Search, User } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { SITE_NAME } from "@/constants/ui";
@@ -27,7 +28,9 @@ export async function Header() {
             </Link>
           </div>
 
-          <NavLinks categories={categories} />
+          <Suspense fallback={<nav className="hidden md:block h-5 w-96" aria-hidden />}>
+            <NavLinks categories={categories} />
+          </Suspense>
 
           <div className="flex items-center gap-1">
             <Link

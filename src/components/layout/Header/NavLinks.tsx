@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { NAV_LINKS } from "@/constants/ui";
-import { ROUTES } from "@/constants/routes";
-import { getCategoryHref, isCategoryLinkAvailable } from "./nav-utils";
+import {
+  getCategoryHref,
+  isCategoryLinkAvailable,
+  isNavLinkActive,
+} from "./nav-utils";
 import type { Category } from "@/types/product";
 
 interface Props {
@@ -16,13 +19,16 @@ interface Props {
 
 export function NavLinks({ categories }: Props) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const search = searchParams.toString() ? `?${searchParams.toString()}` : "";
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="hidden md:flex items-center gap-7">
+    <nav className="hidden md:flex items-center gap-5 lg:gap-6">
       {NAV_LINKS.map((link) => {
         if ("dropdown" in link && link.dropdown) {
           if (categories.length === 0) return null;
+          const isCategoryRoute = pathname.startsWith("/categories/");
           return (
             <div
               key={link.label}
@@ -31,9 +37,10 @@ export function NavLinks({ categories }: Props) {
               onMouseLeave={() => setIsOpen(false)}
             >
               <button
+                type="button"
                 className={cn(
                   "flex items-center gap-1 text-sm font-medium transition-colors hover:text-gold cursor-pointer outline-none",
-                  isOpen ? "text-gold" : "text-secondary-dark"
+                  isOpen || isCategoryRoute ? "text-gold" : "text-secondary-dark"
                 )}
               >
                 {link.label}
@@ -45,7 +52,6 @@ export function NavLinks({ categories }: Props) {
                 />
               </button>
 
-              {/* Dropdown Menu */}
               {isOpen && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-48 rounded-2xl bg-cream border border-border shadow-lg py-2.5 z-50 animate-fade-in">
                   {categories.map((category) => (
@@ -65,13 +71,15 @@ export function NavLinks({ categories }: Props) {
 
         if (!isCategoryLinkAvailable(link.href, categories)) return null;
 
+        const active = isNavLinkActive(link.href, pathname, search);
+
         return (
           <Link
             key={link.href}
             href={link.href}
             className={cn(
               "text-sm font-medium transition-colors hover:text-gold",
-              pathname === link.href ? "text-gold" : "text-secondary-dark"
+              active ? "text-gold" : "text-secondary-dark"
             )}
           >
             {link.label}

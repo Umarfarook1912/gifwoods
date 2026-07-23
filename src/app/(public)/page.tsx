@@ -6,6 +6,7 @@ import { PersonalizeSection } from "@/components/features/products/PersonalizeSe
 import { WhyUsSection } from "@/components/features/products/WhyUsSection";
 import { TestimonialsSection } from "@/components/features/products/TestimonialsSection";
 import { createClient } from "@/lib/supabase/server";
+import { ROUTES } from "@/constants/routes";
 import { getAvailableCategories } from "@/lib/supabase/categories-db";
 import type { Category, Product } from "@/types/product";
 
@@ -69,7 +70,7 @@ export default async function HomePage() {
         title="Bestsellers"
         subtitle="Our most loved and requested signature personalized gifts."
         products={bestsellers}
-        viewAllHref="/shop?bestseller=true"
+        viewAllHref={ROUTES.BESTSELLERS}
         bgClass="bg-white"
         badgeLabel="Loved by our gifters"
       />
@@ -79,7 +80,7 @@ export default async function HomePage() {
         title="New Arrivals"
         subtitle="Explore our latest custom creations finished by hand in our atelier."
         products={newArrivals}
-        viewAllHref="/shop?newArrival=true"
+        viewAllHref={ROUTES.NEW_ARRIVALS}
         bgClass="bg-cream/40"
         badgeLabel="Freshly Crafted"
       />

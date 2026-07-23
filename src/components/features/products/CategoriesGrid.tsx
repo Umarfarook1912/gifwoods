@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-
 import { Reveal } from "@/components/shared/Reveal";
+import { ROUTES } from "@/constants/routes";
 import type { Category } from "@/types/product";
 
 const CATEGORY_META: Record<string, { badge: string; count: string }> = {
@@ -51,7 +51,7 @@ export function CategoriesGrid({ categories }: Props) {
             return (
               <Reveal key={cat.id} delay={(index % 4) as 0 | 1 | 2 | 3}>
               <Link
-                href={`/shop?category=${cat.slug}`}
+                href={ROUTES.CATEGORY(cat.slug)}
                 className="group relative rounded-3xl overflow-hidden aspect-[3/4] bg-muted block"
               >
                 {cat.image_url && (

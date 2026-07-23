@@ -1,30 +1,19 @@
-import type { ReactNode } from "react";
+import { PolicySections } from "@/components/features/support/PolicySections";
+import { SupportPageLayout } from "@/components/shared/SupportPageLayout";
+import type { PolicyDocument } from "@/types/support";
 
 interface Props {
-  title: string;
-  lastUpdated?: string;
-  children: ReactNode;
+  document: PolicyDocument;
 }
 
-export function PolicyPage({ title, lastUpdated, children }: Props) {
+export function PolicyPage({ document }: Props) {
   return (
-    <div className="min-h-screen bg-cream">
-      <div className="bg-secondary-dark py-12">
-        <div className="page-container animate-fade-up">
-          <h1 className="font-display text-3xl md:text-4xl font-bold text-white">{title}</h1>
-          {lastUpdated && (
-            <p className="text-white/50 text-sm mt-2">Last updated: {lastUpdated}</p>
-          )}
-        </div>
-      </div>
-      <div className="page-container py-12 max-w-3xl">
-        <div className="animate-fade-up anim-delay-100 bg-white rounded-2xl p-8 border border-border prose prose-stone max-w-none
-          prose-headings:font-display prose-headings:text-dark prose-h2:text-xl prose-h3:text-base
-          prose-p:text-warm-gray prose-p:leading-relaxed prose-li:text-warm-gray prose-a:text-gold
-          prose-strong:text-dark">
-          {children}
-        </div>
-      </div>
-    </div>
+    <SupportPageLayout
+      title={document.title}
+      description={document.description}
+      lastUpdated={document.lastUpdated}
+    >
+      <PolicySections sections={document.sections} />
+    </SupportPageLayout>
   );
 }
