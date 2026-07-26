@@ -111,9 +111,9 @@ export async function POST(request: Request) {
   const body = await request.json();
   const parsed = productSchema.safeParse(body);
   if (!parsed.success) {
-    const firstError = parsed.error.errors[0];
-    const errorMsg = firstError
-      ? `${firstError.path.length ? firstError.path.join(".") + ": " : ""}${firstError.message}`
+    const firstIssue = parsed.error.issues[0];
+    const errorMsg = firstIssue
+      ? `${firstIssue.path.length ? firstIssue.path.join(".") + ": " : ""}${firstIssue.message}`
       : "Invalid product data";
     return NextResponse.json({ data: null, error: errorMsg }, { status: 400 });
   }
