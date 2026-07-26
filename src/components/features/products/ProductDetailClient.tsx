@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { ShoppingBag, Share2, Truck, Shield } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ShoppingBag, Truck, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ProductImageGallery } from "./ProductImageGallery";
+import { ProductShareButton } from "./ProductShareButton";
+import { ProductAdminEdit } from "./ProductAdminEdit";
 import { StarRating } from "@/components/shared/StarRating";
 import { useCartStore } from "@/hooks/useCartStore";
 import { formatPrice, formatDiscount } from "@/lib/utils/formatters";
@@ -18,9 +20,14 @@ interface Props {
   product: Product;
 }
 
-export function ProductDetailClient({ product }: Props) {
+export function ProductDetailClient({ product: initialProduct }: Props) {
+  const [product, setProduct] = useState(initialProduct);
   const [quantity, setQuantity] = useState(1);
   const { addItem, openCart } = useCartStore();
+
+  useEffect(() => {
+    setProduct(initialProduct);
+  }, [initialProduct]);
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
@@ -37,10 +44,8 @@ export function ProductDetailClient({ product }: Props) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
-      {/* Image Gallery */}
       <ProductImageGallery images={product.images} name={product.name} />
 
-      {/* Details */}
       <div>
         <div className="flex items-center gap-2 mb-3">
           {product.category && (
@@ -58,7 +63,6 @@ export function ProductDetailClient({ product }: Props) {
           {product.name}
         </h1>
 
-        {/* Rating */}
         {product.avg_rating && (
           <div className="flex items-center gap-2 mb-4">
             <StarRating rating={product.avg_rating} size="sm" />
@@ -69,7 +73,6 @@ export function ProductDetailClient({ product }: Props) {
           </div>
         )}
 
-        {/* Price */}
         <div className="flex items-baseline gap-3 mb-6">
           <span className="font-display font-bold text-3xl text-dark">
             {formatPrice(product.price)}
@@ -88,7 +91,6 @@ export function ProductDetailClient({ product }: Props) {
 
         <Separator className="mb-6" />
 
-        {/* Quantity */}
         <div className="flex items-center gap-3 mb-6">
           <Label className="text-sm font-medium text-dark">Quantity</Label>
           <div className="flex items-center border border-border rounded-lg overflow-hidden">
@@ -110,29 +112,31 @@ export function ProductDetailClient({ product }: Props) {
               +
             </button>
           </div>
-          <span className={cn("text-xs", product.stock < 10 ? "text-red-600 font-medium" : "text-muted-foreground")}>
+          <span
+            className={cn(
+              "text-xs",
+              product.stock < 10 ? "text-red-600 font-medium" : "text-muted-foreground"
+            )}
+          >
             {product.stock < 10
               ? `Only ${product.stock} left!`
               : `${product.stock} in stock`}
           </span>
         </div>
 
-        {/* CTA */}
-        <div className="flex gap-3 mb-6">
+        <div className="flex flex-wrap gap-3 mb-6">
           <Button
-            className="flex-1 bg-gold text-dark hover:bg-gold-dark font-semibold h-12"
+            className="flex-1 min-w-[10rem] bg-gold text-dark hover:bg-gold-dark font-semibold h-12"
             onClick={handleAddToCart}
             disabled={product.stock === 0}
           >
             <ShoppingBag className="h-4 w-4 mr-2" />
             {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
           </Button>
-          <Button variant="outline" size="icon" className="h-12 w-12 border-border hover:border-gold">
-            <Share2 className="h-4 w-4" />
-          </Button>
+          <ProductShareButton name={product.name} description={product.description} />
+          <ProductAdminEdit product={product} onUpdated={setProduct} />
         </div>
 
-        {/* Perks */}
         <div className="grid grid-cols-2 gap-3">
           {[
             { icon: Truck, text: "Free gift wrap · Insured shipping" },
@@ -147,13 +151,11 @@ export function ProductDetailClient({ product }: Props) {
 
         <Separator className="my-6" />
 
-        {/* Description */}
         <div>
           <h3 className="font-semibold text-dark mb-2">About this gift</h3>
           <p className="text-sm text-warm-gray leading-relaxed">{product.description}</p>
         </div>
 
-        {/* Specifications */}
         {product.specifications && product.specifications.length > 0 && (
           <div className="mt-6 border-t border-border pt-6">
             <h3 className="font-semibold text-dark mb-3">Specifications</h3>
@@ -162,7 +164,7 @@ export function ProductDetailClient({ product }: Props) {
                 <tbody>
                   {product.specifications.map((spec, i) => (
                     <tr
-                      key={i}
+                      key={`${spec.key}-${i}`}
                       className={cn(
                         "border-b border-border last:border-0",
                         i % 2 === 0 ? "bg-white" : "bg-cream/10"
@@ -171,9 +173,7 @@ export function ProductDetailClient({ product }: Props) {
                       <td className="px-4 py-2.5 font-medium text-dark w-1/3 border-r border-border bg-cream/20">
                         {spec.key}
                       </td>
-                      <td className="px-4 py-2.5 text-warm-gray">
-                        {spec.value}
-                      </td>
+                      <td className="px-4 py-2.5 text-warm-gray">{spec.value}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -182,7 +182,6 @@ export function ProductDetailClient({ product }: Props) {
           </div>
         )}
 
-        {/* Tags */}
         {product.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-6">
             {product.tags.map((tag) => (

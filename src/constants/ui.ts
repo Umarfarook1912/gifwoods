@@ -143,6 +143,53 @@ export const PRODUCT_HOME_TOGGLE_LABELS = {
   NEW_ARRIVAL: "New Arrival",
 } as const;
 
+export const PRODUCT_SHARE_MESSAGES = {
+  COPIED: "Product link copied to clipboard",
+  SHARED: "Thanks for sharing!",
+  FAILED: "Unable to share this product",
+} as const;
+
+export const PRODUCT_EDIT_LABEL = "Edit";
+
+export const DASHBOARD_COPY = {
+  TITLE: "Analytics Dashboard",
+  SUBTITLE: "Overview of sales, orders, users, and store health",
+  RANGE_LABEL: "Date range",
+  METRIC_LABEL: "Metric",
+  SUMMARY_REVENUE: "Period revenue",
+  SUMMARY_ORDERS: "Period orders",
+  SUMMARY_USERS: "New users",
+  MAIN_TITLE: "Performance",
+  MAIN_SUBTITLE_DAY: "Daily totals — hover a bar for details",
+  MAIN_SUBTITLE_WEEK: "Weekly totals — longer ranges are grouped by week",
+  USERS_TITLE: "New user signups",
+  USERS_SUBTITLE_DAY: "Daily registrations — hover for details",
+  USERS_SUBTITLE_WEEK: "Weekly registrations for the selected period",
+  GRANULARITY_DAY: "Daily view",
+  GRANULARITY_WEEK: "Weekly view",
+  STATUS_TITLE: "Orders by status",
+  STATUS_SUBTITLE: "Pipeline for the selected period",
+  RECENT_TITLE: "Recent orders",
+  EMPTY_CHART: "No data for this period",
+  EMPTY_STATUS: "No orders in this period",
+  EMPTY_RECENT: "No recent orders",
+  VIEW_ALL: "View all →",
+  LOADING: "Updating charts…",
+} as const;
+
+export const DASHBOARD_RANGES = [
+  { value: "7", label: "Last 7 days" },
+  { value: "14", label: "Last 14 days" },
+  { value: "30", label: "Last 30 days" },
+  { value: "90", label: "Last 90 days" },
+] as const;
+
+export const DASHBOARD_METRICS = [
+  { value: "revenue", label: "Revenue" },
+  { value: "orders", label: "Orders" },
+  { value: "users", label: "New users" },
+] as const;
+
 export const PRODUCT_BADGES = ["Personalize", "Limited"] as const;
 
 export const PRODUCT_STATUSES = ["active", "draft", "archived"] as const;

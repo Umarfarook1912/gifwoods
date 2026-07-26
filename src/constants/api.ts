@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
   USER_ROLE: (id: string) => `/api/users/${id}/role`,
   PROFILE_ADDRESSES: "/api/profile/addresses",
   UPLOAD: "/api/upload",
+  ADMIN_ANALYTICS: "/api/admin/analytics",
   COUNTRY_CALLING_CODES:
     "https://countriesnow.space/api/v0.1/countries/codes",
 } as const;

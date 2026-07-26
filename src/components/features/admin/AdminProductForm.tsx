@@ -112,50 +112,52 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full sm:max-w-4xl max-h-[92vh] overflow-y-auto p-6">
-        <DialogHeader>
+      <DialogContent className="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl max-h-[90vh]">
+        <DialogHeader className="shrink-0 border-b border-border px-6 py-4 pr-12">
           <DialogTitle className="font-display text-xl">
             {editing ? "Edit Product" : "Add Product"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mt-2">
-          <ProductFormFields
-            form={form}
-            setForm={setForm}
-            categories={categories}
-            newCategoryName={newCategoryName}
-            setNewCategoryName={setNewCategoryName}
-          />
+        <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide px-6 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            <ProductFormFields
+              form={form}
+              setForm={setForm}
+              categories={categories}
+              newCategoryName={newCategoryName}
+              setNewCategoryName={setNewCategoryName}
+            />
 
-          <ImageListField
-            images={form.images}
-            onChange={(images) => setForm({ ...form, images })}
-          />
-          <SpecificationListField
-            specifications={form.specifications}
-            onChange={(specifications) => setForm({ ...form, specifications })}
-          />
+            <ImageListField
+              images={form.images}
+              onChange={(images) => setForm({ ...form, images })}
+            />
+            <SpecificationListField
+              specifications={form.specifications}
+              onChange={(specifications) => setForm({ ...form, specifications })}
+            />
 
-          <div className="md:col-span-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-8">
-            <div className="flex items-center gap-3">
-              <Switch
-                checked={form.is_bestseller}
-                onCheckedChange={(v) => setForm({ ...form, is_bestseller: v })}
-              />
-              <Label>{PRODUCT_HOME_TOGGLE_LABELS.BESTSELLER}</Label>
-            </div>
-            <div className="flex items-center gap-3">
-              <Switch
-                checked={form.is_new_arrival}
-                onCheckedChange={(v) => setForm({ ...form, is_new_arrival: v })}
-              />
-              <Label>{PRODUCT_HOME_TOGGLE_LABELS.NEW_ARRIVAL}</Label>
+            <div className="md:col-span-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-8">
+              <div className="flex items-center gap-3">
+                <Switch
+                  checked={form.is_bestseller}
+                  onCheckedChange={(v) => setForm({ ...form, is_bestseller: v })}
+                />
+                <Label>{PRODUCT_HOME_TOGGLE_LABELS.BESTSELLER}</Label>
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch
+                  checked={form.is_new_arrival}
+                  onCheckedChange={(v) => setForm({ ...form, is_new_arrival: v })}
+                />
+                <Label>{PRODUCT_HOME_TOGGLE_LABELS.NEW_ARRIVAL}</Label>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex gap-3 mt-4">
+        <div className="shrink-0 flex gap-3 border-t border-border bg-cream/40 px-6 py-4">
           <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
             Cancel
           </Button>

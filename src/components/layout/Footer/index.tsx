@@ -157,17 +157,7 @@ export function Footer() {
           <p className="text-xs text-white/50">
             © {new Date().getFullYear()} {SITE_NAME}. Crafted with care in India.
           </p>
-          <div className="flex items-center gap-2 text-xs text-white/50">
-            <span className="uppercase tracking-wider mr-1">We accept</span>
-            {["UPI", "Visa", "MC", "Amex", "COD"].map((method) => (
-              <span
-                key={method}
-                className="px-2.5 py-1 rounded-full border border-white/15 font-medium text-white/60"
-              >
-                {method}
-              </span>
-            ))}
-          </div>
+          
         </div>
       </div>
     </footer>
