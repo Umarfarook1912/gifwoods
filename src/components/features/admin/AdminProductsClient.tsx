@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { DataTable } from "./DataTable";
 import { AdminProductForm } from "./AdminProductForm";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ import { API_ENDPOINTS } from "@/constants/api";
 import { CONFIRMATIONS } from "@/constants/confirmations";
 import { useConfirm } from "@/hooks/useConfirm";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, RefreshCw } from "lucide-react";
 import type { Product, Category, ProductStatus } from "@/types/product";
 
 interface Props {
@@ -34,6 +35,7 @@ const STATUS_COLORS: Record<ProductStatus, string> = {
 
 export function AdminProductsClient({ initialProducts, categories }: Props) {
   const confirm = useConfirm();
+  const router = useRouter();
   const [products, setProducts] = useState(initialProducts);
   const [categoriesState, setCategoriesState] = useState(categories);
   const [search, setSearch] = useState("");
@@ -41,6 +43,16 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => { setProducts(initialProducts); }, [initialProducts]);
+  useEffect(() => { setCategoriesState(categories); }, [categories]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    router.refresh();
+    setTimeout(() => setRefreshing(false), 1000);
+  };
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
@@ -95,9 +107,15 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
     <div className="p-6 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold text-dark">Products</h1>
-        <Button className="bg-gold text-dark hover:bg-gold-dark font-semibold" onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-2" /> Add Product
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2">
+            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+          <Button className="bg-gold text-dark hover:bg-gold-dark font-semibold" onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-2" /> Add Product
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}

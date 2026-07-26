@@ -72,10 +72,14 @@ export function ProductCard({ product, className }: Props) {
         <div className="pt-4">
           {/* Rating line */}
           <div className="flex items-center gap-1.5 mb-1.5">
-            <Star className="h-3.5 w-3.5 fill-gold text-gold" />
-            <span className="text-xs font-semibold text-dark">
-              {product.avg_rating ?? "4.9"}
-            </span>
+            {product.avg_rating ? (
+              <>
+                <Star className="h-3.5 w-3.5 fill-gold text-gold" />
+                <span className="text-xs font-semibold text-dark">{product.avg_rating}</span>
+              </>
+            ) : (
+              <Star className="h-3.5 w-3.5 text-border" />
+            )}
             <span className="text-xs text-warm-gray">· Free wrap</span>
           </div>
 

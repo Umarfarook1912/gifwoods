@@ -7,47 +7,48 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Reveal } from "@/components/shared/Reveal";
 import { ROUTES } from "@/constants/routes";
+import { ASSETS } from "@/constants/assets";
 
 const OCCASIONS_DATA = [
   {
     name: "Birthday",
     slug: "birthdays",
-    image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800",
+    image: ASSETS.OCCASIONS.BIRTHDAY,
     badge: "Celebrate",
     count: "140+ ideas",
   },
   {
     name: "Anniversary",
     slug: "anniversary",
-    image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800",
+    image: ASSETS.OCCASIONS.ANNIVERSARY,
     badge: "Milestones",
     count: "80+ romance gifts",
   },
   {
     name: "Wedding",
     slug: "weddings",
-    image: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800",
+    image: ASSETS.OCCASIONS.WEDDING,
     badge: "Elegant",
     count: "85+ hampers",
   },
   {
     name: "Housewarming",
     slug: "housewarming",
-    image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800",
+    image: ASSETS.OCCASIONS.HOUSEWARMING,
     badge: "Cozy Home",
     count: "50+ home items",
   },
   {
     name: "Baby Shower",
     slug: "baby-shower",
-    image: "https://images.unsplash.com/photo-1519689680058-324335c77ebe?w=800",
+    image: ASSETS.OCCASIONS.BABY_SHOWER,
     badge: "Sweetest",
     count: "40+ keepsake gifts",
   },
   {
     name: "Corporate Gifting",
     slug: "corporate",
-    image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800",
+    image: ASSETS.OCCASIONS.CORPORATE,
     badge: "Bulk Premium",
     count: "60+ curated sets",
   },

@@ -3,6 +3,7 @@ import { AdminCategoriesClient } from "@/components/features/admin/AdminCategori
 import { getCategoriesWithCounts } from "@/lib/supabase/categories-db";
 
 export const metadata: Metadata = { title: "Category Management" };
+export const dynamic = "force-dynamic";
 
 export default async function AdminCategoriesPage() {
   const categories = await getCategoriesWithCounts();

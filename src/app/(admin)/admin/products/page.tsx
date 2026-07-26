@@ -5,6 +5,7 @@ import type { Product } from "@/types/product";
 import type { Category } from "@/types/product";
 
 export const metadata: Metadata = { title: "Product Management" };
+export const dynamic = "force-dynamic";
 
 async function getProducts(): Promise<Product[]> {
   const supabase = createAdminClient();

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { DataTable } from "./DataTable";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,7 +13,7 @@ import { API_ENDPOINTS } from "@/constants/api";
 import { userRoleChangeConfirmation } from "@/constants/confirmations";
 import { useConfirm } from "@/hooks/useConfirm";
 import { toast } from "sonner";
-import { Search, Shield, ShieldOff } from "lucide-react";
+import { Search, Shield, ShieldOff, RefreshCw } from "lucide-react";
 import type { UserProfile, UserRole } from "@/types/user";
 
 interface Props {
@@ -21,9 +22,19 @@ interface Props {
 
 export function AdminUsersClient({ initialUsers }: Props) {
   const confirm = useConfirm();
+  const router = useRouter();
   const [users, setUsers] = useState(initialUsers);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => { setUsers(initialUsers); }, [initialUsers]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    router.refresh();
+    setTimeout(() => setRefreshing(false), 1000);
+  };
 
   const filtered = useMemo(() => {
     return users.filter((u) => {
@@ -54,7 +65,13 @@ export function AdminUsersClient({ initialUsers }: Props) {
 
   return (
     <div className="p-6 md:p-8">
-      <h1 className="font-display text-2xl font-bold text-dark mb-6">Users</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display text-2xl font-bold text-dark">Users</h1>
+        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2">
+          <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
+      </div>
 
       <div className="flex gap-3 mb-6 flex-wrap">
         <div className="relative flex-1 min-w-48">

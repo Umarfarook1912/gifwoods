@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Reveal } from "@/components/shared/Reveal";
 import { ROUTES } from "@/constants/routes";
+import { ASSETS } from "@/constants/assets";
 
 const PERSONALIZE_OPTIONS = [
   "Name Engraving",
@@ -10,9 +11,6 @@ const PERSONALIZE_OPTIONS = [
   "Wooden Name Boards",
   "Corporate Branding",
 ] as const;
-
-const PERSONALIZE_IMAGE =
-  "https://images.unsplash.com/photo-1544816155-12df9643f363?w=900&q=80";
 
 export function PersonalizeSection() {
   return (
@@ -56,7 +54,7 @@ export function PersonalizeSection() {
 
             <div className="relative aspect-[4/3] rounded-3xl overflow-hidden">
               <Image
-                src={PERSONALIZE_IMAGE}
+                src={ASSETS.PERSONALIZE_IMAGE}
                 alt="Personalized leather journal"
                 fill
                 className="object-cover"

@@ -1,14 +1,35 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ImageOff } from "lucide-react";
 import type { ProductSpecification } from "@/types/product";
 
 interface ImageListFieldProps {
   images: string[];
   onChange: (images: string[]) => void;
+}
+
+function ImagePreview({ src }: { src: string }) {
+  const [errored, setErrored] = useState(false);
+  if (!src || errored) {
+    return (
+      <div className="h-9 w-9 flex-shrink-0 rounded border border-border bg-muted flex items-center justify-center">
+        <ImageOff className="h-4 w-4 text-muted-foreground" />
+      </div>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt=""
+      className="h-9 w-9 flex-shrink-0 rounded border border-border object-cover bg-muted"
+      onError={() => setErrored(true)}
+    />
+  );
 }
 
 export function ImageListField({ images, onChange }: ImageListFieldProps) {
@@ -26,9 +47,10 @@ export function ImageListField({ images, onChange }: ImageListFieldProps) {
           <Plus className="h-3.5 w-3.5" /> Add Image URL
         </Button>
       </div>
-      <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
+      <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
         {images.map((img, index) => (
           <div key={index} className="flex gap-2 items-center">
+            <ImagePreview src={img} />
             <Input
               placeholder="https://example.com/image.jpg"
               value={img}

@@ -37,7 +37,11 @@ export async function PATCH(
   const body = await request.json();
   const parsed = productSchema.partial().safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ data: null, error: parsed.error.message }, { status: 400 });
+    const firstError = parsed.error.errors[0];
+    const errorMsg = firstError
+      ? `${firstError.path.length ? firstError.path.join(".") + ": " : ""}${firstError.message}`
+      : "Invalid product data";
+    return NextResponse.json({ data: null, error: errorMsg }, { status: 400 });
   }
 
   const { new_category_name, ...productData } = parsed.data;

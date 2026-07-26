@@ -30,7 +30,25 @@ export async function GET(request: Request) {
     )
     .eq("status", "active");
 
-  if (category) query = query.eq("categories.slug", category);
+  if (category) {
+    const { data: catData } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("slug", category)
+      .maybeSingle();
+    if (catData) {
+      query = query.eq("category_id", catData.id);
+    } else {
+      return NextResponse.json<PaginatedResponse<Product>>({
+        data: [],
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+        error: null,
+      });
+    }
+  }
   if (featured === "true" || bestseller === "true") query = query.eq("is_bestseller", true);
   if (newArrival === "true") query = query.eq("is_new_arrival", true);
   if (minPrice) query = query.gte("price", parseFloat(minPrice));
@@ -93,7 +111,11 @@ export async function POST(request: Request) {
   const body = await request.json();
   const parsed = productSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ data: null, error: parsed.error.message }, { status: 400 });
+    const firstError = parsed.error.errors[0];
+    const errorMsg = firstError
+      ? `${firstError.path.length ? firstError.path.join(".") + ": " : ""}${firstError.message}`
+      : "Invalid product data";
+    return NextResponse.json({ data: null, error: errorMsg }, { status: 400 });
   }
 
   const { new_category_name, ...productData } = parsed.data;

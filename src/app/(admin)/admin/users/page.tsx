@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { UserProfile } from "@/types/user";
 
 export const metadata: Metadata = { title: "User Management" };
+export const dynamic = "force-dynamic";
 
 async function getUsers(): Promise<UserProfile[]> {
   const supabase = createAdminClient();

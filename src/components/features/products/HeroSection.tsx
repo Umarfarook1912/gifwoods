@@ -2,9 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Sparkles, Truck, Star } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
-
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=1200&q=80";
+import { ASSETS } from "@/constants/assets";
 
 const HERO_STATS = [
   { value: "25K+", label: "Gifts delivered" },
@@ -78,7 +76,7 @@ export function HeroSection() {
           <div className="relative animate-scale-in anim-delay-200">
             <div className="relative aspect-[4/5] max-h-[560px] w-full rounded-3xl overflow-hidden">
               <Image
-                src={HERO_IMAGE}
+                src={ASSETS.HERO_IMAGE}
                 alt="Signature Gifwoods gift box with satin ribbon"
                 fill
                 priority

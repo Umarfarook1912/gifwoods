@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SITE_NAME, CONTACT_INFO, SOCIAL_LINKS } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
+import { ASSETS } from "@/constants/assets";
 import { MapPin, Navigation, Mail, Phone, ArrowRight } from "lucide-react";
 import { InstagramIcon, YoutubeIcon } from "@/components/ui/SocialIcons";
 
@@ -20,7 +21,7 @@ export default function AboutPage() {
         <div
           className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=1600')`,
+            backgroundImage: `url('${ASSETS.ABOUT_HERO_IMAGE}')`,
           }}
         />
         <div className="relative page-container text-center max-w-3xl animate-fade-up">

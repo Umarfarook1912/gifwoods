@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { DataTable } from "./DataTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,11 +21,21 @@ interface Props {
 
 export function AdminCategoriesClient({ initialCategories }: Props) {
   const confirm = useConfirm();
+  const router = useRouter();
   const [categories, setCategories] = useState(initialCategories);
   const [search, setSearch] = useState("");
   const [newName, setNewName] = useState("");
   const [adding, setAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => { setCategories(initialCategories); }, [initialCategories]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    router.refresh();
+    setTimeout(() => setRefreshing(false), 1000);
+  };
 
   const filtered = useMemo(
     () =>
@@ -82,6 +93,10 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
     <div className="p-6 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold text-dark">Categories</h1>
+        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2">
+          <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
       </div>
 
       {/* Add new category */}

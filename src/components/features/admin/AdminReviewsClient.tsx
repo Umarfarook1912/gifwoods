@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { DataTable } from "./DataTable";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,7 +21,7 @@ import { API_ENDPOINTS } from "@/constants/api";
 import { CONFIRMATIONS } from "@/constants/confirmations";
 import { useConfirm } from "@/hooks/useConfirm";
 import { toast } from "sonner";
-import { Check, X, Trash2, Search, MessageSquare } from "lucide-react";
+import { Check, X, Trash2, Search, MessageSquare, RefreshCw } from "lucide-react";
 import type { Review } from "@/types/review";
 
 interface Props {
@@ -29,10 +30,20 @@ interface Props {
 
 export function AdminReviewsClient({ initialReviews }: Props) {
   const confirm = useConfirm();
+  const router = useRouter();
   const [reviews, setReviews] = useState(initialReviews);
   const [search, setSearch] = useState("");
   const [approvalFilter, setApprovalFilter] = useState("all");
   const [ratingFilter, setRatingFilter] = useState("all");
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => { setReviews(initialReviews); }, [initialReviews]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    router.refresh();
+    setTimeout(() => setRefreshing(false), 1000);
+  };
 
   // Reply states
   const [replyingReviewId, setReplyingReviewId] = useState<string | null>(null);
@@ -110,7 +121,13 @@ export function AdminReviewsClient({ initialReviews }: Props) {
 
   return (
     <div className="p-6 md:p-8">
-      <h1 className="font-display text-2xl font-bold text-dark mb-6">Reviews</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display text-2xl font-bold text-dark">Reviews</h1>
+        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2">
+          <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
+      </div>
 
       <div className="flex gap-3 mb-6 flex-wrap">
         <div className="relative flex-1 min-w-48">
