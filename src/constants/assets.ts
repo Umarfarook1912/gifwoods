@@ -1,4 +1,6 @@
 export const ASSETS = {
+  LOGO: "/gif_logo.png",
+
   HERO_IMAGE:
     "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=1200&q=80",
 

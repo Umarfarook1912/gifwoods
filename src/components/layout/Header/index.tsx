@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Gift, Search, User } from "lucide-react";
+import { Search, User } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
-import { SITE_NAME } from "@/constants/ui";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { getAvailableCategories } from "@/lib/supabase/categories-db";
 import { NavLinks } from "./NavLinks";
 import { CartButton } from "./CartButton";
@@ -18,13 +18,8 @@ export async function Header() {
         <div className="page-container h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <MobileMenu categories={categories} />
-            <Link href={ROUTES.HOME} className="flex items-center gap-2">
-              <span className="w-9 h-9 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center">
-                <Gift className="h-4 w-4 text-dark" />
-              </span>
-              <span className="font-display font-bold text-xl text-dark tracking-tight">
-                {SITE_NAME}
-              </span>
+            <Link href={ROUTES.HOME} className="flex items-center" aria-label="Home">
+              <BrandLogo priority />
             </Link>
           </div>
 

@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, ChevronDown, Gift } from "lucide-react";
+import { Menu, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { NAV_LINKS, SITE_NAME } from "@/constants/ui";
+import { BrandLogo } from "@/components/shared/BrandLogo";
+import { NAV_LINKS } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils/cn";
 import { getCategoryHref, isCategoryLinkAvailable } from "./nav-utils";
@@ -50,14 +51,10 @@ export function MobileMenu({ categories }: Props) {
             <Link
               href={ROUTES.HOME}
               onClick={closeAll}
-              className="flex items-center gap-2.5"
+              className="flex items-center"
+              aria-label="Home"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-full border border-gold/30 bg-gold/20">
-                <Gift className="h-4 w-4 text-dark" />
-              </span>
-              <span className="font-display text-xl font-bold tracking-tight text-dark">
-                {SITE_NAME}
-              </span>
+              <BrandLogo />
             </Link>
           </div>
 
