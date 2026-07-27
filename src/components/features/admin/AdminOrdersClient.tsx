@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { DataTable } from "./DataTable";
 import { OrderStatusDialog } from "./OrderStatusDialog";
@@ -25,6 +25,12 @@ export function AdminOrdersClient({ initialOrders }: Props) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [statusOrder, setStatusOrder] = useState<Order | null>(null);
+  const [page, setPage] = useState(1);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter]);
 
   const filtered = useMemo(() => {
     return orders.filter((o) => {
@@ -43,6 +49,12 @@ export function AdminOrdersClient({ initialOrders }: Props) {
       return true;
     });
   }, [orders, search, statusFilter]);
+
+  const paginated = useMemo(() => {
+    const limit = 15;
+    const start = (page - 1) * limit;
+    return filtered.slice(start, start + limit);
+  }, [filtered, page]);
 
   const handleStatusUpdated = (orderId: string, status: OrderStatus) => {
     setOrders((current) =>
@@ -109,9 +121,12 @@ export function AdminOrdersClient({ initialOrders }: Props) {
             </div>
           )},
         ]}
-        data={filtered}
+        data={paginated}
         keyExtractor={(o) => o.id}
         total={filtered.length}
+        page={page}
+        limit={15}
+        onPageChange={setPage}
         emptyMessage="No orders found"
       />
 

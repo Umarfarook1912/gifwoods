@@ -13,7 +13,7 @@ interface Props {
 export function ProductCarousel({ children, className }: Props) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
-    containScroll: "trimSnaps",
+    loop: true,
     dragFree: true,
   });
 
@@ -39,6 +39,36 @@ export function ProductCarousel({ children, className }: Props) {
     emblaApi.on("reInit", onSelect);
     emblaApi.on("select", onSelect);
   }, [emblaApi, onSelect]);
+
+  // Autoplay effect
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    let intervalId: NodeJS.Timeout;
+
+    const startAutoplay = () => {
+      intervalId = setInterval(() => {
+        emblaApi.scrollNext();
+      }, 4000); // Autoplay slide transition every 4 seconds
+    };
+
+    const stopAutoplay = () => {
+      clearInterval(intervalId);
+    };
+
+    startAutoplay();
+
+    emblaApi.on("pointerDown", stopAutoplay);
+    emblaApi.on("pointerUp", startAutoplay);
+
+    return () => {
+      clearInterval(intervalId);
+      if (emblaApi) {
+        emblaApi.off("pointerDown", stopAutoplay);
+        emblaApi.off("pointerUp", startAutoplay);
+      }
+    };
+  }, [emblaApi]);
 
   return (
     <div className={cn("group relative w-full", className)}>

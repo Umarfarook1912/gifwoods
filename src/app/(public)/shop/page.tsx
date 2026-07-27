@@ -4,6 +4,7 @@ import { ProductGrid } from "@/components/features/products/ProductGrid";
 import { ProductFilters } from "@/components/features/products/ProductFilters";
 import { MobileProductFilters } from "@/components/features/products/MobileProductFilters";
 import { ShopSortBar } from "@/components/features/products/ShopSortBar";
+import { Pagination } from "@/components/shared/Pagination";
 import { createClient } from "@/lib/supabase/server";
 import { getAvailableCategories } from "@/lib/supabase/categories-db";
 import type { Product } from "@/types/product";
@@ -113,8 +114,15 @@ export default async function ShopPage({ searchParams }: PageProps) {
               </div>
               <ShopSortBar total={total} />
             </Suspense>
-            <div className="mt-6">
+             <div className="mt-6">
               <ProductGrid products={products} />
+              <Pagination
+                currentPage={parseInt(params.page || "1")}
+                totalPages={Math.ceil(total / ITEMS_PER_PAGE)}
+                totalCount={total}
+                itemsPerPage={ITEMS_PER_PAGE}
+                className="mt-8"
+              />
             </div>
           </div>
         </div>

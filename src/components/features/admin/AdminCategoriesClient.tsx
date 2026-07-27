@@ -28,8 +28,14 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
   const [adding, setAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [page, setPage] = useState(1);
 
   useEffect(() => { setCategories(initialCategories); }, [initialCategories]);
+
+  // Reset page when search filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -44,6 +50,12 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
       ),
     [categories, search]
   );
+
+  const paginated = useMemo(() => {
+    const limit = 15;
+    const start = (page - 1) * limit;
+    return filtered.slice(start, start + limit);
+  }, [filtered, page]);
 
   const handleAdd = async () => {
     if (newName.trim().length < 2) {
@@ -170,9 +182,12 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
             </Button>
           )},
         ]}
-        data={filtered}
+        data={paginated}
         keyExtractor={(c) => c.id}
         total={filtered.length}
+        page={page}
+        limit={15}
+        onPageChange={setPage}
         emptyMessage="No categories found"
       />
     </div>

@@ -41,12 +41,18 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => { setProducts(initialProducts); }, [initialProducts]);
   useEffect(() => { setCategoriesState(categories); }, [categories]);
+  
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, categoryFilter, statusFilter]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -62,6 +68,12 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
       return true;
     });
   }, [products, search, categoryFilter, statusFilter]);
+
+  const paginated = useMemo(() => {
+    const limit = 15;
+    const start = (page - 1) * limit;
+    return filtered.slice(start, start + limit);
+  }, [filtered, page]);
 
   const openCreate = () => {
     setEditing(null);
@@ -192,9 +204,12 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
             </div>
           )},
         ]}
-        data={filtered}
+        data={paginated}
         keyExtractor={(p) => p.id}
         total={filtered.length}
+        page={page}
+        limit={15}
+        onPageChange={setPage}
         emptyMessage="No products found"
       />
 
