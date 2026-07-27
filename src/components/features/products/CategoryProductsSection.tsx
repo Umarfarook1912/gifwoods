@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { Reveal } from "@/components/shared/Reveal";
 import { CategoryFilterBar } from "./CategoryFilterBar";
-import { ViewAllProductsPagination } from "./ViewAllProductsPagination";
+import { Pagination } from "@/components/shared/Pagination";
 import { cn } from "@/lib/utils/cn";
 import { ROUTES } from "@/constants/routes";
 import {
@@ -26,6 +26,12 @@ export function CategoryProductsSection({
   products,
 }: CategoryProductsSectionProps) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const handleCategorySelect = (categoryId: string) => {
+    setSelectedCategoryId(categoryId);
+    setCurrentPage(1);
+  };
 
   // Calculate product counts per category
   const categoryCounts = useMemo(() => {
@@ -62,20 +68,12 @@ export function CategoryProductsSection({
     return categories.find((c) => c.id === selectedCategoryId) ?? null;
   }, [selectedCategoryId, categories]);
 
-  const displayedProducts = useMemo(
-    () => filteredProducts.slice(0, HOME_EXPLORE_PRODUCTS_DESKTOP),
-    [filteredProducts]
-  );
+  const displayedProducts = useMemo(() => {
+    const start = (currentPage - 1) * HOME_EXPLORE_PRODUCTS_DESKTOP;
+    return filteredProducts.slice(start, start + HOME_EXPLORE_PRODUCTS_DESKTOP);
+  }, [filteredProducts, currentPage]);
 
-  const showViewAllRow =
-    filteredProducts.length > HOME_EXPLORE_PRODUCTS_MOBILE;
-
-  const viewAllHref = selectedCategoryObj
-    ? ROUTES.CATEGORY(selectedCategoryObj.slug)
-    : ROUTES.SHOP;
-
-  const mobileShown = Math.min(HOME_EXPLORE_PRODUCTS_MOBILE, filteredProducts.length);
-  const desktopShown = Math.min(HOME_EXPLORE_PRODUCTS_DESKTOP, filteredProducts.length);
+  const totalPages = Math.ceil(filteredProducts.length / HOME_EXPLORE_PRODUCTS_DESKTOP);
 
   return (
     <section className="py-16 lg:py-20 bg-white border-t border-border/60">
@@ -115,31 +113,30 @@ export function CategoryProductsSection({
           categoryCounts={categoryCounts}
           totalCount={products.length}
           selectedCategoryId={selectedCategoryId}
-          onSelect={setSelectedCategoryId}
+          onSelect={handleCategorySelect}
         />
 
         {filteredProducts.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
               {displayedProducts.map((product, index) => (
                 <Reveal
                   key={product.id}
                   delay={(index % 4) as 0 | 1 | 2 | 3}
-                  className={cn(
-                    index >= HOME_EXPLORE_PRODUCTS_MOBILE && "hidden lg:block"
-                  )}
                 >
                   <ProductCard product={product} className="h-full" />
                 </Reveal>
               ))}
             </div>
-            {showViewAllRow && (
+            {totalPages > 1 && (
               <Reveal delay={3}>
-                <ViewAllProductsPagination
-                  href={viewAllHref}
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
                   totalCount={filteredProducts.length}
-                  mobileShown={mobileShown}
-                  desktopShown={desktopShown}
+                  itemsPerPage={HOME_EXPLORE_PRODUCTS_DESKTOP}
+                  onPageChange={setCurrentPage}
+                  className="mt-8"
                 />
               </Reveal>
             )}

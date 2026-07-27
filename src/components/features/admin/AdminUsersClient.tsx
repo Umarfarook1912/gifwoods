@@ -26,9 +26,15 @@ export function AdminUsersClient({ initialUsers }: Props) {
   const [users, setUsers] = useState(initialUsers);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => { setUsers(initialUsers); }, [initialUsers]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, roleFilter]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -46,6 +52,12 @@ export function AdminUsersClient({ initialUsers }: Props) {
       return true;
     });
   }, [users, search, roleFilter]);
+
+  const paginated = useMemo(() => {
+    const limit = 15;
+    const start = (page - 1) * limit;
+    return filtered.slice(start, start + limit);
+  }, [filtered, page]);
 
   const toggleRole = async (user: UserProfile) => {
     const newRole: UserRole = user.role === "admin" ? "user" : "admin";
@@ -124,9 +136,12 @@ export function AdminUsersClient({ initialUsers }: Props) {
             </Button>
           )},
         ]}
-        data={filtered}
+        data={paginated}
         keyExtractor={(u) => u.id}
         total={filtered.length}
+        page={page}
+        limit={15}
+        onPageChange={setPage}
         emptyMessage="No users found"
       />
     </div>
