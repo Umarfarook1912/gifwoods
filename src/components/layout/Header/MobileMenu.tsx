@@ -6,7 +6,7 @@ import { Menu, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { BrandLogo } from "@/components/shared/BrandLogo";
-import { NAV_LINKS } from "@/constants/ui";
+import { NAV_LINKS, CATEGORIES_MENU } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils/cn";
 import { getCategoryHref, isCategoryLinkAvailable } from "./nav-utils";
@@ -79,7 +79,7 @@ export function MobileMenu({ categories }: Props) {
                         />
                       </button>
                       {categoriesOpen && (
-                        <div className="ml-2 mt-0.5 flex flex-col gap-0.5 border-l-2 border-gold/20 pl-3">
+                        <div className="ml-2 mt-0.5 max-h-64 overflow-y-auto scrollbar-hide flex flex-col gap-0.5 border-l-2 border-gold/20 pl-3">
                           {categories.map((category) => (
                             <Link
                               key={category.id}
@@ -90,6 +90,13 @@ export function MobileMenu({ categories }: Props) {
                               {category.name}
                             </Link>
                           ))}
+                          <Link
+                            href={ROUTES.SHOP}
+                            onClick={closeAll}
+                            className={cn(mobileNavSubItemClass, "font-semibold text-gold")}
+                          >
+                            {CATEGORIES_MENU.VIEW_ALL}
+                          </Link>
                         </div>
                       )}
                     </div>

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { OrderCard } from "@/components/features/reviews/OrderCard";
 import { ROUTES } from "@/constants/routes";
+import { buildLoginHref } from "@/lib/auth/callback-url";
 import type { Order } from "@/types/order";
 
 export const metadata: Metadata = {
@@ -23,7 +24,7 @@ async function getOrders(userId: string): Promise<Order[]> {
 
 export default async function OrdersPage() {
   const session = await auth();
-  if (!session) redirect(ROUTES.LOGIN);
+  if (!session) redirect(buildLoginHref(ROUTES.ORDERS));
 
   const userId = session.user.supabaseId ?? session.user.id;
   const orders = await getOrders(userId);

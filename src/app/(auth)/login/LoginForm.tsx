@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { SITE_NAME, SITE_TAGLINE } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
+import { sanitizeCallbackUrl, buildRegisterHref } from "@/lib/auth/callback-url";
 import { toast } from "sonner";
 import { Globe, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -23,7 +24,7 @@ export function LoginForm() {
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? ROUTES.HOME;
+  const callbackUrl = sanitizeCallbackUrl(searchParams.get("callbackUrl"), ROUTES.HOME);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,7 +164,10 @@ export function LoginForm() {
             {/* Register link */}
             <p className="text-center text-sm text-warm-gray">
               Don&apos;t have an account?{" "}
-              <Link href={ROUTES.REGISTER} className="text-gold font-semibold hover:underline">
+              <Link
+                href={buildRegisterHref(callbackUrl)}
+                className="text-gold font-semibold hover:underline"
+              >
                 Create one
               </Link>
             </p>
@@ -200,7 +204,7 @@ export function LoginForm() {
         </div>
 
         <p className="text-center text-sm text-warm-gray mt-6">
-          <Link href={ROUTES.HOME} className="text-gold hover:underline">
+          <Link href={callbackUrl} className="text-gold hover:underline">
             Continue shopping without signing in →
           </Link>
         </p>

@@ -15,7 +15,11 @@ export function NavigationLoader() {
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
+      if (event.defaultPrevented) return;
+
       const target = event.target as HTMLElement | null;
+      if (target?.closest("button, [role='button'], input, select, textarea")) return;
+
       const anchor = target?.closest("a");
       if (!anchor) return;
 

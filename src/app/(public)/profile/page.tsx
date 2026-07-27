@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import { ProfileClient } from "@/components/features/profile/ProfileClient";
 import { ROUTES } from "@/constants/routes";
+import { buildLoginHref } from "@/lib/auth/callback-url";
 
 export const metadata: Metadata = {
   title: "My Profile | Gifwoods",
@@ -14,7 +15,7 @@ export default async function ProfilePage() {
   const session = await auth();
   
   if (!session) {
-    redirect(`${ROUTES.LOGIN}?callbackUrl=/profile`);
+    redirect(buildLoginHref(ROUTES.PROFILE));
   }
 
   return (

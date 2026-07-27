@@ -7,6 +7,7 @@ import { Star, MessageSquare } from "lucide-react";
 import { ReviewCard } from "./ReviewCard";
 import { ReviewForm } from "./ReviewForm";
 import { Separator } from "@/components/ui/separator";
+import { buildLoginHref } from "@/lib/auth/callback-url";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import type { Review } from "@/types/review";
@@ -87,7 +88,7 @@ export function ReviewsSection({ reviews: initialReviews, productId }: Props) {
                   Only logged-in customers can leave reviews. Sign in to write a review for this gift.
                 </p>
                 <Button asChild className="w-full bg-gold hover:bg-gold-dark text-dark font-semibold">
-                  <Link href={`/login?callbackUrl=${encodeURIComponent(pathname)}`}>
+                  <Link href={buildLoginHref(pathname)}>
                     Sign In to Review
                   </Link>
                 </Button>

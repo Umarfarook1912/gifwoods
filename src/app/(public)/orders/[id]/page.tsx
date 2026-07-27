@@ -12,6 +12,7 @@ import { OrderStatusBadges } from "@/components/shared/OrderStatusBadges";
 import { formatPrice, formatDate, formatOrderId } from "@/lib/utils/formatters";
 import { getPaymentStatus } from "@/lib/orders/status";
 import { ROUTES } from "@/constants/routes";
+import { buildLoginHref } from "@/lib/auth/callback-url";
 import type { Order, OrderItem } from "@/types/order";
 import type { Product } from "@/types/product";
 
@@ -24,9 +25,11 @@ export const metadata: Metadata = { title: "Order Details" };
 
 export default async function OrderDetailPage({ params, searchParams }: Props) {
   const session = await auth();
-  if (!session) redirect(ROUTES.LOGIN);
-
   const [{ id }, query] = await Promise.all([params, searchParams]);
+  if (!session) {
+    const paymentQuery = query.payment ? `?payment=${query.payment}` : "";
+    redirect(buildLoginHref(ROUTES.ORDER_DETAIL(id) + paymentQuery));
+  }
   const supabase = await createClient();
   const userId = session.user.supabaseId ?? session.user.id;
 

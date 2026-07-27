@@ -17,7 +17,9 @@ export async function Header() {
       <div className="bg-cream/95 backdrop-blur-sm border-b border-border">
         <div className="page-container h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <MobileMenu categories={categories} />
+            <Suspense fallback={null}>
+              <MobileMenu categories={categories} />
+            </Suspense>
             <Link href={ROUTES.HOME} className="flex items-center" aria-label="Home">
               <BrandLogo priority />
             </Link>
@@ -35,7 +37,9 @@ export async function Header() {
             >
               <Search className="h-[18px] w-[18px]" />
             </Link>
-            <AuthMenu icon={<User className="h-[18px] w-[18px]" />} />
+            <Suspense fallback={<div className="h-9 w-9 rounded-full bg-muted animate-pulse" />}>
+              <AuthMenu icon={<User className="h-[18px] w-[18px]" />} />
+            </Suspense>
             <CartButton />
           </div>
         </div>

@@ -190,6 +190,15 @@ export const DASHBOARD_METRICS = [
   { value: "users", label: "New users" },
 ] as const;
 
+export const CATEGORIES_MENU = {
+  TITLE: "Shop by category",
+  VIEW_ALL: "View all gifts",
+  COLUMNS_WIDE: 3,
+  COLUMNS_MEDIUM: 2,
+  WIDE_THRESHOLD: 12,
+  MEDIUM_THRESHOLD: 6,
+} as const;
+
 export const PRODUCT_BADGES = ["Personalize", "Limited"] as const;
 
 export const PRODUCT_STATUSES = ["active", "draft", "archived"] as const;

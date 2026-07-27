@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { User, LogOut, Package, Settings } from "lucide-react";
 import {
   DropdownMenu,
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ROUTES } from "@/constants/routes";
+import { buildLoginHref } from "@/lib/auth/callback-url";
 import type { ReactNode } from "react";
 
 interface Props {
@@ -22,6 +24,9 @@ interface Props {
 
 export function AuthMenu({ icon }: Props) {
   const { data: session, status } = useSession();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnPath = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
   if (status === "loading") {
     return <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />;
@@ -30,7 +35,7 @@ export function AuthMenu({ icon }: Props) {
   if (!session) {
     return (
       <Link
-        href={ROUTES.LOGIN}
+        href={buildLoginHref(returnPath)}
         aria-label="Login"
         className="w-9 h-9 rounded-full flex items-center justify-center text-dark hover:bg-gold/10 transition-colors"
       >

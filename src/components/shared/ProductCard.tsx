@@ -27,6 +27,7 @@ export function ProductCard({ product, className }: Props) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     addItem(product);
     openCart();
     toast.success(`${product.name} added to cart`, {
@@ -36,8 +37,8 @@ export function ProductCard({ product, className }: Props) {
 
   return (
     <div className={cn("group relative", className)}>
-      <Link href={ROUTES.PRODUCT(product.slug)} className="block">
-        <div className="relative aspect-square overflow-hidden rounded-3xl bg-muted">
+      <div className="relative aspect-square overflow-hidden rounded-3xl bg-muted">
+        <Link href={ROUTES.PRODUCT(product.slug)} className="absolute inset-0 block">
           {product.images[0] ? (
             <Image
               src={product.images[0]}
@@ -51,50 +52,48 @@ export function ProductCard({ product, className }: Props) {
               <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
             </div>
           )}
+        </Link>
 
-          {/* Badge pill */}
-          {product.badge && (
-            <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-dark text-[10px] font-bold tracking-wider uppercase px-3 py-1.5 rounded-full">
-              {BADGE_LABELS[product.badge] ?? product.badge}
-            </span>
+        {product.badge && (
+          <span className="pointer-events-none absolute top-4 left-4 z-[1] bg-white/90 backdrop-blur-sm text-dark text-[10px] font-bold tracking-wider uppercase px-3 py-1.5 rounded-full">
+            {BADGE_LABELS[product.badge] ?? product.badge}
+          </span>
+        )}
+
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={product.stock === 0}
+          className="absolute bottom-4 left-4 right-4 z-[2] bg-gold text-dark text-sm font-semibold py-2.5 rounded-full opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 hover:bg-gold-dark disabled:opacity-50"
+        >
+          {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+        </button>
+      </div>
+
+      <Link href={ROUTES.PRODUCT(product.slug)} className="block pt-4">
+        <div className="flex items-center gap-1.5 mb-1.5">
+          {product.avg_rating ? (
+            <>
+              <Star className="h-3.5 w-3.5 fill-gold text-gold" />
+              <span className="text-xs font-semibold text-dark">{product.avg_rating}</span>
+            </>
+          ) : (
+            <Star className="h-3.5 w-3.5 text-border" />
           )}
-
-          {/* Add to cart overlay */}
-          <button
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            className="absolute bottom-4 left-4 right-4 bg-gold text-dark text-sm font-semibold py-2.5 rounded-full opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:bg-gold-dark disabled:opacity-50"
-          >
-            {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
-          </button>
+          <span className="text-xs text-warm-gray">· Free wrap</span>
         </div>
 
-        <div className="pt-4">
-          {/* Rating line */}
-          <div className="flex items-center gap-1.5 mb-1.5">
-            {product.avg_rating ? (
-              <>
-                <Star className="h-3.5 w-3.5 fill-gold text-gold" />
-                <span className="text-xs font-semibold text-dark">{product.avg_rating}</span>
-              </>
-            ) : (
-              <Star className="h-3.5 w-3.5 text-border" />
-            )}
-            <span className="text-xs text-warm-gray">· Free wrap</span>
-          </div>
+        <h3 className="font-display font-semibold text-dark text-base leading-snug mb-1.5 line-clamp-2">
+          {product.name}
+        </h3>
 
-          <h3 className="font-display font-semibold text-dark text-base leading-snug mb-1.5 line-clamp-2">
-            {product.name}
-          </h3>
-
-          <div className="flex items-baseline gap-2">
-            <span className="font-bold text-dark">{formatPrice(product.price)}</span>
-            {product.original_price && product.original_price > product.price && (
-              <span className="text-sm text-warm-gray line-through">
-                {formatPrice(product.original_price)}
-              </span>
-            )}
-          </div>
+        <div className="flex items-baseline gap-2">
+          <span className="font-bold text-dark">{formatPrice(product.price)}</span>
+          {product.original_price && product.original_price > product.price && (
+            <span className="text-sm text-warm-gray line-through">
+              {formatPrice(product.original_price)}
+            </span>
+          )}
         </div>
       </Link>
     </div>

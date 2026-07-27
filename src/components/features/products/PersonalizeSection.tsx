@@ -44,12 +44,7 @@ export function PersonalizeSection() {
                 ))}
               </div>
 
-              <Link
-                href={ROUTES.CATEGORY("personalized")}
-                className="inline-flex items-center gap-2 bg-gold text-dark font-semibold px-7 py-3.5 rounded-full hover:bg-gold-dark transition-colors"
-              >
-                Customize Now <ArrowRight className="h-4 w-4" />
-              </Link>
+             
             </div>
 
             <div className="relative aspect-[4/3] rounded-3xl overflow-hidden">

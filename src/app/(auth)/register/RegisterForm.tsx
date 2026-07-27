@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SITE_NAME, SITE_TAGLINE } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
+import { buildLoginHref, sanitizeCallbackUrl } from "@/lib/auth/callback-url";
 import { toast } from "sonner";
 import { User, Mail, Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,8 @@ interface FieldErrors {
 
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = sanitizeCallbackUrl(searchParams.get("callbackUrl"), ROUTES.HOME);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -94,14 +97,14 @@ export function RegisterForm() {
       const result = await signIn("email-password", {
         email: email.toLowerCase().trim(),
         password,
-        callbackUrl: ROUTES.HOME,
+        callbackUrl,
         redirect: false,
       });
 
       if (result?.error) {
         // Account created but auto-login failed — redirect to login
         toast.info("Account created. Please log in.");
-        router.push(ROUTES.LOGIN);
+        router.push(buildLoginHref(callbackUrl));
       } else if (result?.url) {
         window.location.href = result.url;
       }
@@ -286,7 +289,7 @@ export function RegisterForm() {
 
         <p className="text-center text-sm text-warm-gray mt-6">
           Already have an account?{" "}
-          <Link href={ROUTES.LOGIN} className="text-gold font-semibold hover:underline">
+          <Link href={buildLoginHref(callbackUrl)} className="text-gold font-semibold hover:underline">
             Sign in
           </Link>
         </p>

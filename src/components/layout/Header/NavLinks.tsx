@@ -6,8 +6,8 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { NAV_LINKS } from "@/constants/ui";
+import { CategoriesMegaMenu } from "./CategoriesMegaMenu";
 import {
-  getCategoryHref,
   isCategoryLinkAvailable,
   isNavLinkActive,
 } from "./nav-utils";
@@ -53,16 +53,11 @@ export function NavLinks({ categories }: Props) {
               </button>
 
               {isOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-48 rounded-2xl bg-cream border border-border shadow-lg py-2.5 z-50 animate-fade-in">
-                  {categories.map((category) => (
-                    <Link
-                      key={category.id}
-                      href={getCategoryHref(category.slug)}
-                      className="block px-4 py-2 text-sm font-medium text-secondary-dark hover:bg-gold/15 hover:text-gold transition-colors"
-                    >
-                      {category.name}
-                    </Link>
-                  ))}
+                <div className="absolute top-full left-1/2 z-50 mt-1 -translate-x-1/2 animate-fade-in">
+                  <CategoriesMegaMenu
+                    categories={categories}
+                    onNavigate={() => setIsOpen(false)}
+                  />
                 </div>
               )}
             </div>

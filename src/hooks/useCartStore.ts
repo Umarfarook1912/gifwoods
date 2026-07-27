@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { CART_STORAGE_KEY } from "@/constants/routes";
 import type { CartState, CartItem } from "@/types/cart";
 import type { Product, Customization } from "@/types/product";
 
@@ -67,7 +68,8 @@ export const useCartStore = create<CartState>()(
       },
     }),
     {
-      name: "gifwoods-cart",
+      name: CART_STORAGE_KEY,
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ items: state.items }),
     }
   )

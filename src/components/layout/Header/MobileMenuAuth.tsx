@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import {
   User,
@@ -14,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import { AUTH_NAV_LABELS } from "@/constants/auth";
+import { buildLoginHref, buildRegisterHref } from "@/lib/auth/callback-url";
 import { cn } from "@/lib/utils/cn";
 import {
   mobileNavItemClass,
@@ -26,6 +28,9 @@ interface MobileMenuAuthProps {
 
 export function MobileMenuAuth({ onNavigate }: MobileMenuAuthProps) {
   const { data: session, status } = useSession();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnPath = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
   if (status === "loading") {
     return <div className="mt-4 h-20 animate-pulse rounded-xl bg-muted/40" />;
@@ -35,11 +40,19 @@ export function MobileMenuAuth({ onNavigate }: MobileMenuAuthProps) {
     <div className="mt-4 border-t border-border pt-4">
       {!session ? (
         <div className="flex flex-col gap-0.5">
-          <Link href={ROUTES.LOGIN} onClick={onNavigate} className={mobileNavItemClass}>
+          <Link
+            href={buildLoginHref(returnPath)}
+            onClick={onNavigate}
+            className={mobileNavItemClass}
+          >
             <LogIn className="h-4 w-4 shrink-0" />
             {AUTH_NAV_LABELS.LOGIN}
           </Link>
-          <Link href={ROUTES.REGISTER} onClick={onNavigate} className={mobileNavItemClass}>
+          <Link
+            href={buildRegisterHref(returnPath)}
+            onClick={onNavigate}
+            className={mobileNavItemClass}
+          >
             <UserPlus className="h-4 w-4 shrink-0" />
             {AUTH_NAV_LABELS.REGISTER}
           </Link>

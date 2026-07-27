@@ -30,3 +30,5 @@ export const ROUTES = {
     REVIEWS: "/admin/reviews",
   },
 } as const;
+
+export const CART_STORAGE_KEY = "gifwoods-cart";
