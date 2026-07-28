@@ -30,6 +30,24 @@ export async function getAllReviews(): Promise<Review[]> {
   return (data ?? []) as Review[];
 }
 
+export async function getApprovedReviews(limit?: number): Promise<Review[]> {
+  const supabase = createAdminClient();
+  let query = supabase
+    .from("reviews")
+    .select("*, user:profiles(id, name, avatar_url), product:products(id, name, slug)")
+    .eq("is_approved", true)
+    .order("created_at", { ascending: false });
+
+  if (limit) {
+    query = query.limit(limit);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []) as Review[];
+}
+
+
 export async function createReview(
   userId: string,
   payload: { product_id: string; order_id?: string | null; rating: number; comment: string }

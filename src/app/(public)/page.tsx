@@ -8,6 +8,7 @@ import { TestimonialsSection } from "@/components/features/products/Testimonials
 import { createClient } from "@/lib/supabase/server";
 import { ROUTES } from "@/constants/routes";
 import { getAvailableCategories } from "@/lib/supabase/categories-db";
+import { getApprovedReviews } from "@/lib/supabase/reviews-db";
 import type { Category, Product } from "@/types/product";
 
 export const metadata: Metadata = {
@@ -54,11 +55,12 @@ async function getAllActiveProducts(): Promise<Product[]> {
 }
 
 export default async function HomePage() {
-  const [bestsellers, newArrivals, categories, allProducts] = await Promise.all([
+  const [bestsellers, newArrivals, categories, allProducts, reviews] = await Promise.all([
     getBestsellers(),
     getNewArrivals(),
     getAvailableCategories(),
     getAllActiveProducts(),
+    getApprovedReviews(),
   ]);
 
   return (
@@ -90,7 +92,7 @@ export default async function HomePage() {
 
       <PersonalizeSection />
       <WhyUsSection />
-      <TestimonialsSection />
+      <TestimonialsSection reviews={reviews} />
     </>
   );
 }

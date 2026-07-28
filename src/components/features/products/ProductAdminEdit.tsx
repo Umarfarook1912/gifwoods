@@ -24,7 +24,9 @@ export function ProductAdminEdit({ product, onUpdated }: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
 
-  if (session?.user?.role !== "admin") return null;
+  const role = session?.user?.role;
+  const isAdmin = role === "admin" || role === "super_admin";
+  if (!isAdmin) return null;
 
   const openEditor = async () => {
     setOpen(true);

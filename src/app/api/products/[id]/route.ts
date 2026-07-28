@@ -29,7 +29,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!hasApiPermission(session, "products")) {
+  const role = session?.user?.role;
+  const isAdmin = role === "admin" || role === "super_admin";
+  if (!isAdmin) {
     return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 403 });
   }
 
