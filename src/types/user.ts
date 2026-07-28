@@ -1,4 +1,4 @@
-export type UserRole = "user" | "admin";
+export type UserRole = "user" | "admin" | "super_admin";
 
 export interface UserProfile {
   id: string;
@@ -9,6 +9,8 @@ export interface UserProfile {
   phone: string | null;
   created_at: string;
   updated_at: string;
+  permissions?: string[];
+  status?: string;
 }
 
 export interface GuestUser {

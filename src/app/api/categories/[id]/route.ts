@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { auth } from "@/lib/auth/auth";
+import { auth, hasApiPermission } from "@/lib/auth/auth";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -8,8 +8,8 @@ interface RouteContext {
 
 export async function DELETE(_request: Request, { params }: RouteContext) {
   const session = await auth();
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 401 });
+  if (!hasApiPermission(session, "categories")) {
+    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 403 });
   }
 
   const { id } = await params;

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   LayoutDashboard,
   Package,
@@ -16,16 +17,28 @@ import { ROUTES } from "@/constants/routes";
 import { SITE_NAME } from "@/constants/ui";
 
 const NAV_ITEMS = [
-  { href: ROUTES.ADMIN.DASHBOARD, label: "Dashboard", icon: LayoutDashboard },
-  { href: ROUTES.ADMIN.PRODUCTS, label: "Products", icon: Package },
-  { href: ROUTES.ADMIN.CATEGORIES, label: "Categories", icon: Tags },
-  { href: ROUTES.ADMIN.ORDERS, label: "Orders", icon: ShoppingBag },
-  { href: ROUTES.ADMIN.USERS, label: "Users", icon: Users },
-  { href: ROUTES.ADMIN.REVIEWS, label: "Reviews", icon: Star },
+  { href: ROUTES.ADMIN.DASHBOARD, label: "Dashboard", icon: LayoutDashboard, key: "dashboard" },
+  { href: ROUTES.ADMIN.PRODUCTS, label: "Products", icon: Package, key: "products" },
+  { href: ROUTES.ADMIN.CATEGORIES, label: "Categories", icon: Tags, key: "categories" },
+  { href: ROUTES.ADMIN.ORDERS, label: "Orders", icon: ShoppingBag, key: "orders" },
+  { href: ROUTES.ADMIN.USERS, label: "Users", icon: Users, key: "users" },
+  { href: ROUTES.ADMIN.REVIEWS, label: "Reviews", icon: Star, key: "reviews" },
 ] as const;
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+
+  const role = session?.user?.role;
+  const permissions = session?.user?.permissions || [];
+
+  const visibleItems = NAV_ITEMS.filter((item) => {
+    if (role === "super_admin") return true;
+    if (role === "admin") {
+      return permissions.includes(item.key);
+    }
+    return false;
+  });
 
   return (
     <aside className="w-56 min-h-screen bg-dark border-r border-white/10 flex-shrink-0 hidden md:flex flex-col">
@@ -36,7 +49,7 @@ export function AdminSidebar() {
         <p className="text-white/40 text-xs mt-0.5">Admin Panel</p>
       </div>
       <nav className="flex-1 p-3 space-y-1">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {visibleItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link

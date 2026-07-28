@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth/auth";
+import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { getAnalyticsSeries } from "@/lib/admin/dashboard-stats";
 import type { DashboardMetricKey } from "@/types/admin-dashboard";
 
@@ -8,8 +8,8 @@ const ALLOWED_METRICS = new Set<DashboardMetricKey>(["revenue", "orders", "users
 
 export async function GET(request: Request) {
   const session = await auth();
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 401 });
+  if (!hasApiPermission(session, "dashboard")) {
+    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 403 });
   }
 
   const { searchParams } = new URL(request.url);

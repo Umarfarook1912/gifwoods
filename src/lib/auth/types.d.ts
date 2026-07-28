@@ -12,6 +12,8 @@ declare module "next-auth" {
       role: string;
       isGuest: boolean;
       authProvider?: string;
+      permissions?: string[];
+      status?: string;
     };
   }
 
@@ -27,5 +29,7 @@ declare module "next-auth/jwt" {
     role?: string;
     isGuest?: boolean;
     authProvider?: string;
+    permissions?: string[];
+    status?: string;
   }
 }

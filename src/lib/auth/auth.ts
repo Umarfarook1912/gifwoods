@@ -30,6 +30,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (error || !data.user) return null;
 
+        // Fetch profile to check if active/inactive
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("status")
+          .eq("id", data.user.id)
+          .maybeSingle();
+
+        if (profile && profile.status === "inactive") {
+          return null;
+        }
+
         return {
           id: data.user.id,
           email: data.user.email,
@@ -48,11 +59,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const { data: existing } = await supabase
           .from("profiles")
-          .select("id")
+          .select("id, status")
           .eq("email", email)
           .maybeSingle();
 
         if (existing) {
+          if (existing.status === "inactive") {
+            return false;
+          }
           const { error } = await supabase
             .from("profiles")
             .update({ name: user.name, avatar_url: user.image })
@@ -129,13 +143,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const supabase = createAdminClient();
         const { data } = await supabase
           .from("profiles")
-          .select("id, role")
+          .select("id, role, permissions, status")
           .eq("email", token.email)
           .maybeSingle();
 
         if (data) {
           token.supabaseId = data.id;
           token.role = data.role ?? "user";
+          token.permissions = data.permissions ?? [];
+          token.status = data.status ?? "active";
         }
       }
 
@@ -149,6 +165,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.role = (token.role as string) ?? "user";
         session.user.isGuest = (token.isGuest as boolean) ?? false;
         session.user.authProvider = token.authProvider as string | undefined;
+        session.user.permissions = (token.permissions as string[]) ?? [];
+        session.user.status = (token.status as string) ?? "active";
       }
       return session;
     },
@@ -164,3 +182,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     maxAge: 30 * 24 * 60 * 60,
   },
 });
+
+export function hasApiPermission(session: any, requiredPermission?: string): boolean {
+  if (!session) return false;
+  const role = session.user?.role;
+  if (role === "super_admin") return true;
+  if (role === "admin") {
+    if (!requiredPermission) return true;
+    return session.user?.permissions?.includes(requiredPermission) ?? false;
+  }
+  return false;
+}

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth/auth";
+import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { updateReview, deleteReview } from "@/lib/supabase/reviews-db";
 
 export async function PATCH(
@@ -7,8 +7,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 401 });
+  if (!hasApiPermission(session, "reviews")) {
+    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 403 });
   }
 
   try {
@@ -26,8 +26,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 401 });
+  if (!hasApiPermission(session, "reviews")) {
+    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 403 });
   }
 
   try {

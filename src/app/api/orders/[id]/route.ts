@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth/auth";
+import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { createClient } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/nodemailer";
 import { FULFILLMENT_STATUSES } from "@/constants/ui";
@@ -29,7 +29,7 @@ export async function GET(
   }
 
   const isOwner = (data as { user_id: string }).user_id === userId;
-  const isAdmin = session.user.role === "admin";
+  const isAdmin = session.user.role === "admin" || session.user.role === "super_admin";
   if (!isOwner && !isAdmin) {
     return NextResponse.json({ data: null, error: "Forbidden" }, { status: 403 });
   }
@@ -42,8 +42,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 401 });
+  if (!hasApiPermission(session, "orders")) {
+    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 403 });
   }
 
   const { id } = await params;

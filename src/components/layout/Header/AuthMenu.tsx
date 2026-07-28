@@ -76,7 +76,7 @@ export function AuthMenu({ icon }: Props) {
             <Package className="h-4 w-4" /> My Orders
           </Link>
         </DropdownMenuItem>
-        {session.user.role === "admin" && (
+        {(session.user.role === "admin" || session.user.role === "super_admin") && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem>

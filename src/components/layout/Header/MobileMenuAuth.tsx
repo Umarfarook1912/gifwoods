@@ -77,7 +77,7 @@ export function MobileMenuAuth({ onNavigate }: MobileMenuAuthProps) {
               <MapPin className="h-4 w-4 shrink-0" />
               {AUTH_NAV_LABELS.ADDRESS_BOOK}
             </Link>
-            {session.user.role === "admin" && (
+            {(session.user.role === "admin" || session.user.role === "super_admin") && (
               <Link
                 href={ROUTES.ADMIN.DASHBOARD}
                 onClick={onNavigate}

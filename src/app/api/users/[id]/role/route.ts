@@ -7,14 +7,14 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 401 });
+  if (!session || session.user.role !== "super_admin") {
+    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 403 });
   }
 
   const { id } = await params;
   const { role } = await request.json();
 
-  if (!["user", "admin"].includes(role)) {
+  if (!["user", "admin", "super_admin"].includes(role)) {
     return NextResponse.json({ data: null, error: "Invalid role" }, { status: 400 });
   }
 

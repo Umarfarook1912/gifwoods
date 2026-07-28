@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -24,7 +24,14 @@ export function LoginForm() {
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
   const searchParams = useSearchParams();
+  const errorParam = searchParams.get("error");
   const callbackUrl = sanitizeCallbackUrl(searchParams.get("callbackUrl"), ROUTES.HOME);
+
+  useEffect(() => {
+    if (errorParam === "InactiveAccount") {
+      toast.error("Your account has been deactivated. Please contact the administrator.");
+    }
+  }, [errorParam]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();

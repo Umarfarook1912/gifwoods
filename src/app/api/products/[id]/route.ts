@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { auth } from "@/lib/auth/auth";
+import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { productSchema } from "@/lib/utils/validators";
 
 export async function GET(
@@ -29,8 +29,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 401 });
+  if (!hasApiPermission(session, "products")) {
+    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 403 });
   }
 
   const { id } = await params;
@@ -109,8 +109,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 401 });
+  if (!hasApiPermission(session, "products")) {
+    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 403 });
   }
 
   const { id } = await params;
