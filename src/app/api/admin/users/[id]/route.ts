@@ -14,11 +14,12 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { name, status, permissions, password } = body as {
+    const { name, status, permissions, password, role } = body as {
       name?: string;
       status?: "active" | "inactive";
       permissions?: string[];
       password?: string;
+      role?: "admin" | "user";
     };
 
     const supabase = createAdminClient();
@@ -44,6 +45,7 @@ export async function PUT(
     if (name) updatePayload.name = name.trim();
     if (status) updatePayload.status = status;
     if (permissions) updatePayload.permissions = permissions;
+    if (role) updatePayload.role = role;
 
     const { data, error: profileError } = await supabase
       .from("profiles")

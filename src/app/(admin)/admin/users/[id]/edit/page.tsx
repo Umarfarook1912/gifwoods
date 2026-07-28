@@ -19,15 +19,6 @@ const AVAILABLE_PERMISSIONS = [
   { id: "orders", label: "Orders", description: "View purchases, update fulfillment statuses, track payment status." },
   { id: "users", label: "Users & Admins", description: "Manage database profiles and assign admin credentials." },
   { id: "reviews", label: "Reviews", description: "Moderate, approve or delete client product testimonials." },
-  { id: "customers", label: "Customers", description: "Manage customer profiles, purchase history and feedback." },
-  { id: "brands", label: "Brands", description: "Add, modify and associate product branding." },
-  { id: "coupons", label: "Coupons", description: "Create marketing promotional discounts and rules." },
-  { id: "inventory", label: "Inventory", description: "Manage stock levels, warehouses and replenish inventory." },
-  { id: "reports", label: "Reports", description: "Export financial statements, audit logs and customer reports." },
-  { id: "settings", label: "Settings", description: "Modify global store metadata, SEO and contact info." },
-  { id: "notifications", label: "Notifications", description: "Manage email triggers and push alerts." },
-  { id: "banners", label: "Banners & Promos", description: "Customise home hero layouts and discount sliders." },
-  { id: "blogs", label: "Blogs & Editorial", description: "Write and update storefront news posts." },
 ];
 
 type Props = {
