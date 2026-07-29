@@ -31,6 +31,12 @@ export const CONFIRMATIONS = {
     confirmLabel: "Clear Cart",
     variant: "destructive",
   },
+  ORDER_DELETE: {
+    title: "Delete this order?",
+    description: "The order, including its items and reviews, will be permanently deleted. This action cannot be undone.",
+    confirmLabel: "Delete Order",
+    variant: "destructive",
+  },
 } as const satisfies Record<string, ConfirmOptions>;
 
 export function categoryDeleteConfirmation(name: string): ConfirmOptions {

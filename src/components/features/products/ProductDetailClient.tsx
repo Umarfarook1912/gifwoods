@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ShoppingBag, Truck, Shield } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ShoppingBag, Truck, Shield, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function ProductDetailClient({ product: initialProduct }: Props) {
+  const router = useRouter();
   const [product, setProduct] = useState(initialProduct);
   const [quantity, setQuantity] = useState(1);
   const { addItem, openCart } = useCartStore();
@@ -43,7 +45,18 @@ export function ProductDetailClient({ product: initialProduct }: Props) {
       : null;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+    <div className="space-y-6">
+      <div>
+        <button
+          onClick={() => router.back()}
+          className="group flex items-center gap-2 text-sm font-medium text-warm-gray hover:text-dark transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+          Back
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
       <ProductImageGallery images={product.images} name={product.name} />
 
       <div>
@@ -192,6 +205,7 @@ export function ProductDetailClient({ product: initialProduct }: Props) {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }

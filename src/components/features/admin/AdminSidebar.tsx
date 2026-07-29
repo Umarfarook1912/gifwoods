@@ -41,7 +41,7 @@ export function AdminSidebar() {
   });
 
   return (
-    <aside className="w-56 min-h-screen bg-dark border-r border-white/10 flex-shrink-0 hidden md:flex flex-col">
+    <aside className="w-56 h-screen bg-dark border-r border-white/10 flex-shrink-0 hidden md:flex flex-col">
       <div className="p-5 border-b border-white/10">
         <Link href="/">
           <span className="font-display font-bold text-lg text-gold">{SITE_NAME}</span>

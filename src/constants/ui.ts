@@ -38,8 +38,7 @@ export const FOOTER_COMPANY_LINKS = [
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
   { label: "FAQs", href: "/faqs" },
-  { label: "Blog", href: "#" },
-  { label: "Careers", href: "#" },
+
 ] as const;
 
 export const FOOTER_SUPPORT_LINKS = [

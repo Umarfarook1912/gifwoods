@@ -82,3 +82,25 @@ export async function PATCH(
 
   return NextResponse.json({ data, error: null });
 }
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!hasApiPermission(session, "orders")) {
+    return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const supabase = await createClient();
+
+  const { error } = await supabase.from("orders").delete().eq("id", id);
+
+  if (error) {
+    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ data: { id, action: "deleted" }, error: null });
+}
+
