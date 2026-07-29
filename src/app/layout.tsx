@@ -1,23 +1,7 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { DEFAULT_SEO } from "@/constants/seo";
-
-/**
- * Site-wide font — same face as the hero description
- * ("Premium personalized gifts crafted…").
- */
-const siteFont = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(DEFAULT_SEO.url),
@@ -54,7 +38,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${siteFont.variable} ${siteFont.className} ${geistMono.variable} antialiased`}
+        className="antialiased"
+        style={
+          {
+            "--font-sans":
+              "Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+            "--font-geist-mono":
+              "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace",
+          } as React.CSSProperties
+        }
         suppressHydrationWarning
       >
         <Providers>{children}</Providers>
