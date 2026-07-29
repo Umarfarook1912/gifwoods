@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, Minus, Plus, Trash2, Sparkles } from "lucide-react";
+import { ShoppingBag, Minus, Plus, Trash2, Truck } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/hooks/useCartStore";
 import { formatPrice } from "@/lib/utils/formatters";
 import { ROUTES } from "@/constants/routes";
-import { MIN_ORDER_FOR_FREE_WRAP } from "@/constants/ui";
+import { FREE_SHIPPING_THRESHOLD } from "@/constants/ui";
 import { CONFIRMATIONS } from "@/constants/confirmations";
 import { useConfirm } from "@/hooks/useConfirm";
 import { cn } from "@/lib/utils/cn";
@@ -23,8 +23,8 @@ export function CartDrawer() {
   };
   const subtotal = getSubtotal();
   const itemCount = getItemCount();
-  const wrapRemaining = Math.max(0, MIN_ORDER_FOR_FREE_WRAP - subtotal);
-  const wrapProgress = Math.min(100, (subtotal / MIN_ORDER_FOR_FREE_WRAP) * 100);
+  const shippingRemaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
+  const shippingProgress = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && closeCart()}>
@@ -68,21 +68,21 @@ export function CartDrawer() {
           </div>
         ) : (
           <>
-            {/* Free gift wrap progress */}
+            {/* Free shipping progress */}
             <div className="px-5 pt-4">
               <div className="rounded-xl bg-gold/10 border border-gold/20 px-4 py-3">
                 <p className="text-xs font-medium text-dark flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-gold flex-shrink-0" />
-                  {wrapRemaining > 0 ? (
-                    <>Add {formatPrice(wrapRemaining)} more to unlock free gift wrap</>
+                  <Truck className="h-3.5 w-3.5 text-gold flex-shrink-0" />
+                  {shippingRemaining > 0 ? (
+                    <>Add {formatPrice(shippingRemaining)} more for free shipping</>
                   ) : (
-                    <>You&apos;ve unlocked free gift wrap!</>
+                    <>You&apos;ve unlocked free shipping!</>
                   )}
                 </p>
                 <div className="h-1.5 rounded-full bg-gold/20 mt-2 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-gold transition-all duration-500"
-                    style={{ width: `${wrapProgress}%` }}
+                    style={{ width: `${shippingProgress}%` }}
                   />
                 </div>
               </div>

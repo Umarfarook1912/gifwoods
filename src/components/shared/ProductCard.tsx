@@ -31,7 +31,7 @@ export function ProductCard({ product, className }: Props) {
     addItem(product);
     openCart();
     toast.success(`${product.name} added to cart`, {
-      description: "Complimentary gift wrap included!",
+      description: "Added to your cart!",
     });
   };
 
@@ -80,7 +80,6 @@ export function ProductCard({ product, className }: Props) {
           ) : (
             <Star className="h-3.5 w-3.5 text-border" />
           )}
-          <span className="text-xs text-warm-gray">· Free wrap</span>
         </div>
 
         <h3 className="font-display font-semibold text-dark text-base leading-snug mb-1.5 line-clamp-2">

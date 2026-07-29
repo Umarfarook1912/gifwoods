@@ -217,7 +217,6 @@ export const SHOP_FILTERS_LABEL = "Filters";
 export const BRAND_GOLD = "#e5a93c";
 export const LOADER_SIZE = "medium" as const;
 
-export const MIN_ORDER_FOR_FREE_WRAP = 1499;
-export const FREE_SHIPPING_THRESHOLD = 500;
-export const STANDARD_SHIPPING_FEE = 60;
+export const FREE_SHIPPING_THRESHOLD = 1500;
+export const STANDARD_SHIPPING_FEE = 75;
 export const MIN_CORPORATE_ORDER = 25;
