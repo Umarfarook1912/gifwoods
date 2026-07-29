@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductDetailClient } from "@/components/features/products/ProductDetailClient";
-import { ReviewsSection } from "@/components/features/reviews/ReviewsSection";
-import { BestsellersSection } from "@/components/features/products/BestsellersSection";
+import { ProductTabs } from "@/components/features/products/ProductTabs";
 import { createClient } from "@/lib/supabase/server";
 import type { Product } from "@/types/product";
 import type { Review } from "@/types/review";
@@ -72,17 +71,8 @@ export default async function ProductPage({ params }: Props) {
           <ProductDetailClient product={product} />
         </div>
 
-        {/* Reviews */}
-        <div className="mt-16">
-          <ReviewsSection reviews={reviews} productId={product.id} />
-        </div>
-
-        {/* Related */}
-        {related.length > 0 && (
-          <div className="mt-16">
-            <BestsellersSection products={related} />
-          </div>
-        )}
+        {/* Tabbed description / specs / reviews + related products */}
+        <ProductTabs product={product} reviews={reviews} related={related} />
       </div>
     </div>
   );
