@@ -154,10 +154,6 @@ export default function CartPage() {
                     )}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-warm-gray">Gift wrap</span>
-                  <span className="text-emerald-600 font-medium">Complimentary</span>
-                </div>
               </div>
               <Separator className="mb-4" />
               <div className="flex justify-between font-bold text-dark mb-6">
@@ -166,7 +162,7 @@ export default function CartPage() {
               </div>
               {subtotal < FREE_SHIPPING_THRESHOLD && (
                 <p className="text-xs text-warm-gray mb-4 p-3 rounded-lg bg-cream border border-gold/20">
-                  Add {formatPrice(FREE_SHIPPING_THRESHOLD - subtotal)} more for free shipping!
+                  Add {formatPrice(FREE_SHIPPING_THRESHOLD - subtotal)} more to get free shipping!
                 </p>
               )}
               <Button

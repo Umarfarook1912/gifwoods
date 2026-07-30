@@ -76,7 +76,7 @@ export function CheckoutSummary({ items, subtotal, shipping, total }: Props) {
       <div className="flex gap-2 rounded-xl bg-cream p-3 text-xs text-warm-gray">
         <Truck className="h-4 w-4 shrink-0 text-gold" />
         <span>
-          Free shipping on orders of {formatPrice(FREE_SHIPPING_THRESHOLD)} or more.
+          Free shipping on orders above {formatPrice(FREE_SHIPPING_THRESHOLD)}. Otherwise ₹75 shipping applies.
         </span>
       </div>
     </aside>

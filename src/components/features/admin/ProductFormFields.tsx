@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/features/admin/RichTextEditor";
 import {
   Select,
   SelectContent,
@@ -167,12 +167,14 @@ export function ProductFormFields({
 
       <div className="md:col-span-2">
         <Label>Description</Label>
-        <Textarea
+        <RichTextEditor
           value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-          className="mt-1"
-          rows={3}
+          onChange={(html) => setForm({ ...form, description: html })}
+          placeholder="Write a detailed product description — use headings, bullet points, images, or embed a YouTube video…"
         />
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          Use the toolbar to add bold headings, bullet points, images (paste URL), or embed a YouTube video.
+        </p>
       </div>
       <div className="md:col-span-2">
         <Label>Tags (comma separated)</Label>
