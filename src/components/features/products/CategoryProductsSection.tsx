@@ -118,7 +118,7 @@ export function CategoryProductsSection({
 
         {filteredProducts.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
               {displayedProducts.map((product, index) => (
                 <Reveal
                   key={product.id}

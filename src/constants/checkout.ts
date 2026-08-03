@@ -17,3 +17,15 @@ export const CHECKOUT_COPY = {
   PAYMENT_TITLE: "Complete payment",
   PAY_SECURELY: "Pay securely",
 } as const;
+
+export const PAYMENT_RETURN_TOAST = {
+  SUCCESS: "Payment successful",
+  SUCCESS_DESCRIPTION: "Your order is confirmed. A receipt has been sent to your email.",
+  PENDING: "Payment processing",
+  PENDING_DESCRIPTION: "We’re confirming your payment. Order status will update shortly.",
+  VERIFICATION_FAILED: "Payment verification pending",
+  VERIFICATION_FAILED_DESCRIPTION:
+    "We could not verify the payment yet. Please check your orders again shortly.",
+  STORAGE_KEY_PREFIX: "gifwoods:payment-toast:",
+  DURATION_MS: 3000,
+} as const;

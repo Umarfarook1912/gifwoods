@@ -150,7 +150,7 @@ export function ProductTabs({ product, reviews, related }: Props) {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
             {related.map((item) => (
               <Link
                 key={item.id}

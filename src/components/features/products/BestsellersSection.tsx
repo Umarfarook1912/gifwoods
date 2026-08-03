@@ -32,7 +32,7 @@ export function BestsellersSection({ products }: Props) {
           </Link>
         </Reveal>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
           {products.map((product, index) => (
             <Reveal key={product.id} delay={(index % 4) as 0 | 1 | 2 | 3}>
               <ProductCard product={product} />

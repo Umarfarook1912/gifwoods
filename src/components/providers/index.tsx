@@ -23,7 +23,7 @@ export function Providers({ children }: Props) {
             <Suspense fallback={null}>
               <NavigationLoader />
             </Suspense>
-            <Toaster richColors position="top-right" />
+            <Toaster richColors={false} position="top-right" closeButton />
           </ConfirmDialogProvider>
         </TooltipProvider>
       </QueryProvider>

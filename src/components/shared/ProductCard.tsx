@@ -36,8 +36,8 @@ export function ProductCard({ product, className }: Props) {
   };
 
   return (
-    <div className={cn("group relative", className)}>
-      <div className="relative aspect-square overflow-hidden rounded-3xl bg-muted">
+    <div className={cn("group relative rounded-3xl border border-gold/40 bg-white p-2", className)}>
+      <div className="relative aspect-square overflow-hidden rounded-[1.25rem] bg-muted">
         <Link href={ROUTES.PRODUCT(product.slug)} className="absolute inset-0 block">
           {product.images[0] ? (
             <Image
@@ -55,7 +55,7 @@ export function ProductCard({ product, className }: Props) {
         </Link>
 
         {product.badge && (
-          <span className="pointer-events-none absolute top-4 left-4 z-[1] bg-white/90 backdrop-blur-sm text-dark text-[10px] font-bold tracking-wider uppercase px-3 py-1.5 rounded-full">
+          <span className="pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 z-[1] bg-white/90 backdrop-blur-sm text-dark text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full">
             {BADGE_LABELS[product.badge] ?? product.badge}
           </span>
         )}
@@ -64,13 +64,13 @@ export function ProductCard({ product, className }: Props) {
           type="button"
           onClick={handleAddToCart}
           disabled={product.stock === 0}
-          className="absolute bottom-4 left-4 right-4 z-[2] bg-gold text-dark text-sm font-semibold py-2.5 rounded-full opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 hover:bg-gold-dark disabled:opacity-50"
+          className="absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-4 sm:left-4 sm:right-4 z-[2] bg-gold text-dark text-[11px] sm:text-sm font-semibold py-1.5 sm:py-2.5 rounded-full opacity-100 translate-y-0 pointer-events-auto md:opacity-0 md:translate-y-2 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:translate-y-0 md:group-hover:pointer-events-auto transition-all duration-300 hover:bg-gold-dark disabled:opacity-50"
         >
           {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
         </button>
       </div>
 
-      <Link href={ROUTES.PRODUCT(product.slug)} className="block pt-4">
+      <Link href={ROUTES.PRODUCT(product.slug)} className="block pt-3 sm:pt-4 px-1">
         <div className="flex items-center gap-1.5 mb-1.5">
           {product.avg_rating ? (
             <>
@@ -82,14 +82,14 @@ export function ProductCard({ product, className }: Props) {
           )}
         </div>
 
-        <h3 className="font-display font-semibold text-dark text-base leading-snug mb-1.5 line-clamp-2">
+        <h3 className="font-display font-semibold text-dark text-sm sm:text-base leading-snug mb-1.5 line-clamp-2">
           {product.name}
         </h3>
 
         <div className="flex items-baseline gap-2">
-          <span className="font-bold text-dark">{formatPrice(product.price)}</span>
+          <span className="font-bold text-dark text-sm sm:text-base">{formatPrice(product.price)}</span>
           {product.original_price && product.original_price > product.price && (
-            <span className="text-sm text-warm-gray line-through">
+            <span className="text-xs sm:text-sm text-warm-gray line-through">
               {formatPrice(product.original_price)}
             </span>
           )}

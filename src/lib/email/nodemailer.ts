@@ -1,23 +1,21 @@
-import nodemailer from "nodemailer";
 import { SITE_NAME } from "@/constants/ui";
-
-function createTransporter() {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST ?? "smtp.gmail.com",
-    port: parseInt(process.env.SMTP_PORT ?? "587"),
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASSWORD,
-    },
-  });
-}
+import { getAdminEmail, sendEmail } from "@/lib/email/transporter";
+import { buildCustomerOrderEmailHtml } from "@/lib/email/templates/order-email";
+import {
+  buildContactEmailHtml,
+  buildOrderStatusEmailHtml,
+  buildWelcomeEmailHtml,
+} from "@/lib/email/templates/simple-emails";
+import type { OrderEmailLineItem } from "@/types/email";
 
 interface OrderConfirmationProps {
   to: string;
   userName: string | null;
   orderId: string;
   total: number;
+  subtotal: number;
+  shippingCost: number;
+  items: OrderEmailLineItem[];
 }
 
 export async function sendOrderConfirmationEmail({
@@ -25,52 +23,25 @@ export async function sendOrderConfirmationEmail({
   userName,
   orderId,
   total,
+  subtotal,
+  shippingCost,
+  items,
 }: OrderConfirmationProps) {
-  const transporter = createTransporter();
   const name = userName ?? "Valued Customer";
-  const shortId = `#${orderId.slice(0, 8).toUpperCase()}`;
 
-  await transporter.sendMail({
-    from: process.env.EMAIL_FROM ?? `${SITE_NAME} <${process.env.SMTP_USER}>`,
+  await sendEmail({
     to,
-    subject: `Order Confirmed ${shortId} — ${SITE_NAME}`,
-    html: `
-      <!DOCTYPE html>
-      <html>
-      <head><meta charset="utf-8"/></head>
-      <body style="font-family: Georgia, serif; background: #faf7f2; margin: 0; padding: 40px 20px;">
-        <div style="max-width: 560px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e8e0d8;">
-          <div style="background: #16130f; padding: 24px 32px; text-align: center;">
-            <h1 style="color: #e5a93c; font-family: Georgia, serif; font-size: 28px; margin: 0;">${SITE_NAME}</h1>
-            <p style="color: rgba(255,255,255,0.6); font-size: 12px; margin: 6px 0 0;">A luxury gifting atelier</p>
-          </div>
-          <div style="padding: 32px;">
-            <h2 style="color: #16130f; font-family: Georgia, serif; font-size: 22px; margin: 0 0 8px;">Order Confirmed! 🎁</h2>
-            <p style="color: #8b7d6b; font-size: 15px; line-height: 1.6;">Dear ${name},</p>
-            <p style="color: #8b7d6b; font-size: 15px; line-height: 1.6;">
-              Thank you for your order. We've received it and our artisans are already crafting your gifts with care.
-            </p>
-            <div style="background: #faf7f2; border-radius: 12px; padding: 20px; margin: 24px 0; border: 1px solid #e8e0d8;">
-              <p style="margin: 0 0 8px; color: #16130f; font-weight: bold; font-size: 14px;">Order Details</p>
-              <p style="margin: 4px 0; color: #8b7d6b; font-size: 14px;">Order ID: <strong style="color: #16130f;">${shortId}</strong></p>
-              <p style="margin: 4px 0; color: #8b7d6b; font-size: 14px;">Total: <strong style="color: #e5a93c;">₹${total.toLocaleString("en-IN")}</strong></p>
-            </div>
-            <p style="color: #8b7d6b; font-size: 14px; line-height: 1.6;">
-              You'll receive another email when your order is shipped. If you have any questions, reply to this email.
-            </p>
-            <div style="text-align: center; margin-top: 28px;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL}/orders/${orderId}" style="background: #e5a93c; color: #16130f; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block;">
-                Track Your Order →
-              </a>
-            </div>
-          </div>
-          <div style="background: #faf7f2; border-top: 1px solid #e8e0d8; padding: 20px 32px; text-align: center;">
-            <p style="color: #8b7d6b; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} ${SITE_NAME}. Crafted with care in India.</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `,
+    toName: name,
+    subject: `Order confirmed — ${SITE_NAME}`,
+    html: buildCustomerOrderEmailHtml({
+      orderId,
+      customerName: userName,
+      customerEmail: to,
+      items,
+      subtotal,
+      shippingCost,
+      total,
+    }),
   });
 }
 
@@ -87,9 +58,8 @@ export async function sendOrderStatusEmail({
   orderId,
   status,
 }: OrderStatusProps) {
-  const transporter = createTransporter();
   const name = userName ?? "Valued Customer";
-  const shortId = `#${orderId.slice(0, 8).toUpperCase()}`;
+  const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
 
   const STATUS_MESSAGES: Record<string, string> = {
     processing: "Your order is being crafted by our artisans.",
@@ -98,35 +68,19 @@ export async function sendOrderStatusEmail({
     cancelled: "Your order has been cancelled. If you have questions, please contact us.",
   };
 
-  const message = STATUS_MESSAGES[status] ?? `Your order status has been updated to: ${status}`;
+  const message =
+    STATUS_MESSAGES[status] ?? `Your order status has been updated to: ${status}`;
 
-  await transporter.sendMail({
-    from: process.env.EMAIL_FROM ?? `${SITE_NAME} <${process.env.SMTP_USER}>`,
+  await sendEmail({
     to,
-    subject: `Order Update ${shortId} — ${status.charAt(0).toUpperCase() + status.slice(1)} | ${SITE_NAME}`,
-    html: `
-      <!DOCTYPE html>
-      <html>
-      <body style="font-family: Georgia, serif; background: #faf7f2; margin: 0; padding: 40px 20px;">
-        <div style="max-width: 560px; margin: 0 auto; background: white; border-radius: 16px; border: 1px solid #e8e0d8;">
-          <div style="background: #16130f; padding: 24px 32px; text-align: center;">
-            <h1 style="color: #e5a93c; font-size: 28px; margin: 0; font-family: Georgia, serif;">${SITE_NAME}</h1>
-          </div>
-          <div style="padding: 32px;">
-            <h2 style="color: #16130f; font-family: Georgia, serif; font-size: 20px;">Order Update</h2>
-            <p style="color: #8b7d6b; line-height: 1.6;">Dear ${name},</p>
-            <p style="color: #8b7d6b; line-height: 1.6;">${message}</p>
-            <div style="background: #faf7f2; border-radius: 12px; padding: 16px; margin: 20px 0;">
-              <p style="margin: 0; color: #16130f; font-size: 14px;">Order ${shortId} · Status: <strong style="text-transform: capitalize;">${status}</strong></p>
-            </div>
-            <div style="text-align: center; margin-top: 24px;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL}/orders/${orderId}" style="background: #e5a93c; color: #16130f; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block;">View Order</a>
-            </div>
-          </div>
-        </div>
-      </body>
-      </html>
-    `,
+    toName: name,
+    subject: `Order update — ${statusLabel} | ${SITE_NAME}`,
+    html: buildOrderStatusEmailHtml({
+      userName,
+      orderId,
+      status,
+      message,
+    }),
   });
 }
 
@@ -136,30 +90,13 @@ interface WelcomeEmailProps {
 }
 
 export async function sendWelcomeEmail({ to, userName }: WelcomeEmailProps) {
-  const transporter = createTransporter();
   const name = userName ?? "Gifter";
 
-  await transporter.sendMail({
-    from: process.env.EMAIL_FROM ?? `${SITE_NAME} <${process.env.SMTP_USER}>`,
+  await sendEmail({
     to,
-    subject: `Welcome to ${SITE_NAME} — Your first gift awaits`,
-    html: `
-      <!DOCTYPE html>
-      <html>
-      <body style="font-family: Georgia, serif; background: #faf7f2; margin: 0; padding: 40px 20px;">
-        <div style="max-width: 560px; margin: 0 auto; background: white; border-radius: 16px; border: 1px solid #e8e0d8;">
-          <div style="background: #16130f; padding: 24px 32px; text-align: center;">
-            <h1 style="color: #e5a93c; font-size: 28px; margin: 0; font-family: Georgia, serif;">${SITE_NAME}</h1>
-          </div>
-          <div style="padding: 32px; text-align: center;">
-            <h2 style="color: #16130f; font-family: Georgia, serif; font-size: 24px;">Welcome, ${name}! 🎁</h2>
-            <p style="color: #8b7d6b; line-height: 1.6; font-size: 15px;">You've joined a community of 25,000+ gifters who know that the right gift changes everything.</p>
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/shop" style="background: #e5a93c; color: #16130f; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 16px;">Explore Collections →</a>
-          </div>
-        </div>
-      </body>
-      </html>
-    `,
+    toName: name,
+    subject: `Welcome to ${SITE_NAME}`,
+    html: buildWelcomeEmailHtml({ userName }),
   });
 }
 
@@ -170,36 +107,16 @@ interface ContactEmailProps {
   message: string;
 }
 
-export async function sendContactEmail({ name, email, phone, message }: ContactEmailProps) {
-  const transporter = createTransporter();
-  const recipient = process.env.ADMIN_EMAIL ?? "gifwoodsoffice@gmail.com";
-
-  await transporter.sendMail({
-    from: process.env.EMAIL_FROM ?? `${SITE_NAME} <${process.env.SMTP_USER}>`,
-    to: recipient,
+export async function sendContactEmail({
+  name,
+  email,
+  phone,
+  message,
+}: ContactEmailProps) {
+  await sendEmail({
+    to: getAdminEmail(),
     replyTo: email,
-    subject: `Contact Form Submission from ${name} (${SITE_NAME})`,
-    html: `
-      <div style="font-family: Georgia, serif; padding: 24px; background: #faf7f2; color: #16130f;">
-        <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e8e0d8; overflow: hidden;">
-          <div style="background: #16130f; padding: 20px 28px; text-align: center;">
-            <h2 style="color: #e5a93c; margin: 0; font-family: Georgia, serif; font-size: 22px;">New Contact Message</h2>
-            <p style="color: rgba(255,255,255,0.6); font-size: 12px; margin: 4px 0 0;">${SITE_NAME} Atelier Inquiry</p>
-          </div>
-          <div style="padding: 28px; font-family: sans-serif; font-size: 14px; line-height: 1.6; color: #333333;">
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-            ${phone ? `<p><strong>Phone:</strong> <a href="tel:${phone}">${phone}</a></p>` : ""}
-            <div style="margin-top: 16px; padding: 16px; background: #faf7f2; border-radius: 12px; border: 1px solid #e8e0d8;">
-              <p style="margin: 0 0 6px; font-weight: bold; color: #16130f;">Message:</p>
-              <p style="margin: 0; white-space: pre-wrap; color: #4a4a4a;">${message}</p>
-            </div>
-            <p style="margin-top: 20px; font-size: 12px; color: #888888;">
-              Tip: You can hit <strong>Reply</strong> directly in your email client to reply to ${name} (${email}).
-            </p>
-          </div>
-        </div>
-      </div>
-    `,
+    subject: `New contact message — ${SITE_NAME}`,
+    html: buildContactEmailHtml({ name, email, phone, message }),
   });
 }

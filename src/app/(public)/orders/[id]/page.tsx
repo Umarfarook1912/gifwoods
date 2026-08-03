@@ -48,7 +48,7 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
 
   return (
     <div className="min-h-screen bg-cream py-10">
-      <PaymentReturnNotice paymentResult={query.payment} />
+      <PaymentReturnNotice orderId={typedOrder.id} paymentResult={query.payment} />
       <div className="page-container max-w-3xl">
         <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
           <div>

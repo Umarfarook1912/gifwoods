@@ -115,15 +115,3 @@ ALTER TABLE wishlists ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can manage their own wishlist"
   ON wishlists FOR ALL USING (auth.uid() = user_id);
-
--- =============================================
--- SEED DATA
--- =============================================
-INSERT INTO categories (name, slug, description, image_url) VALUES
-  ('Personalized', 'personalized', 'Custom gifts with names, photos, and messages', 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800'),
-  ('Weddings', 'weddings', 'Elegant gifts and hampers for weddings', 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800'),
-  ('Corporate', 'corporate', 'Branded gifts for teams and clients', 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800'),
-  ('Birthdays', 'birthdays', 'Celebrate birthdays with unique gifts', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800'),
-  ('Hampers', 'hampers', 'Curated luxury gift hampers', 'https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=800'),
-  ('Anniversary', 'anniversary', 'Romantic gifts for anniversaries', 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800')
-ON CONFLICT (slug) DO NOTHING;

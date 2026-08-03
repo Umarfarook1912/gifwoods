@@ -1,18 +1,37 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendOrderConfirmationEmail } from "@/lib/email/nodemailer";
 import { sendAdminOrderEmail } from "@/lib/email/admin-order-email";
+import type { OrderEmailLineItem } from "@/types/email";
 
 interface OrderUser {
   name: string | null;
   email: string;
 }
 
+interface PaidOrderItem {
+  quantity: number;
+  unit_price: number;
+  product: { name: string } | null;
+}
+
 interface PaidOrder {
   id: string;
   status: string;
+  subtotal: number;
+  shipping_cost: number;
   total: number;
   confirmation_email_sent_at: string | null;
   user: OrderUser | null;
+  order_items: PaidOrderItem[] | null;
+}
+
+function mapEmailItems(items: PaidOrderItem[] | null): OrderEmailLineItem[] {
+  return (items ?? []).map((item) => ({
+    name: item.product?.name ?? "Product",
+    quantity: item.quantity,
+    unitPrice: Number(item.unit_price),
+    lineTotal: Number(item.unit_price) * item.quantity,
+  }));
 }
 
 export async function completePaidOrder(
@@ -23,7 +42,7 @@ export async function completePaidOrder(
   const { data: current, error: fetchError } = await supabase
     .from("orders")
     .select(
-      "id, status, total, confirmation_email_sent_at, user:profiles(name, email)"
+      "id, status, subtotal, shipping_cost, total, confirmation_email_sent_at, user:profiles(name, email), order_items(quantity, unit_price, product:products(name))"
     )
     .eq("id", orderId)
     .single();
@@ -48,20 +67,25 @@ export async function completePaidOrder(
 
   if (!order.user?.email || order.confirmation_email_sent_at) return;
 
+  const items = mapEmailItems(order.order_items);
+  const emailPayload = {
+    orderId,
+    customerName: order.user.name,
+    customerEmail: order.user.email,
+    items,
+    subtotal: Number(order.subtotal),
+    shippingCost: Number(order.shipping_cost),
+    total: Number(order.total),
+    paymentId,
+  };
+
   const results = await Promise.allSettled([
     sendOrderConfirmationEmail({
       to: order.user.email,
       userName: order.user.name,
-      orderId,
-      total: order.total,
+      ...emailPayload,
     }),
-    sendAdminOrderEmail({
-      orderId,
-      customerName: order.user.name,
-      customerEmail: order.user.email,
-      total: order.total,
-      paymentId,
-    }),
+    sendAdminOrderEmail(emailPayload),
   ]);
 
   const failures = results.filter((result) => result.status === "rejected");
