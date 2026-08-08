@@ -37,14 +37,22 @@ export function ProductCard({ product, className }: Props) {
 
   return (
     <div className={cn("group relative rounded-3xl border border-gold/40 bg-white p-2", className)}>
-      <div className="relative aspect-square overflow-hidden rounded-[1.25rem] bg-muted">
+      {product.badge && (
+        <div className="px-1 pb-0">
+          <span className="inline-block bg-cream text-dark text-[8px] sm:text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full border border-gold/30">
+            {BADGE_LABELS[product.badge] ?? product.badge}
+          </span>
+        </div>
+      )}
+
+      <div className="relative aspect-square overflow-hidden rounded-[1.25rem] bg-white">
         <Link href={ROUTES.PRODUCT(product.slug)} className="absolute inset-0 block">
           {product.images[0] ? (
             <Image
               src={product.images[0]}
               alt={product.name}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-contain p-3 group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width: 640px) 50vw, 25vw"
             />
           ) : (
@@ -53,12 +61,6 @@ export function ProductCard({ product, className }: Props) {
             </div>
           )}
         </Link>
-
-        {product.badge && (
-          <span className="pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 z-[1] bg-white/90 backdrop-blur-sm text-dark text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full">
-            {BADGE_LABELS[product.badge] ?? product.badge}
-          </span>
-        )}
 
         <button
           type="button"

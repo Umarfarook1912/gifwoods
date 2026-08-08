@@ -157,13 +157,13 @@ export function ProductTabs({ product, reviews, related }: Props) {
                 href={ROUTES.PRODUCT(item.slug)}
                 className="group rounded-2xl border border-border bg-white overflow-hidden hover:shadow-md transition-shadow"
               >
-                <div className="relative aspect-square bg-cream overflow-hidden">
+                <div className="relative aspect-square bg-white overflow-hidden">
                   {item.images[0] ? (
                     <Image
                       src={item.images[0]}
                       alt={item.name}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="object-contain p-3 group-hover:scale-105 transition-transform duration-500"
                       sizes="(max-width: 640px) 50vw, 25vw"
                     />
                   ) : (
