@@ -82,6 +82,12 @@ export function ProductDetailClient({ product: initialProduct }: Props) {
           {product.name}
         </h1>
 
+        {product.code && (
+          <p className="text-xs text-muted-foreground mb-3">
+            SKU: <span className="font-medium text-warm-gray">{product.code}</span>
+          </p>
+        )}
+
         {product.avg_rating && (
           <div className="flex items-center gap-2 mb-4">
             <StarRating rating={product.avg_rating} size="sm" />

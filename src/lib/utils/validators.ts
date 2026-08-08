@@ -32,6 +32,7 @@ export const reviewSchema = z.object({
 export const productSchema = z.object({
   name: z.string().min(2).max(200),
   slug: z.string().min(2).max(200),
+  code: z.string().max(50).optional().nullable(),
   description: z.string().min(10),
   price: z.number().positive(),
   original_price: z.number().positive().optional(),

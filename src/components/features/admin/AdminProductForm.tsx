@@ -21,6 +21,7 @@ import type { Category, Product, ProductFormState } from "@/types/product";
 const EMPTY_FORM: ProductFormState = {
   name: "",
   slug: "",
+  code: "",
   description: "",
   price: 0,
   original_price: 0,
@@ -58,6 +59,7 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
         ? {
             name: editing.name,
             slug: editing.slug,
+            code: editing.code ?? "",
             description: editing.description,
             price: editing.price,
             original_price: editing.original_price ?? 0,
@@ -86,6 +88,7 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
         ...form,
         category_id: isNewCategory ? undefined : form.category_id || undefined,
         new_category_name: isNewCategory ? newCategoryName.trim() : undefined,
+        code: form.code.trim() || undefined,
         original_price: form.original_price || undefined,
         badge: form.badge || undefined,
         images: form.images.filter(Boolean),

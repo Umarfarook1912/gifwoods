@@ -54,6 +54,16 @@ export function ProductFormFields({
       </div>
 
       <div>
+        <Label>Product Code (SKU)</Label>
+        <Input
+          value={form.code}
+          onChange={(e) => setForm({ ...form, code: e.target.value })}
+          className="mt-1"
+          placeholder="GF-WA-004"
+        />
+      </div>
+
+      <div>
         <Label>Category</Label>
         <Select
           value={form.category_id || undefined}

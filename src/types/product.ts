@@ -14,6 +14,7 @@ export interface Product {
   id: string;
   name: string;
   slug: string;
+  code: string | null;
   description: string;
   price: number;
   original_price: number | null;
@@ -48,6 +49,7 @@ export interface ProductFilters {
 export interface ProductFormData {
   name: string;
   slug: string;
+  code?: string | null;
   description: string;
   price: number;
   original_price?: number;
@@ -70,6 +72,7 @@ export interface ProductSpecification {
 export interface ProductFormState {
   name: string;
   slug: string;
+  code: string;
   description: string;
   price: number;
   original_price: number;
