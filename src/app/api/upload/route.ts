@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
-import fs from "fs/promises";
-import path from "path";
+import { CUSTOMIZATION_UPLOAD } from "@/constants/customization";
+import { avatarFolder, uploadToImageKit } from "@/lib/imagekit/upload";
+
+const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -11,29 +13,29 @@ export async function POST(request: Request) {
 
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File | null;
-
-    if (!file) {
+    const file = formData.get("file");
+    if (!(file instanceof File)) {
       return NextResponse.json({ data: null, error: "No file uploaded" }, { status: 400 });
     }
+    if (!ALLOWED.has(file.type)) {
+      return NextResponse.json({ data: null, error: "Use a JPG, PNG, or WebP image" }, { status: 400 });
+    }
+    if (file.size > CUSTOMIZATION_UPLOAD.MAX_BYTES) {
+      return NextResponse.json({ data: null, error: "Image must be under 5 MB" }, { status: 400 });
+    }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+    const userId = session.user.supabaseId ?? session.user.id;
+    const uploaded = await uploadToImageKit(
+      buffer,
+      `${userId}-${Date.now()}.${ext}`,
+      avatarFolder(userId)
+    );
 
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    await fs.mkdir(uploadsDir, { recursive: true });
-
-    // Generate unique name
-    const fileExt = path.extname(file.name) || ".png";
-    const fileName = `${session.user.id}-${Date.now()}${fileExt}`;
-    const filePath = path.join(uploadsDir, fileName);
-
-    await fs.writeFile(filePath, buffer);
-
-    const fileUrl = `/uploads/${fileName}`;
-    return NextResponse.json({ data: { url: fileUrl }, error: null });
-  } catch (error: any) {
-    console.error("Upload error:", error);
-    return NextResponse.json({ data: null, error: error.message || "Failed to upload file" }, { status: 500 });
+    return NextResponse.json({ data: { url: uploaded.url }, error: null });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to upload file";
+    return NextResponse.json({ data: null, error: message }, { status: 500 });
   }
 }

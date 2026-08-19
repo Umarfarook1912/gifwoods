@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils/cn";
 import { SOCIAL_LINKS, SITE_NAME } from "@/constants/ui";
 import { InstagramIcon, YoutubeIcon } from "@/components/ui/SocialIcons";
+import { productNotice, getCustomizationNeed } from "@/lib/customization";
 import type { Product } from "@/types/product";
 
 interface Props {
@@ -115,6 +116,12 @@ export function ProductDetailClient({ product: initialProduct }: Props) {
         </div>
 
         <Separator className="mb-6" />
+
+        {productNotice(getCustomizationNeed(product)) && (
+          <p className="mb-6 rounded-xl border border-gold/30 bg-gold/5 px-4 py-3 text-sm text-dark">
+            {productNotice(getCustomizationNeed(product))}
+          </p>
+        )}
 
         <div className="flex items-center gap-3 mb-6">
           <Label className="text-sm font-medium text-dark">Quantity</Label>

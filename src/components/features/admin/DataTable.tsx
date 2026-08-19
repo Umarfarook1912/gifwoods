@@ -85,7 +85,7 @@ export function DataTable<T>({
   return (
     <div className="space-y-4">
       <div className="rounded-xl border border-border overflow-hidden">
-        <Table>
+        <Table className="table-fixed w-full">
           <TableHeader>
             <TableRow className="bg-muted/50">
               {columns.map((col) => (

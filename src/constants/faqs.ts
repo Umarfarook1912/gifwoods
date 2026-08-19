@@ -1,7 +1,7 @@
 export const FAQS = [
   {
     q: "How does personalization work?",
-    a: "When you add a personalizable product to your cart, you'll see a form to enter names, messages, or upload photos. Our artisans then engrave or print your customization in-house before shipping.",
+    a: "After you pay, open your order page to enter a name and/or upload a photo if that product needs it. We confirm on the same page when your image is received. Our artisans then engrave or print it in-house before shipping.",
   },
   {
     q: "How long does delivery take?",

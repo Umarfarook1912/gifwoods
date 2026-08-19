@@ -1,18 +1,19 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import Link from "next/link";
 import { DataTable } from "./DataTable";
 import { OrderStatusDialog } from "./OrderStatusDialog";
 import { OrderStatusBadges } from "@/components/shared/OrderStatusBadges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AdminOrderCustomization } from "./AdminOrderCustomization";
+import { AdminCustomizationDialog } from "./AdminCustomizationDialog";
 import { formatPrice, formatDate } from "@/lib/utils/formatters";
 import { getOrderProductSummary } from "@/lib/orders/display";
-import { ROUTES } from "@/constants/routes";
 import { Eye, ListRestart, Search, Trash2 } from "lucide-react";
 import { ORDER_STATUSES } from "@/constants/ui";
+import { CUSTOMIZATION_COPY } from "@/constants/customization";
 import { useConfirm } from "@/hooks/useConfirm";
 import { CONFIRMATIONS } from "@/constants/confirmations";
 import { API_ENDPOINTS } from "@/constants/api";
@@ -30,6 +31,7 @@ export function AdminOrdersClient({ initialOrders }: Props) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [statusOrder, setStatusOrder] = useState<Order | null>(null);
+  const [viewOrder, setViewOrder] = useState<Order | null>(null);
   const [page, setPage] = useState(1);
 
   // Reset page when filters change
@@ -104,18 +106,21 @@ export function AdminOrdersClient({ initialOrders }: Props) {
 
       <DataTable
         columns={[
-          { key: "product", label: "Product", render: (o) => (
-            <span className="text-sm font-semibold text-dark">
+          { key: "product", label: "Product", className: "whitespace-normal max-w-[10rem] sm:max-w-[14rem]", render: (o) => (
+            <span className="text-sm font-semibold text-dark line-clamp-2">
               {getOrderProductSummary(o)}
             </span>
           )},
-          { key: "user", label: "Customer", render: (o) => {
+          { key: "user", label: "Customer", className: "whitespace-normal", render: (o) => {
             const user = o.user as UserProfile | null;
-            return <div><p className="text-sm font-medium">{user?.name ?? "—"}</p><p className="text-xs text-warm-gray">{user?.email}</p></div>;
+            return <div><p className="text-sm font-medium">{user?.name ?? "—"}</p><p className="text-xs text-warm-gray break-all">{user?.email}</p></div>;
           }},
           { key: "total", label: "Total", render: (o) => <span className="font-semibold">{formatPrice(o.total)}</span> },
-          { key: "status", label: "Statuses", render: (o) => (
-            <OrderStatusBadges order={o} compact className="min-w-44" />
+          { key: "customization", label: CUSTOMIZATION_COPY.COLUMN, render: (o) => (
+            <AdminOrderCustomization items={o.order_items} />
+          )},
+          { key: "status", label: "Statuses", className: "whitespace-normal", render: (o) => (
+            <OrderStatusBadges order={o} compact />
           )},
           { key: "created_at", label: "Date", render: (o) => <span className="text-xs text-warm-gray">{formatDate(o.created_at)}</span> },
           { key: "actions", label: "", render: (o) => (
@@ -124,12 +129,10 @@ export function AdminOrdersClient({ initialOrders }: Props) {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                title="View full order details"
-                asChild
+                title={CUSTOMIZATION_COPY.VIEW_DETAILS}
+                onClick={() => setViewOrder(o)}
               >
-                <Link href={ROUTES.ORDER_DETAIL(o.id)}>
-                  <Eye className="h-3.5 w-3.5" />
-                </Link>
+                <Eye className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="ghost"
@@ -161,6 +164,10 @@ export function AdminOrdersClient({ initialOrders }: Props) {
         emptyMessage="No orders found"
       />
 
+      <AdminCustomizationDialog
+        order={viewOrder}
+        onClose={() => setViewOrder(null)}
+      />
       <OrderStatusDialog
         order={statusOrder}
         onClose={() => setStatusOrder(null)}

@@ -10,7 +10,7 @@ async function getOrders(): Promise<Order[]> {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("orders")
-    .select("*, user:profiles(id, name, email), order_items(id, quantity, unit_price, product:products(id, name))")
+    .select("*, user:profiles(id, name, email), order_items(id, quantity, unit_price, customization, product:products(id, name, customization_text, customization_image))")
     .order("created_at", { ascending: false })
     .limit(100);
   return (data ?? []) as Order[];

@@ -14,6 +14,7 @@ import { ProductFormFields } from "./ProductFormFields";
 import { ImageListField, SpecificationListField } from "./ProductFormLists";
 import { API_ENDPOINTS } from "@/constants/api";
 import { NEW_CATEGORY_OPTION, PRODUCT_HOME_TOGGLE_LABELS } from "@/constants/ui";
+import { CUSTOMIZATION_COPY } from "@/constants/customization";
 import { toast } from "sonner";
 import { RefreshCw } from "lucide-react";
 import type { Category, Product, ProductFormState } from "@/types/product";
@@ -31,6 +32,8 @@ const EMPTY_FORM: ProductFormState = {
   stock: 0,
   is_bestseller: false,
   is_new_arrival: false,
+  customization_text: false,
+  customization_image: false,
   badge: "",
   status: "active",
   specifications: [],
@@ -69,6 +72,8 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
             stock: editing.stock,
             is_bestseller: editing.is_bestseller ?? false,
             is_new_arrival: editing.is_new_arrival ?? false,
+            customization_text: editing.customization_text ?? false,
+            customization_image: editing.customization_image ?? false,
             badge: editing.badge ?? "",
             status: editing.status,
             specifications: editing.specifications ?? [],
@@ -141,7 +146,7 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
               onChange={(specifications) => setForm({ ...form, specifications })}
             />
 
-            <div className="md:col-span-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-8">
+            <div className="md:col-span-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-8">
               <div className="flex items-center gap-3">
                 <Switch
                   checked={form.is_bestseller}
@@ -155,6 +160,20 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
                   onCheckedChange={(v) => setForm({ ...form, is_new_arrival: v })}
                 />
                 <Label>{PRODUCT_HOME_TOGGLE_LABELS.NEW_ARRIVAL}</Label>
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch
+                  checked={form.customization_text}
+                  onCheckedChange={(v) => setForm({ ...form, customization_text: v })}
+                />
+                <Label>{CUSTOMIZATION_COPY.TEXT_TOGGLE}</Label>
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch
+                  checked={form.customization_image}
+                  onCheckedChange={(v) => setForm({ ...form, customization_image: v })}
+                />
+                <Label>{CUSTOMIZATION_COPY.IMAGE_TOGGLE}</Label>
               </div>
             </div>
           </div>

@@ -27,6 +27,8 @@ export interface Product {
   is_bestseller: boolean;
   is_new_arrival: boolean;
   badge: ProductBadge | null;
+  customization_text?: boolean;
+  customization_image?: boolean;
   status: ProductStatus;
   specifications?: Array<{ key: string; value: string }>;
   avg_rating?: number;
@@ -59,6 +61,8 @@ export interface ProductFormData {
   stock: number;
   is_bestseller: boolean;
   is_new_arrival: boolean;
+  customization_text?: boolean;
+  customization_image?: boolean;
   badge?: ProductBadge;
   status: ProductStatus;
   specifications?: Array<{ key: string; value: string }>;
@@ -82,6 +86,8 @@ export interface ProductFormState {
   stock: number;
   is_bestseller: boolean;
   is_new_arrival: boolean;
+  customization_text: boolean;
+  customization_image: boolean;
   badge: string;
   status: ProductStatus;
   specifications: ProductSpecification[];

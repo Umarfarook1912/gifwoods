@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { ReviewForm } from "@/components/features/reviews/ReviewForm";
 import { PaymentReturnNotice } from "@/components/features/orders/PaymentReturnNotice";
 import { OrderStatusBadges } from "@/components/shared/OrderStatusBadges";
+import { OrderItemCustomization } from "@/components/features/orders/OrderItemCustomization";
 import { formatPrice, formatDate, formatOrderId } from "@/lib/utils/formatters";
 import { getPaymentStatus } from "@/lib/orders/status";
 import { ROUTES } from "@/constants/routes";
@@ -35,7 +36,7 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
 
   const { data: order } = await supabase
     .from("orders")
-    .select("*, order_items(*, product:products(id, name, images, slug, price))")
+    .select("*, order_items(*, product:products(id, name, images, slug, price, customization_text, customization_image))")
     .eq("id", id)
     .single();
 
@@ -45,6 +46,8 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
 
   const typedOrder = order as Order;
   const addr = typedOrder.shipping_address;
+  const isPaid = getPaymentStatus(typedOrder) === "paid";
+  const isOwner = typedOrder.user_id === userId;
 
   return (
     <div className="min-h-screen bg-cream py-10">
@@ -89,6 +92,15 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
                       </Link>
                     )}
                     <p className="text-xs text-warm-gray mt-0.5">Qty: {item.quantity}</p>
+                    {product && (
+                      <OrderItemCustomization
+                        orderId={typedOrder.id}
+                        orderItemId={item.id}
+                        product={product}
+                        customization={item.customization}
+                        canSubmit={isPaid && isOwner}
+                      />
+                    )}
                   </div>
                   <span className="font-semibold text-dark text-sm">
                     {formatPrice(item.unit_price * item.quantity)}
