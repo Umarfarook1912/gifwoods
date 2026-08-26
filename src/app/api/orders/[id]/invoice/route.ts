@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth/auth";
+import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice, formatDate, formatOrderId } from "@/lib/utils/formatters";
 import { getPaymentStatus, canDownloadInvoice } from "@/lib/orders/status";
@@ -30,7 +30,7 @@ export async function GET(
 
   const typedOrder = order as Order;
 
-  if (typedOrder.user_id !== userId && session.user.role !== "admin") {
+  if (typedOrder.user_id !== userId && !hasApiPermission(session, "orders")) {
     return new Response("Forbidden", { status: 403 });
   }
 

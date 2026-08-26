@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/auth";
+import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { redirect, notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -39,7 +39,8 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
     .eq("id", id)
     .single();
 
-  if (!order || ((order as Order).user_id !== userId && session.user.role !== "admin")) {
+  const canViewAsStaff = hasApiPermission(session, "orders");
+  if (!order || ((order as Order).user_id !== userId && !canViewAsStaff)) {
     notFound();
   }
 

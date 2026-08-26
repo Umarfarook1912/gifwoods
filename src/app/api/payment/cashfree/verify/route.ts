@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth/auth";
+import { auth, hasApiPermission } from "@/lib/auth/auth";
 import {
   createCashfreeOrderId,
   getCashfreeOrder,
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     .eq("id", orderId)
     .single();
 
-  if (!order || (order.user_id !== userId && session.user.role !== "admin")) {
+  if (!order || (order.user_id !== userId && !hasApiPermission(session, "orders"))) {
     return NextResponse.redirect(new URL(ROUTES.ORDERS, url.origin));
   }
 
