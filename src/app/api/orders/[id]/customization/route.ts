@@ -107,14 +107,20 @@ export async function PATCH(
     const buffer = Buffer.from(await file.arrayBuffer());
     let uploaded;
     try {
-      uploaded = await uploadToImageKit(buffer, `${stem}.${ext}`, folder, false);
-    } catch {
-      uploaded = await uploadToImageKit(
-        buffer,
-        `${stem}-${orderItemId.slice(0, 6)}.${ext}`,
-        folder,
-        false
-      );
+      try {
+        uploaded = await uploadToImageKit(buffer, `${stem}.${ext}`, folder, false);
+      } catch {
+        uploaded = await uploadToImageKit(
+          buffer,
+          `${stem}-${orderItemId.slice(0, 6)}.${ext}`,
+          folder,
+          false
+        );
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Photo upload failed";
+      return NextResponse.json({ data: null, error: message }, { status: 500 });
     }
     next.photo = uploaded.url;
   }

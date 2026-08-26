@@ -52,8 +52,17 @@ export function OrderItemCustomization({
         method: "PATCH",
         body,
       });
-      const json = await res.json();
+      const text = await res.text();
+      let json: { data?: { customization?: Customization }; error?: string };
+      try {
+        json = text ? (JSON.parse(text) as typeof json) : {};
+      } catch {
+        throw new Error(
+          res.ok ? "Invalid server response" : "Upload failed. Please try again."
+        );
+      }
       if (!res.ok || json.error) throw new Error(json.error ?? "Submit failed");
+      if (!json.data?.customization) throw new Error("Submit failed");
       setSaved(json.data.customization);
       toast.success(CUSTOMIZATION_COPY.SUBMITTED);
     } catch (err) {
