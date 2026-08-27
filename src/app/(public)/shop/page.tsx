@@ -4,11 +4,9 @@ import { ProductGrid } from "@/components/features/products/ProductGrid";
 import { ProductFilters } from "@/components/features/products/ProductFilters";
 import { MobileProductFilters } from "@/components/features/products/MobileProductFilters";
 import { ShopSortBar } from "@/components/features/products/ShopSortBar";
-import { Pagination } from "@/components/shared/Pagination";
 import { createClient } from "@/lib/supabase/server";
 import { getAvailableCategories } from "@/lib/supabase/categories-db";
 import type { Product } from "@/types/product";
-import { ITEMS_PER_PAGE } from "@/constants/ui";
 
 export const metadata: Metadata = {
   title: "Shop All Gifts",
@@ -25,10 +23,8 @@ async function getProducts(searchParams: Record<string, string>): Promise<{
   total: number;
 }> {
   const supabase = await createClient();
-  const { category, search, sort, minPrice, maxPrice, page = "1", badge, bestseller, newArrival } =
+  const { category, search, sort, minPrice, maxPrice, badge, bestseller, newArrival } =
     searchParams;
-  const pageNum = parseInt(page);
-  const from = (pageNum - 1) * ITEMS_PER_PAGE;
 
   let query = supabase
     .from("products")
@@ -45,7 +41,10 @@ async function getProducts(searchParams: Record<string, string>): Promise<{
     if (catData) {
       query = query.eq("category_id", catData.id);
     } else {
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(category);
+      const isUUID =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+          category
+        );
       if (isUUID) {
         query = query.eq("category_id", category);
       } else {
@@ -54,29 +53,25 @@ async function getProducts(searchParams: Record<string, string>): Promise<{
     }
   }
 
-  if (badge) {
-    query = query.eq("badge", badge);
-  }
-
-  if (bestseller === "true") {
-    query = query.eq("is_bestseller", true);
-  }
-
-  if (newArrival === "true") {
-    query = query.eq("is_new_arrival", true);
-  }
-
+  if (badge) query = query.eq("badge", badge);
+  if (bestseller === "true") query = query.eq("is_bestseller", true);
+  if (newArrival === "true") query = query.eq("is_new_arrival", true);
   if (minPrice) query = query.gte("price", parseFloat(minPrice));
   if (maxPrice) query = query.lte("price", parseFloat(maxPrice));
   if (search) query = query.ilike("name", `%${search}%`);
 
   switch (sort) {
-    case "price-asc": query = query.order("price", { ascending: true }); break;
-    case "price-desc": query = query.order("price", { ascending: false }); break;
-    default: query = query.order("created_at", { ascending: false });
+    case "price-asc":
+      query = query.order("price", { ascending: true });
+      break;
+    case "price-desc":
+      query = query.order("price", { ascending: false });
+      break;
+    default:
+      query = query.order("created_at", { ascending: false });
   }
 
-  const { data, count } = await query.range(from, from + ITEMS_PER_PAGE - 1);
+  const { data, count } = await query;
   return { products: (data ?? []) as Product[], total: count ?? 0 };
 }
 
@@ -93,7 +88,8 @@ export default async function ShopPage({ searchParams }: PageProps) {
         <div className="page-container">
           <h1 className="font-display text-3xl font-bold text-dark">
             {params.category
-              ? categories.find((c) => c.slug === params.category)?.name ?? "Products"
+              ? categories.find((c) => c.slug === params.category)?.name ??
+                "Products"
               : "All Gifts"}
           </h1>
           <p className="text-warm-gray mt-1">{total} products</p>
@@ -114,15 +110,8 @@ export default async function ShopPage({ searchParams }: PageProps) {
               </div>
               <ShopSortBar total={total} />
             </Suspense>
-             <div className="mt-6">
+            <div className="mt-6">
               <ProductGrid products={products} />
-              <Pagination
-                currentPage={parseInt(params.page || "1")}
-                totalPages={Math.ceil(total / ITEMS_PER_PAGE)}
-                totalCount={total}
-                itemsPerPage={ITEMS_PER_PAGE}
-                className="mt-8"
-              />
             </div>
           </div>
         </div>

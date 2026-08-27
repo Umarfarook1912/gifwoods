@@ -3,8 +3,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "./DataTable";
+import { RichTextEditor } from "./RichTextEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { API_ENDPOINTS } from "@/constants/api";
 import { categoryDeleteConfirmation } from "@/constants/confirmations";
@@ -25,14 +27,16 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
   const [categories, setCategories] = useState(initialCategories);
   const [search, setSearch] = useState("");
   const [newName, setNewName] = useState("");
+  const [newDescription, setNewDescription] = useState("");
   const [adding, setAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
 
-  useEffect(() => { setCategories(initialCategories); }, [initialCategories]);
+  useEffect(() => {
+    setCategories(initialCategories);
+  }, [initialCategories]);
 
-  // Reset page when search filter changes
   useEffect(() => {
     setPage(1);
   }, [search]);
@@ -67,7 +71,10 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
       const res = await fetch(API_ENDPOINTS.CATEGORIES, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName.trim() }),
+        body: JSON.stringify({
+          name: newName.trim(),
+          description: newDescription.trim() || null,
+        }),
       });
       const json = await res.json();
       if (!res.ok || json.error) throw new Error(json.error ?? "Failed to add category");
@@ -77,6 +84,7 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
         )
       );
       setNewName("");
+      setNewDescription("");
       toast.success(`Category "${json.data.name}" added`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to add category");
@@ -89,7 +97,9 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
     if (!(await confirm(categoryDeleteConfirmation(category.name)))) return;
     setDeletingId(category.id);
     try {
-      const res = await fetch(API_ENDPOINTS.CATEGORY(category.id), { method: "DELETE" });
+      const res = await fetch(API_ENDPOINTS.CATEGORY(category.id), {
+        method: "DELETE",
+      });
       const json = await res.json();
       if (!res.ok || json.error) throw new Error(json.error ?? "Failed to delete category");
       setCategories((prev) => prev.filter((c) => c.id !== category.id));
@@ -103,39 +113,58 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
 
   return (
     <div className="p-6 md:p-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <h1 className="font-display text-2xl font-bold text-dark">Categories</h1>
-        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="gap-2"
+        >
           <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
           Refresh
         </Button>
       </div>
 
-      {/* Add new category */}
-      <div className="flex gap-3 mb-6 flex-wrap items-center rounded-xl border border-border bg-cream/40 p-4">
-        <Input
-          placeholder="New category name (e.g. Valentine Gifting)"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-          className="flex-1 min-w-56 bg-white"
-        />
-        <Button
-          className="bg-gold text-dark hover:bg-gold-dark font-semibold"
-          onClick={handleAdd}
-          disabled={adding}
-        >
-          {adding ? (
-            <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <Plus className="h-4 w-4 mr-2" />
-          )}
-          Add Category
-        </Button>
+      <div className="mb-6 space-y-3 rounded-xl border border-border bg-cream/40 p-4">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="min-w-56 flex-1">
+            <Label htmlFor="category-name">Name</Label>
+            <Input
+              id="category-name"
+              placeholder="New category name (e.g. Valentine Gifting)"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+              className="mt-1 bg-white"
+            />
+          </div>
+          <Button
+            className="bg-gold font-semibold text-dark hover:bg-gold-dark"
+            onClick={handleAdd}
+            disabled={adding}
+          >
+            {adding ? (
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="mr-2 h-4 w-4" />
+            )}
+            Add Category
+          </Button>
+        </div>
+        <div>
+          <Label>Description</Label>
+          <RichTextEditor
+            value={newDescription}
+            onChange={setNewDescription}
+            placeholder="Optional category description shown on the category page…"
+          />
+        </div>
       </div>
 
       <div className="relative mb-4 max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Search categories..."
           value={search}
@@ -146,41 +175,52 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
 
       <DataTable
         columns={[
-          { key: "name", label: "Category", render: (c) => (
-            <div>
-              <p className="font-medium text-dark text-sm">{c.name}</p>
-              <p className="text-xs text-warm-gray">{c.slug}</p>
-            </div>
-          )},
-          { key: "product_count", label: "Products", render: (c) => (
-            c.product_count > 0 ? (
-              <Badge className="bg-gold/10 text-gold border-gold/30 text-xs">
-                {c.product_count} product{c.product_count > 1 ? "s" : ""}
-              </Badge>
-            ) : (
-              <span className="text-xs text-muted-foreground">No products</span>
-            )
-          )},
-          { key: "actions", label: "", render: (c) => (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 hover:text-destructive"
-              onClick={() => handleDelete(c)}
-              disabled={deletingId === c.id}
-              title={
-                c.product_count > 0
-                  ? "Categories with products cannot be deleted"
-                  : "Delete category"
-              }
-            >
-              {deletingId === c.id ? (
-                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+          {
+            key: "name",
+            label: "Category",
+            render: (c) => (
+              <div>
+                <p className="text-sm font-medium text-dark">{c.name}</p>
+                <p className="text-xs text-warm-gray">{c.slug}</p>
+              </div>
+            ),
+          },
+          {
+            key: "product_count",
+            label: "Products",
+            render: (c) =>
+              c.product_count > 0 ? (
+                <Badge className="border-gold/30 bg-gold/10 text-xs text-gold">
+                  {c.product_count} product{c.product_count > 1 ? "s" : ""}
+                </Badge>
               ) : (
-                <Trash2 className="h-3.5 w-3.5" />
-              )}
-            </Button>
-          )},
+                <span className="text-xs text-muted-foreground">No products</span>
+              ),
+          },
+          {
+            key: "actions",
+            label: "",
+            render: (c) => (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 hover:text-destructive"
+                onClick={() => handleDelete(c)}
+                disabled={deletingId === c.id}
+                title={
+                  c.product_count > 0
+                    ? "Categories with products cannot be deleted"
+                    : "Delete category"
+                }
+              >
+                {deletingId === c.id ? (
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Trash2 className="h-3.5 w-3.5" />
+                )}
+              </Button>
+            ),
+          },
         ]}
         data={paginated}
         keyExtractor={(c) => c.id}

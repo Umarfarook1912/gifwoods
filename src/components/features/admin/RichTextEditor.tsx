@@ -2,28 +2,15 @@
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Image from "@tiptap/extension-image";
 import Youtube from "@tiptap/extension-youtube";
 import Placeholder from "@tiptap/extension-placeholder";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { Color } from "@tiptap/extension-color";
 import { useEffect, useCallback, useState } from "react";
-import { cn } from "@/lib/utils/cn";
-import {
-  Bold,
-  Italic,
-  UnderlineIcon,
-  Heading2,
-  Heading3,
-  List,
-  ListOrdered,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  ImageIcon,
-  PlayCircle,
-  Minus,
-} from "lucide-react";
+import { RichTextToolbar } from "./RichTextToolbar";
+import { RICH_TEXT_COPY } from "@/constants/rich-text-editor";
 
 interface Props {
   value: string;
@@ -31,54 +18,38 @@ interface Props {
   placeholder?: string;
 }
 
-interface ToolbarButtonProps {
-  active?: boolean;
-  onClick: () => void;
-  title: string;
-  children: React.ReactNode;
-}
-
-function ToolbarButton({ active, onClick, title, children }: ToolbarButtonProps) {
-  return (
-    <button
-      type="button"
-      title={title}
-      onMouseDown={(e) => {
-        e.preventDefault();
-        onClick();
-      }}
-      className={cn(
-        "p-1.5 rounded hover:bg-gold/10 transition-colors text-dark",
-        active && "bg-gold/20 text-dark"
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
-function Divider() {
-  return <span className="w-px h-5 bg-border mx-0.5 flex-shrink-0" />;
-}
-
 export function RichTextEditor({ value, onChange, placeholder }: Props) {
   const [imageUrl, setImageUrl] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
   const [showImageInput, setShowImageInput] = useState(false);
   const [showYoutubeInput, setShowYoutubeInput] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [showColorMenu, setShowColorMenu] = useState(false);
+  const [charCount, setCharCount] = useState(0);
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({ heading: { levels: [2, 3] } }),
-      Underline,
+      StarterKit.configure({
+        heading: { levels: [2, 3] },
+        link: {
+          openOnClick: false,
+          HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" },
+        },
+      }),
+      TextStyle,
+      Color,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Image.configure({ inline: false, allowBase64: false }),
       Youtube.configure({ controls: true, width: 640, height: 360 }),
-      Placeholder.configure({ placeholder: placeholder ?? "Write a detailed product description…" }),
+      Placeholder.configure({
+        placeholder: placeholder ?? RICH_TEXT_COPY.PLACEHOLDER,
+      }),
     ],
     content: value || "",
-    onUpdate({ editor }) {
-      onChange(editor.getHTML());
+    onUpdate({ editor: ed }) {
+      onChange(ed.getHTML());
+      setCharCount(ed.getText().length);
     },
     editorProps: {
       attributes: {
@@ -89,11 +60,11 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
     immediatelyRender: false,
   });
 
-  // sync external value on open (existing product)
   useEffect(() => {
     if (!editor) return;
     if (editor.getHTML() === value) return;
     editor.commands.setContent(value || "", { emitUpdate: false });
+    setCharCount(editor.getText().length);
   }, [editor, value]);
 
   const insertImage = useCallback(() => {
@@ -110,139 +81,83 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
     setShowYoutubeInput(false);
   }, [editor, youtubeUrl]);
 
+  const applyLink = useCallback(() => {
+    if (!editor) return;
+    const href = linkUrl.trim();
+    if (!href) {
+      editor.chain().focus().unsetLink().run();
+    } else {
+      editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
+    }
+    setLinkUrl("");
+    setShowLinkInput(false);
+  }, [editor, linkUrl]);
+
   if (!editor) return null;
 
   return (
-    <div className="mt-1 rounded-xl border border-border overflow-hidden bg-white">
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-border bg-cream/60">
-        <ToolbarButton
-          title="Bold"
-          active={editor.isActive("bold")}
-          onClick={() => editor.chain().focus().toggleBold().run()}
-        >
-          <Bold className="h-3.5 w-3.5" />
-        </ToolbarButton>
+    <div className="mt-1 overflow-hidden rounded-xl border border-border bg-white">
+      <RichTextToolbar
+        editor={editor}
+        showImageInput={showImageInput}
+        showYoutubeInput={showYoutubeInput}
+        showLinkInput={showLinkInput}
+        showColorMenu={showColorMenu}
+        onToggleImage={() => {
+          setShowImageInput((v) => !v);
+          setShowYoutubeInput(false);
+          setShowLinkInput(false);
+          setShowColorMenu(false);
+        }}
+        onToggleYoutube={() => {
+          setShowYoutubeInput((v) => !v);
+          setShowImageInput(false);
+          setShowLinkInput(false);
+          setShowColorMenu(false);
+        }}
+        onToggleLink={() => {
+          setShowLinkInput((v) => !v);
+          setShowImageInput(false);
+          setShowYoutubeInput(false);
+          setShowColorMenu(false);
+          if (editor.isActive("link")) {
+            setLinkUrl(editor.getAttributes("link").href ?? "");
+          }
+        }}
+        onToggleColor={() => {
+          setShowColorMenu((v) => !v);
+          setShowImageInput(false);
+          setShowYoutubeInput(false);
+          setShowLinkInput(false);
+        }}
+      />
 
-        <ToolbarButton
-          title="Italic"
-          active={editor.isActive("italic")}
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-        >
-          <Italic className="h-3.5 w-3.5" />
-        </ToolbarButton>
-
-        <ToolbarButton
-          title="Underline"
-          active={editor.isActive("underline")}
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-        >
-          <UnderlineIcon className="h-3.5 w-3.5" />
-        </ToolbarButton>
-
-        <Divider />
-
-        <ToolbarButton
-          title="Heading 2"
-          active={editor.isActive("heading", { level: 2 })}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        >
-          <Heading2 className="h-3.5 w-3.5" />
-        </ToolbarButton>
-
-        <ToolbarButton
-          title="Heading 3"
-          active={editor.isActive("heading", { level: 3 })}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        >
-          <Heading3 className="h-3.5 w-3.5" />
-        </ToolbarButton>
-
-        <Divider />
-
-        <ToolbarButton
-          title="Bullet list"
-          active={editor.isActive("bulletList")}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-        >
-          <List className="h-3.5 w-3.5" />
-        </ToolbarButton>
-
-        <ToolbarButton
-          title="Numbered list"
-          active={editor.isActive("orderedList")}
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        >
-          <ListOrdered className="h-3.5 w-3.5" />
-        </ToolbarButton>
-
-        <Divider />
-
-        <ToolbarButton
-          title="Align left"
-          active={editor.isActive({ textAlign: "left" })}
-          onClick={() => editor.chain().focus().setTextAlign("left").run()}
-        >
-          <AlignLeft className="h-3.5 w-3.5" />
-        </ToolbarButton>
-
-        <ToolbarButton
-          title="Align center"
-          active={editor.isActive({ textAlign: "center" })}
-          onClick={() => editor.chain().focus().setTextAlign("center").run()}
-        >
-          <AlignCenter className="h-3.5 w-3.5" />
-        </ToolbarButton>
-
-        <ToolbarButton
-          title="Align right"
-          active={editor.isActive({ textAlign: "right" })}
-          onClick={() => editor.chain().focus().setTextAlign("right").run()}
-        >
-          <AlignRight className="h-3.5 w-3.5" />
-        </ToolbarButton>
-
-        <Divider />
-
-        <ToolbarButton
-          title="Horizontal rule"
-          onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        >
-          <Minus className="h-3.5 w-3.5" />
-        </ToolbarButton>
-
-        <Divider />
-
-        <ToolbarButton
-          title="Insert image"
-          active={showImageInput}
-          onClick={() => {
-            setShowImageInput((v) => !v);
-            setShowYoutubeInput(false);
-          }}
-        >
-          <ImageIcon className="h-3.5 w-3.5" />
-        </ToolbarButton>
-
-        <ToolbarButton
-          title="Embed YouTube video"
-          active={showYoutubeInput}
-          onClick={() => {
-            setShowYoutubeInput((v) => !v);
-            setShowImageInput(false);
-          }}
-        >
-          <PlayCircle className="h-3.5 w-3.5" />
-        </ToolbarButton>
-      </div>
-
-      {/* Image URL input */}
-      {showImageInput && (
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-cream/30">
+      {showLinkInput && (
+        <div className="flex items-center gap-2 border-b border-border bg-cream/30 px-3 py-2">
           <input
             type="url"
-            className="flex-1 text-xs border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-gold/50"
-            placeholder="Paste image URL (e.g. https://ik.imagekit.io/…)"
+            className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gold/50"
+            placeholder={RICH_TEXT_COPY.LINK_PROMPT}
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && applyLink()}
+          />
+          <button
+            type="button"
+            onClick={applyLink}
+            className="rounded-lg bg-gold px-3 py-1.5 text-xs font-semibold text-dark transition-colors hover:bg-gold-dark"
+          >
+            {RICH_TEXT_COPY.INSERT}
+          </button>
+        </div>
+      )}
+
+      {showImageInput && (
+        <div className="flex items-center gap-2 border-b border-border bg-cream/30 px-3 py-2">
+          <input
+            type="url"
+            className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gold/50"
+            placeholder={RICH_TEXT_COPY.IMAGE_PLACEHOLDER}
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && insertImage()}
@@ -250,20 +165,19 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
           <button
             type="button"
             onClick={insertImage}
-            className="text-xs bg-gold text-dark font-semibold px-3 py-1.5 rounded-lg hover:bg-gold-dark transition-colors"
+            className="rounded-lg bg-gold px-3 py-1.5 text-xs font-semibold text-dark transition-colors hover:bg-gold-dark"
           >
-            Insert
+            {RICH_TEXT_COPY.INSERT}
           </button>
         </div>
       )}
 
-      {/* YouTube URL input */}
       {showYoutubeInput && (
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-cream/30">
+        <div className="flex items-center gap-2 border-b border-border bg-cream/30 px-3 py-2">
           <input
             type="url"
-            className="flex-1 text-xs border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-gold/50"
-            placeholder="Paste YouTube URL (e.g. https://youtube.com/watch?v=…)"
+            className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gold/50"
+            placeholder={RICH_TEXT_COPY.YOUTUBE_PLACEHOLDER}
             value={youtubeUrl}
             onChange={(e) => setYoutubeUrl(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && insertYoutube()}
@@ -271,15 +185,21 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
           <button
             type="button"
             onClick={insertYoutube}
-            className="text-xs bg-gold text-dark font-semibold px-3 py-1.5 rounded-lg hover:bg-gold-dark transition-colors"
+            className="rounded-lg bg-gold px-3 py-1.5 text-xs font-semibold text-dark transition-colors hover:bg-gold-dark"
           >
-            Embed
+            {RICH_TEXT_COPY.EMBED}
           </button>
         </div>
       )}
 
-      {/* Editor area */}
       <EditorContent editor={editor} />
+
+      <div className="flex items-center justify-between gap-3 border-t border-border bg-cream/40 px-3 py-2">
+        <p className="text-[11px] text-warm-gray">{RICH_TEXT_COPY.FOOTER_HELP}</p>
+        <p className="shrink-0 text-[11px] font-medium text-warm-gray">
+          {charCount} {RICH_TEXT_COPY.CHARACTERS}
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import DOMPurify from "dompurify";
+import { sanitizeHtml } from "@/lib/utils/sanitize-html";
 import Image from "next/image";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,14 +20,10 @@ interface Props {
 }
 
 export function ProductTabs({ product, reviews, related }: Props) {
-  const safeDescription = useMemo(() => {
-    if (typeof window === "undefined") return product.description;
-    return DOMPurify.sanitize(product.description, {
-      USE_PROFILES: { html: true },
-      ADD_TAGS: ["iframe"],
-      ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling", "src", "width", "height"],
-    });
-  }, [product.description]);
+  const safeDescription = useMemo(
+    () => sanitizeHtml(product.description),
+    [product.description]
+  );
 
   const hasSpecs = product.specifications && product.specifications.length > 0;
 
