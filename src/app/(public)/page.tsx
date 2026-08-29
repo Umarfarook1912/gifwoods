@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { HeroSection } from "@/components/features/products/HeroSection";
 import { ProductSectionCarousel } from "@/components/features/products/ProductSectionCarousel";
 import { CategoryProductsSection } from "@/components/features/products/CategoryProductsSection";
-import { PersonalizeSection } from "@/components/features/products/PersonalizeSection";
 import { WhyUsSection } from "@/components/features/products/WhyUsSection";
 import { TestimonialsSection } from "@/components/features/products/TestimonialsSection";
 import { createClient } from "@/lib/supabase/server";
@@ -90,7 +89,6 @@ export default async function HomePage() {
       {/* Section 3: Category Filter & Products Grid */}
       <CategoryProductsSection categories={categories} products={allProducts} />
 
-      <PersonalizeSection />
       <WhyUsSection />
       <TestimonialsSection reviews={reviews} />
     </>
