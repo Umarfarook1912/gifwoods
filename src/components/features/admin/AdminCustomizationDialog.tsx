@@ -47,6 +47,7 @@ function ItemDetails({ item }: { item: OrderItem }) {
   if (!product || !needsCustomization(product)) return null;
   const received = isCustomizationComplete(item.customization, product);
   const need = getCustomizationNeed(product);
+  const hasWhatsappPhoto = Boolean(item.customization?.whatsapp_sent);
 
   const handleDownload = async () => {
     const url = item.customization?.photo;
@@ -66,11 +67,13 @@ function ItemDetails({ item }: { item: OrderItem }) {
       <p className="text-sm font-semibold text-dark">{product.name}</p>
       <p className="text-xs text-warm-gray">
         Need: {getNeedLabel(need)} ·{" "}
-        {received ? CUSTOMIZATION_COPY.RECEIVED_STATUS : CUSTOMIZATION_COPY.PENDING}
+        <span className={received ? "text-emerald-600 font-medium" : "text-amber-600 font-medium"}>
+          {received ? CUSTOMIZATION_COPY.RECEIVED_STATUS : CUSTOMIZATION_COPY.PENDING}
+        </span>
       </p>
       {item.customization?.name && (
         <p className="text-sm text-dark">
-          {CUSTOMIZATION_COPY.NAME_LABEL}: {item.customization.name}
+          {CUSTOMIZATION_COPY.NAME_LABEL}: <span className="font-medium">{item.customization.name}</span>
         </p>
       )}
       {item.customization?.photo && (
@@ -89,6 +92,11 @@ function ItemDetails({ item }: { item: OrderItem }) {
             {CUSTOMIZATION_COPY.DOWNLOAD_IMAGE}
           </Button>
         </div>
+      )}
+      {!item.customization?.photo && hasWhatsappPhoto && (
+        <p className="text-sm font-medium text-emerald-700">
+          ✓ {CUSTOMIZATION_COPY.WHATSAPP_ADMIN_NOTE}
+        </p>
       )}
     </div>
   );

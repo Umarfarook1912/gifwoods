@@ -62,9 +62,18 @@ export const SUPPORT_CONTACT_CTA_DESCRIPTION =
 export const SUPPORT_CONTACT_CTA_LABEL = "Contact Us";
 export const SUPPORT_LAST_UPDATED_PREFIX = "Last updated";
 
+const rawAdminPhone = (process.env.NEXT_PUBLIC_ADMIN_WHATSAPP_NUMBER || "7010969348").replace(/\D/g, "");
+const nationalPhone =
+  rawAdminPhone.length === 12 && rawAdminPhone.startsWith("91")
+    ? rawAdminPhone.slice(2)
+    : rawAdminPhone;
+const internationalPhone = rawAdminPhone.startsWith("91")
+  ? rawAdminPhone
+  : `91${rawAdminPhone}`;
+
 export const CONTACT_INFO = {
-  phone: "7010969348",
-  phoneFormatted: "+91 7010969348",
+  phone: nationalPhone,
+  phoneFormatted: `+91 ${nationalPhone}`,
   email: "gifwoodsoffice@gmail.com",
   address: "G1A, VOC Nagar, Parisutham Nagar, Thanjavur, Tamil Nadu 613007",
   mapUrl: "https://maps.google.com/?q=G1A,+VOC+Nagar,+Parisutham+Nagar,+Thanjavur,+Tamil+Nadu+613007",
@@ -75,8 +84,8 @@ export const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/gifwoods_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   youtube: "https://www.youtube.com/channel/UCOXu-Pw7731tU0h0AjG4A2g",
   email: "mailto:gifwoodsoffice@gmail.com",
-  phone: "tel:+917010969348",
-  whatsapp: "https://wa.me/917010969348",
+  phone: `tel:+${internationalPhone}`,
+  whatsapp: `https://wa.me/${internationalPhone}`,
 } as const;
 
 export const MEDIA_LOGOS = [

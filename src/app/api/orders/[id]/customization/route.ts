@@ -1,14 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { CUSTOMIZATION_UPLOAD } from "@/constants/customization";
-import { customizationFolder, uploadToImageKit } from "@/lib/imagekit/upload";
 import { getPaymentStatus } from "@/lib/orders/status";
-import { isCustomizationComplete, sanitizeFileStem } from "@/lib/customization";
+import { isCustomizationComplete } from "@/lib/customization";
 import type { Customization } from "@/types/product";
 import type { Order } from "@/types/order";
-
-const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 interface ItemRow {
   id: string;
@@ -31,10 +27,22 @@ export async function PATCH(
   }
 
   const { id: orderId } = await params;
-  const formData = await request.formData();
-  const orderItemId = String(formData.get("orderItemId") ?? "");
-  const name = String(formData.get("name") ?? "").trim();
-  const file = formData.get("file");
+  let orderItemId = "";
+  let name = "";
+  let whatsappSent = false;
+
+  const contentType = request.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    const json = await request.json().catch(() => ({}));
+    orderItemId = String(json.orderItemId ?? "");
+    name = String(json.name ?? "").trim();
+    whatsappSent = Boolean(json.whatsapp_sent);
+  } else {
+    const formData = await request.formData();
+    orderItemId = String(formData.get("orderItemId") ?? "");
+    name = String(formData.get("name") ?? "").trim();
+    whatsappSent = formData.get("whatsapp_sent") === "true";
+  }
 
   if (!orderItemId) {
     return NextResponse.json({ data: null, error: "Missing order item" }, { status: 400 });
@@ -58,11 +66,17 @@ export async function PATCH(
   if ((order as { user_id: string }).user_id !== userId) {
     return NextResponse.json({ data: null, error: "Forbidden" }, { status: 403 });
   }
-  if (getPaymentStatus(order as Order) !== "paid") {
+  if (
+    getPaymentStatus({
+      status: order.status,
+      payment_status: order.payment_status,
+      payment_id: order.payment_id,
+    }) !== "paid"
+  ) {
     return NextResponse.json({ data: null, error: "Pay first to submit details" }, { status: 400 });
   }
 
-  const items = ((order as { order_items: ItemRow[] }).order_items ?? []) as ItemRow[];
+  const items = ((order as unknown as { order_items: ItemRow[] }).order_items ?? []) as ItemRow[];
   const item = items.find((row) => row.id === orderItemId);
   if (!item?.product) {
     return NextResponse.json({ data: null, error: "Item not found" }, { status: 404 });
@@ -86,43 +100,8 @@ export async function PATCH(
     next.name = name;
   }
 
-  if (wantsImage) {
-    if (!(file instanceof File)) {
-      return NextResponse.json({ data: null, error: "Please upload a photo" }, { status: 400 });
-    }
-    if (!ALLOWED.has(file.type)) {
-      return NextResponse.json({ data: null, error: "Use a JPG, PNG, or WebP image" }, { status: 400 });
-    }
-    if (file.size > CUSTOMIZATION_UPLOAD.MAX_BYTES) {
-      return NextResponse.json({ data: null, error: "Image must be under 5 MB" }, { status: 400 });
-    }
-    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-    const folder = customizationFolder(
-      item.product.category?.slug ?? item.product.category?.name ?? item.product.slug
-    );
-    const stem = sanitizeFileStem(
-      name || next.name || "",
-      CUSTOMIZATION_UPLOAD.FALLBACK_FILE
-    );
-    const buffer = Buffer.from(await file.arrayBuffer());
-    let uploaded;
-    try {
-      try {
-        uploaded = await uploadToImageKit(buffer, `${stem}.${ext}`, folder, false);
-      } catch {
-        uploaded = await uploadToImageKit(
-          buffer,
-          `${stem}-${orderItemId.slice(0, 6)}.${ext}`,
-          folder,
-          false
-        );
-      }
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Photo upload failed";
-      return NextResponse.json({ data: null, error: message }, { status: 500 });
-    }
-    next.photo = uploaded.url;
+  if (wantsImage || whatsappSent) {
+    next.whatsapp_sent = "true";
   }
 
   const { data: updated, error: updErr } = await supabase
