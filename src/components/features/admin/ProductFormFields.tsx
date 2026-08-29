@@ -182,9 +182,6 @@ export function ProductFormFields({
           onChange={(html) => setForm({ ...form, description: html })}
           placeholder="Write a detailed product description — use headings, bullet points, images, or embed a YouTube video…"
         />
-        <p className="mt-1.5 text-xs text-muted-foreground">
-          Use the toolbar to add bold headings, bullet points, images (paste URL), or embed a YouTube video.
-        </p>
       </div>
       <div className="md:col-span-2">
         <Label>Tags (comma separated)</Label>
