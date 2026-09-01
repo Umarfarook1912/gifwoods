@@ -11,6 +11,9 @@ const nextConfig = {
     },
   },
   images: {
+    // Vercel Image Optimization quota exceeded on production (402).
+    // Source CDNs (ImageKit, Cloudinary, Supabase) serve images directly.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",

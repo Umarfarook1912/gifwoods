@@ -16,6 +16,9 @@ export const CHECKOUT_COPY = {
   REVIEW_TITLE: "Review your order",
   PAYMENT_TITLE: "Complete payment",
   PAY_SECURELY: "Pay securely",
+  REMOVE_ITEM: "Remove item",
+  DECREASE_QTY: "Decrease quantity",
+  INCREASE_QTY: "Increase quantity",
 } as const;
 
 export const PAYMENT_RETURN_TOAST = {
