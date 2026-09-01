@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { DataTable } from "./DataTable";
 import { OrderStatusDialog } from "./OrderStatusDialog";
 import { OrderStatusBadges } from "@/components/shared/OrderStatusBadges";
+import { ShipmentTrackDialog } from "./ShipmentTrackDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,7 +12,7 @@ import { AdminOrderCustomization } from "./AdminOrderCustomization";
 import { AdminCustomizationDialog } from "./AdminCustomizationDialog";
 import { formatPrice, formatDate } from "@/lib/utils/formatters";
 import { getOrderProductSummary } from "@/lib/orders/display";
-import { Eye, ListRestart, Search, Trash2 } from "lucide-react";
+import { Eye, ListRestart, Loader2, Search, Truck, Trash2 } from "lucide-react";
 import { ORDER_STATUSES } from "@/constants/ui";
 import { CUSTOMIZATION_COPY } from "@/constants/customization";
 import { useConfirm } from "@/hooks/useConfirm";
@@ -32,9 +33,10 @@ export function AdminOrdersClient({ initialOrders }: Props) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [statusOrder, setStatusOrder] = useState<Order | null>(null);
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
+  const [trackOrder, setTrackOrder] = useState<Order | null>(null);
+  const [pushingId, setPushingId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  // Reset page when filters change
   useEffect(() => {
     setPage(1);
   }, [search, statusFilter]);
@@ -86,6 +88,25 @@ export function AdminOrdersClient({ initialOrders }: Props) {
     }
   };
 
+  const handlePushToShiprocket = async (order: Order) => {
+    setPushingId(order.id);
+    try {
+      const res = await fetch(API_ENDPOINTS.ORDER_SHIPROCKET(order.id), {
+        method: "POST",
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) {
+        toast.error(json.error ?? "Failed to push to Shiprocket");
+        return;
+      }
+      toast.success("Shipment created on Shiprocket");
+    } catch {
+      toast.error("Network error — could not push to Shiprocket");
+    } finally {
+      setPushingId(null);
+    }
+  };
+
   return (
     <div className="p-6 md:p-8">
       <h1 className="font-display text-2xl font-bold text-dark mb-6">Orders</h1>
@@ -116,6 +137,16 @@ export function AdminOrdersClient({ initialOrders }: Props) {
             return <div><p className="text-sm font-medium">{user?.name ?? "—"}</p><p className="text-xs text-warm-gray break-all">{user?.email}</p></div>;
           }},
           { key: "total", label: "Total", render: (o) => <span className="font-semibold">{formatPrice(o.total)}</span> },
+          { key: "shipment", label: "Shipment", render: (o) => (
+            o.awb_code ? (
+              <div className="text-xs">
+                <p className="font-mono font-semibold text-dark">{o.awb_code}</p>
+                {o.courier_name && <p className="text-warm-gray">{o.courier_name}</p>}
+              </div>
+            ) : (
+              <span className="text-xs text-warm-gray">—</span>
+            )
+          )},
           { key: "customization", label: CUSTOMIZATION_COPY.COLUMN, render: (o) => (
             <AdminOrderCustomization items={o.order_items} />
           )},
@@ -143,6 +174,32 @@ export function AdminOrdersClient({ initialOrders }: Props) {
               >
                 <ListRestart className="h-3.5 w-3.5" />
               </Button>
+              {o.awb_code ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-blue-500 hover:text-blue-700"
+                  title="Track shipment"
+                  onClick={() => setTrackOrder(o)}
+                >
+                  <Truck className="h-3.5 w-3.5" />
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 hover:text-gold"
+                  title="Push to Shiprocket"
+                  disabled={pushingId === o.id}
+                  onClick={() => handlePushToShiprocket(o)}
+                >
+                  {pushingId === o.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Truck className="h-3.5 w-3.5" />
+                  )}
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
@@ -172,6 +229,11 @@ export function AdminOrdersClient({ initialOrders }: Props) {
         order={statusOrder}
         onClose={() => setStatusOrder(null)}
         onUpdated={handleStatusUpdated}
+      />
+      <ShipmentTrackDialog
+        orderId={trackOrder?.id ?? null}
+        awbCode={trackOrder?.awb_code ?? null}
+        onClose={() => setTrackOrder(null)}
       />
     </div>
   );

@@ -3,7 +3,7 @@ import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { redirect, notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { CreditCard } from "lucide-react";
+import { CreditCard, ExternalLink, Package } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Separator } from "@/components/ui/separator";
 import { ReviewForm } from "@/components/features/reviews/ReviewForm";
@@ -126,6 +126,39 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
             </div>
           </div>
         </div>
+
+        {/* Tracking section — show when AWB is assigned */}
+        {typedOrder.awb_code &&
+          ["processing", "shipped", "delivered"].includes(typedOrder.status) && (
+          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-border bg-white p-5">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/15">
+              <Package className="h-4 w-4 text-gold" />
+            </span>
+            <div className="flex-1">
+              <h2 className="font-semibold text-dark">Shipment Tracking</h2>
+              <p className="mt-1 text-sm text-warm-gray">
+                Courier:{" "}
+                <span className="font-medium text-dark">
+                  {typedOrder.courier_name ?? "Assigned"}
+                </span>
+              </p>
+              <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                AWB: {typedOrder.awb_code}
+              </p>
+              {typedOrder.tracking_url && (
+                <a
+                  href={typedOrder.tracking_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-gold hover:text-gold-dark"
+                >
+                  Track your order
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              )}
+            </div>
+          </div>
+        )}
 
         {typedOrder.payment_id && (
           <div className="mb-6 flex items-start gap-3 rounded-2xl border border-border bg-white p-5">

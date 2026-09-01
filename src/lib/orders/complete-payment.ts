@@ -1,7 +1,9 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendOrderConfirmationEmail } from "@/lib/email/nodemailer";
 import { sendAdminOrderEmail } from "@/lib/email/admin-order-email";
+import { createShiprocketShipment } from "@/lib/shiprocket/create-shipment";
 import type { OrderEmailLineItem } from "@/types/email";
+import type { ShippingAddress } from "@/types/order";
 
 interface OrderUser {
   name: string | null;
@@ -21,6 +23,7 @@ interface PaidOrder {
   shipping_cost: number;
   total: number;
   confirmation_email_sent_at: string | null;
+  shipping_address: ShippingAddress;
   user: OrderUser | null;
   order_items: PaidOrderItem[] | null;
 }
@@ -42,7 +45,7 @@ export async function completePaidOrder(
   const { data: current, error: fetchError } = await supabase
     .from("orders")
     .select(
-      "id, status, subtotal, shipping_cost, total, confirmation_email_sent_at, user:profiles(name, email), order_items(quantity, unit_price, product:products(name))"
+      "id, status, subtotal, shipping_cost, total, confirmation_email_sent_at, shipping_address, user:profiles(name, email), order_items(quantity, unit_price, product:products(name))"
     )
     .eq("id", orderId)
     .single();
@@ -64,6 +67,18 @@ export async function completePaidOrder(
     })
     .eq("id", orderId);
   if (error) throw new Error(error.message);
+
+  // Auto-create Shiprocket shipment — failure does NOT block payment confirmation
+  try {
+    await createShiprocketShipment({
+      id: order.id,
+      subtotal: order.subtotal,
+      shipping_address: order.shipping_address,
+      order_items: order.order_items,
+    });
+  } catch (shiprocketError) {
+    console.error("Shiprocket shipment creation failed:", shiprocketError);
+  }
 
   if (!order.user?.email || order.confirmation_email_sent_at) return;
 

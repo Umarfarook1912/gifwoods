@@ -49,6 +49,12 @@ export interface Order {
   order_items?: OrderItem[];
   created_at: string;
   updated_at: string;
+  // Shiprocket integration
+  shiprocket_order_id?: string | null;
+  shiprocket_shipment_id?: string | null;
+  awb_code?: string | null;
+  courier_name?: string | null;
+  tracking_url?: string | null;
 }
 
 export interface OrderFilters {

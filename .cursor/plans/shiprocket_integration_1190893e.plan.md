@@ -4,34 +4,34 @@ overview: "Integrate Shiprocket shipping into Gifwoods: auto-create shipments af
 todos:
   - id: shiprocket-db-migration
     content: Create Supabase migration to add shiprocket_order_id, shiprocket_shipment_id, awb_code, courier_name, tracking_url to orders table
-    status: pending
+    status: completed
   - id: shiprocket-types
     content: Add Shiprocket types to src/types/shiprocket.ts and extend Order interface in src/types/order.ts
-    status: pending
+    status: completed
   - id: shiprocket-client
     content: Build Shiprocket API client at src/lib/shiprocket/client.ts with token caching, createOrder, assignAWB, schedulePickup, getTracking, cancelOrder
-    status: pending
+    status: completed
   - id: shiprocket-env
     content: Add SHIPROCKET_EMAIL, SHIPROCKET_PASSWORD, SHIPROCKET_PICKUP_LOCATION, SHIPROCKET_BASE_URL to .env.local and .env.example
-    status: pending
+    status: completed
   - id: shiprocket-auto-create
     content: Integrate createShiprocketShipment helper into src/lib/orders/complete-payment.ts after payment is confirmed
-    status: pending
+    status: completed
   - id: shiprocket-webhook
     content: Create src/app/api/webhooks/shiprocket/route.ts to receive status events, update orders.status, and trigger status emails
-    status: pending
+    status: completed
   - id: shiprocket-track-api
     content: Create src/app/api/orders/[id]/track/route.ts to proxy live tracking data from Shiprocket to the admin client
-    status: pending
+    status: completed
   - id: shiprocket-admin-ui
     content: "Update AdminOrdersClient.tsx: add AWB/courier column, Track dialog, and Push to Shiprocket button"
-    status: pending
+    status: completed
   - id: shiprocket-customer-ui
     content: Update /orders/[id]/page.tsx to show tracking number, courier, and tracking link when awb_code is present
-    status: pending
+    status: completed
   - id: shiprocket-email
     content: Update shipped status email in src/lib/email/templates/order-email.ts to include tracking_url link
-    status: pending
+    status: completed
 isProject: false
 ---
 

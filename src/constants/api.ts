@@ -7,6 +7,8 @@ export const API_ENDPOINTS = {
   ORDERS: "/api/orders",
   ORDER: (id: string) => `/api/orders/${id}`,
   ORDER_CUSTOMIZATION: (id: string) => `/api/orders/${id}/customization`,
+  ORDER_TRACK: (id: string) => `/api/orders/${id}/track`,
+  ORDER_SHIPROCKET: (id: string) => `/api/orders/${id}/shiprocket`,
   REVIEWS: "/api/reviews",
   REVIEW: (id: string) => `/api/reviews/${id}`,
   PAYMENT_CASHFREE: "/api/payment/cashfree",

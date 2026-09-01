@@ -50,6 +50,7 @@ interface OrderStatusProps {
   userName: string | null;
   orderId: string;
   status: string;
+  trackingUrl?: string | null;
 }
 
 export async function sendOrderStatusEmail({
@@ -57,6 +58,7 @@ export async function sendOrderStatusEmail({
   userName,
   orderId,
   status,
+  trackingUrl,
 }: OrderStatusProps) {
   const name = userName ?? "Valued Customer";
   const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
@@ -80,6 +82,7 @@ export async function sendOrderStatusEmail({
       orderId,
       status,
       message,
+      trackingUrl,
     }),
   });
 }

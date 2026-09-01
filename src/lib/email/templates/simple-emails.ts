@@ -33,12 +33,25 @@ export function buildOrderStatusEmailHtml(options: {
   orderId: string;
   status: string;
   message: string;
+  trackingUrl?: string | null;
 }): string {
   const name = escapeHtml(options.userName ?? "Valued Customer");
   const statusLabel = escapeHtml(
     options.status.charAt(0).toUpperCase() + options.status.slice(1)
   );
   const orderUrl = `${process.env.NEXT_PUBLIC_APP_URL}/orders/${options.orderId}`;
+
+  const trackingBlock =
+    options.trackingUrl
+      ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;background:${CREAM};border:1px solid ${BORDER};border-radius:12px;">
+        <tr>
+          <td style="padding:14px 16px;color:${MUTED};font-size:13px;">Track shipment</td>
+          <td style="padding:14px 16px;text-align:right;">
+            <a href="${options.trackingUrl}" style="color:${GOLD};font-size:13px;font-weight:700;text-decoration:none;">Track your order →</a>
+          </td>
+        </tr>
+      </table>`
+      : "";
 
   return wrapEmailLayout({
     title: `Order update — ${statusLabel}`,
@@ -53,6 +66,7 @@ export function buildOrderStatusEmailHtml(options: {
           <td style="padding:14px 16px;color:${DARK};font-size:13px;font-weight:700;text-align:right;text-transform:capitalize;">${statusLabel}</td>
         </tr>
       </table>
+      ${trackingBlock}
       ${ctaButton(orderUrl, "View your order")}
     `,
   });

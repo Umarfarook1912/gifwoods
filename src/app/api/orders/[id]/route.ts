@@ -66,14 +66,18 @@ export async function PATCH(
 
   if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 });
 
-  const user = (data as { user: { name: string; email: string } | null }).user;
-  if (user?.email) {
+  const typedData = data as {
+    tracking_url?: string | null;
+    user: { name: string; email: string } | null;
+  };
+  if (typedData.user?.email) {
     try {
       await sendOrderStatusEmail({
-        to: user.email,
-        userName: user.name,
+        to: typedData.user.email,
+        userName: typedData.user.name,
         orderId: id,
         status,
+        trackingUrl: status === "shipped" ? (typedData.tracking_url ?? null) : null,
       });
     } catch (emailError) {
       console.error("Order status email failed:", emailError);
