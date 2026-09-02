@@ -13,6 +13,8 @@ import {
 import { formatPrice } from "@/lib/utils/formatters";
 import { getOrderProductSummary } from "@/lib/orders/display";
 import { ADMIN_PAGE } from "@/constants/admin-ui";
+import type { OrderStatusSummary } from "@/lib/orders/status";
+import type { Order } from "@/types/order";
 
 export const metadata: Metadata = { title: "Admin Dashboard" };
 export const dynamic = "force-dynamic";

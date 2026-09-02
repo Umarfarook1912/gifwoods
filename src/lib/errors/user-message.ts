@@ -89,7 +89,7 @@ export function toUserErrorMessage(error: unknown, fallback: string): string {
 
 export function mapAuthErrorMessage(
   message: string,
-  fallback = APP_ERRORS.REGISTRATION_FAILED
+  fallback: string = APP_ERRORS.REGISTRATION_FAILED
 ): string {
   if (isDuplicateEmailIssue(message)) return APP_ERRORS.EMAIL_EXISTS;
   return toUserErrorMessage(message, fallback);

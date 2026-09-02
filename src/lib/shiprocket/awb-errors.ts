@@ -8,6 +8,9 @@ interface AwbFailureResponse {
   response?: {
     data?: {
       awb_assign_error?: string;
+      awb_code?: string;
+      courier_name?: string;
+      courier_id?: number | string;
     };
   };
 }
