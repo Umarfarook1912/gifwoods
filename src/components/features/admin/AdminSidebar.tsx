@@ -11,9 +11,11 @@ import {
   Star,
   Tags,
   ChevronRight,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { ROUTES } from "@/constants/routes";
+import { ADMIN_PERMISSION_IDS, hasAdminModuleAccess } from "@/constants/admin-permissions";
 import { SITE_NAME } from "@/constants/ui";
 
 const NAV_ITEMS = [
@@ -21,7 +23,8 @@ const NAV_ITEMS = [
   { href: ROUTES.ADMIN.PRODUCTS, label: "Products", icon: Package, key: "products" },
   { href: ROUTES.ADMIN.CATEGORIES, label: "Categories", icon: Tags, key: "categories" },
   { href: ROUTES.ADMIN.ORDERS, label: "Orders", icon: ShoppingBag, key: "orders" },
-  { href: ROUTES.ADMIN.USERS, label: "Users", icon: Users, key: "users" },
+  { href: ROUTES.ADMIN.ADMINS, label: "Admins", icon: Shield, key: ADMIN_PERMISSION_IDS.ADMINS, matchPrefix: "/admin/admins" },
+  { href: ROUTES.ADMIN.CUSTOMERS, label: "Users", icon: Users, key: ADMIN_PERMISSION_IDS.CUSTOMERS, matchPrefix: "/admin/customers" },
   { href: ROUTES.ADMIN.REVIEWS, label: "Reviews", icon: Star, key: "reviews" },
 ] as const;
 
@@ -35,7 +38,7 @@ export function AdminSidebar() {
   const visibleItems = NAV_ITEMS.filter((item) => {
     if (role === "super_admin") return true;
     if (role === "admin") {
-      return permissions.includes(item.key);
+      return hasAdminModuleAccess(permissions, item.key);
     }
     return false;
   });
@@ -49,8 +52,13 @@ export function AdminSidebar() {
         <p className="text-white/40 text-xs mt-0.5">Admin Panel</p>
       </div>
       <nav className="flex-1 p-3 space-y-1">
-        {visibleItems.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + "/");
+        {visibleItems.map((item) => {
+          const { href, label, icon: Icon } = item;
+          const matchPrefix = "matchPrefix" in item ? item.matchPrefix : href;
+          const active =
+            pathname === href ||
+            pathname.startsWith(`${href}/`) ||
+            (matchPrefix === "/admin/admins" && pathname.startsWith("/admin/users"));
           return (
             <Link
               key={href}

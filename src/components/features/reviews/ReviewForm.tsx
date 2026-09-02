@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { StarRating } from "@/components/shared/StarRating";
 import { reviewSchema } from "@/lib/utils/validators";
 import { API_ENDPOINTS } from "@/constants/api";
+import { APP_ERRORS } from "@/constants/errors";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
 import type { ReviewFormData } from "@/types/review";
 
@@ -59,7 +61,7 @@ export function ReviewForm({ productId, orderId, onSuccess }: Props) {
       setRating(0);
       onSuccess?.();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to submit review");
+      toastError(e, APP_ERRORS.REVIEW_SUBMIT_FAILED);
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
+import { apiError } from "@/lib/errors/api-response";
 import { updateAddress, deleteAddress } from "@/lib/supabase/profile-db";
 
 export async function PUT(
@@ -18,8 +20,8 @@ export async function PUT(
 
     const data = await updateAddress(userId, id, body);
     return NextResponse.json({ data, error: null });
-  } catch (error: any) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+  } catch (error) {
+    return apiError(error, APP_ERRORS.ADDRESS_SAVE_FAILED);
   }
 }
 
@@ -41,7 +43,7 @@ export async function DELETE(
       return NextResponse.json({ data: null, error: "Address not found or delete failed" }, { status: 444 });
     }
     return NextResponse.json({ data: { success: true }, error: null });
-  } catch (error: any) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+  } catch (error) {
+    return apiError(error, APP_ERRORS.ADDRESS_DELETE_FAILED);
   }
 }

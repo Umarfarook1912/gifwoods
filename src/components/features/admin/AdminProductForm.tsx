@@ -15,6 +15,8 @@ import { ImageListField, SpecificationListField } from "./ProductFormLists";
 import { API_ENDPOINTS } from "@/constants/api";
 import { NEW_CATEGORY_OPTION, PRODUCT_HOME_TOGGLE_LABELS } from "@/constants/ui";
 import { CUSTOMIZATION_COPY } from "@/constants/customization";
+import { APP_ERRORS } from "@/constants/errors";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
 import { RefreshCw } from "lucide-react";
 import type { Category, Product, ProductFormState } from "@/types/product";
@@ -112,7 +114,7 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
       onSaved(json.data, json.newCategory ?? null);
       onOpenChange(false);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Save failed");
+      toastError(e, APP_ERRORS.PRODUCT_SAVE_FAILED);
     } finally {
       setSaving(false);
     }

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
+import { toUserErrorMessage } from "@/lib/errors/user-message";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(
@@ -13,7 +15,13 @@ export async function GET(
   const supabase = await createClient();
   const { data, error } = await supabase.from("profiles").select("*").eq("id", id).single();
 
-  if (error) return NextResponse.json({ data: null, error: error.message }, { status: 404 });
+  if (error) {
+    console.error(APP_ERRORS.NOT_FOUND, error);
+    return NextResponse.json(
+      { data: null, error: toUserErrorMessage(error, APP_ERRORS.NOT_FOUND) },
+      { status: 404 }
+    );
+  }
   return NextResponse.json({ data, error: null });
 }
 
@@ -35,6 +43,12 @@ export async function PATCH(
     .select()
     .single();
 
-  if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+  if (error) {
+    console.error(APP_ERRORS.PROFILE_SAVE_FAILED, error);
+    return NextResponse.json(
+      { data: null, error: toUserErrorMessage(error, APP_ERRORS.PROFILE_SAVE_FAILED) },
+      { status: 500 }
+    );
+  }
   return NextResponse.json({ data, error: null });
 }

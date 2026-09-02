@@ -71,6 +71,16 @@ export function getActiveCouriers(
   return active.length > 0 ? active : couriers;
 }
 
+export function pickCourierId(
+  couriers: ShiprocketCourierCompany[]
+): number | null {
+  const active = getActiveCouriers(couriers);
+  for (const courier of active) {
+    if (courier.courier_company_id) return courier.courier_company_id;
+  }
+  return null;
+}
+
 export function parseCourierTransitDays(
   couriers: ShiprocketCourierCompany[]
 ): { min: number; max: number } | null {

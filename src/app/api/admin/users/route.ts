@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
+import { mapAuthErrorMessage, toUserErrorMessage } from "@/lib/errors/user-message";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
@@ -62,7 +64,10 @@ export async function POST(request: Request) {
           { status: 409 }
         );
       }
-      return NextResponse.json({ error: authError.message }, { status: 400 });
+      return NextResponse.json(
+        { error: mapAuthErrorMessage(authError.message, APP_ERRORS.ADMIN_CREATE_FAILED) },
+        { status: 400 }
+      );
     }
 
     if (!authData.user) {
@@ -88,14 +93,18 @@ export async function POST(request: Request) {
     if (profileError) {
       // Clean up the auth user if profile creation fails
       await supabase.auth.admin.deleteUser(authData.user.id);
-      return NextResponse.json({ error: profileError.message }, { status: 500 });
+      console.error(APP_ERRORS.ADMIN_CREATE_FAILED, profileError);
+      return NextResponse.json(
+        { error: toUserErrorMessage(profileError, APP_ERRORS.ADMIN_CREATE_FAILED) },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ success: true, userId: authData.user.id });
   } catch (err) {
     console.error("Admin user create API error:", err);
     return NextResponse.json(
-      { error: "Internal server error." },
+      { error: APP_ERRORS.ADMIN_CREATE_FAILED },
       { status: 500 }
     );
   }

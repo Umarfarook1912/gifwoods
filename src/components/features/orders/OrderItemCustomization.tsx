@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { API_ENDPOINTS } from "@/constants/api";
 import { CUSTOMIZATION_COPY, CUSTOMIZATION_UPLOAD } from "@/constants/customization";
+import { APP_ERRORS } from "@/constants/errors";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
 import type { Customization, Product } from "@/types/product";
 import {
@@ -81,7 +83,7 @@ export function OrderItemCustomization({
       window.open(whatsappUrl, "_blank", "noopener,noreferrer");
       toast.success(CUSTOMIZATION_COPY.SUBMITTED);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Submit failed");
+      toastError(err, APP_ERRORS.CUSTOMIZATION_SUBMIT_FAILED);
     } finally {
       setSaving(false);
     }

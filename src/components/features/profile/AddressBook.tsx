@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { APP_ERRORS } from "@/constants/errors";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
 import { CONFIRMATIONS } from "@/constants/confirmations";
 import { useConfirm } from "@/hooks/useConfirm";
@@ -108,8 +110,8 @@ export function AddressBook() {
       toast.success(editId ? "Address updated!" : "Address added successfully!");
       resetForm();
       await loadAddresses();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to save address");
+    } catch (err) {
+      toastError(err, APP_ERRORS.ADDRESS_SAVE_FAILED);
       setLoading(false);
     }
   };
@@ -122,8 +124,8 @@ export function AddressBook() {
       if (error) throw new Error(error);
       toast.success("Address deleted");
       await loadAddresses();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete address");
+    } catch (err) {
+      toastError(err, APP_ERRORS.ADDRESS_DELETE_FAILED);
     }
   };
 

@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { API_ENDPOINTS } from "@/constants/api";
 import { QUERY_KEYS } from "@/constants/query-keys";
+import { APP_ERRORS } from "@/constants/errors";
+import { toUserErrorMessage } from "@/lib/errors/user-message";
 import type { Product } from "@/types/product";
 import type { DeliveryEstimateResult } from "@/types/shipping";
 
@@ -25,7 +27,7 @@ async function fetchDeliveryEstimate(
   };
 
   if (!response.ok || !json.data) {
-    throw new Error(json.error ?? "Unable to fetch delivery estimate");
+    throw new Error(toUserErrorMessage(json.error, APP_ERRORS.DELIVERY_ESTIMATE_FAILED));
   }
 
   return json.data;

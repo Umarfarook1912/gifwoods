@@ -15,6 +15,8 @@ import { calculateShipping } from "@/lib/orders/pricing";
 import { ROUTES } from "@/constants/routes";
 import { API_ENDPOINTS } from "@/constants/api";
 import { CHECKOUT_COPY } from "@/constants/checkout";
+import { APP_ERRORS } from "@/constants/errors";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
 import type { CheckoutStep, ShippingAddress } from "@/types/order";
 
@@ -90,7 +92,7 @@ export default function CheckoutPage() {
         redirectTarget: "_self",
       });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Payment failed");
+      toastError(e, APP_ERRORS.PAYMENT_INIT_FAILED);
       setLoading(false);
     }
   };

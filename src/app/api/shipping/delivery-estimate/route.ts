@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { z } from "zod";
 import { DEFAULT_SHIPMENT_WEIGHT_KG } from "@/constants/shipping";
 import { getShiprocketDeliveryEstimate } from "@/lib/shipping/delivery-estimate";
@@ -60,7 +61,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Shiprocket delivery estimate failed:", error);
     return NextResponse.json(
-      { data: null, error: "Unable to fetch delivery estimate" },
+      { data: null, error: APP_ERRORS.DELIVERY_ESTIMATE_FAILED },
       { status: 502 }
     );
   }

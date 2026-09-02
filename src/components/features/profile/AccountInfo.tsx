@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { APP_ERRORS } from "@/constants/errors";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
 import { PhoneNumberField } from "./PhoneNumberField";
 
@@ -69,8 +71,8 @@ export function AccountInfo() {
 
       await update({ image: newAvatarUrl });
       toast.success("Profile picture updated!");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to upload avatar");
+    } catch (err) {
+      toastError(err, APP_ERRORS.AVATAR_UPLOAD_FAILED);
     } finally {
       setUploading(false);
     }
@@ -93,8 +95,8 @@ export function AccountInfo() {
 
       await update({ name });
       toast.success("Profile details updated successfully!");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to save profile");
+    } catch (err) {
+      toastError(err, APP_ERRORS.PROFILE_SAVE_FAILED);
     } finally {
       setLoading(false);
     }

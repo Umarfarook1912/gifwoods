@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createShiprocketShipment } from "@/lib/shiprocket/create-shipment";
+import { formatShiprocketPushError } from "@/lib/shiprocket/awb-errors";
 import type { ShippingAddress } from "@/types/order";
 
 interface OrderItem {
@@ -13,7 +14,10 @@ interface OrderItem {
 interface OrderRow {
   id: string;
   subtotal: number;
+  total: number;
   shiprocket_order_id: string | null;
+  shiprocket_shipment_id: string | null;
+  awb_code: string | null;
   shipping_address: ShippingAddress;
   order_items: OrderItem[] | null;
 }
@@ -33,7 +37,7 @@ export async function POST(
   const { data: order, error } = await supabase
     .from("orders")
     .select(
-      "id, subtotal, shiprocket_order_id, shipping_address, order_items(quantity, unit_price, product:products(name))"
+      "id, subtotal, total, shiprocket_order_id, shiprocket_shipment_id, awb_code, shipping_address, order_items(quantity, unit_price, product:products(name))"
     )
     .eq("id", id)
     .single();
@@ -45,15 +49,22 @@ export async function POST(
   const typedOrder = order as unknown as OrderRow;
 
   try {
-    await createShiprocketShipment({
-      id: typedOrder.id,
-      subtotal: typedOrder.subtotal,
-      shipping_address: typedOrder.shipping_address,
-      order_items: typedOrder.order_items,
-    });
+    await createShiprocketShipment(
+      {
+        id: typedOrder.id,
+        subtotal: typedOrder.subtotal,
+        total: typedOrder.total,
+        shipping_address: typedOrder.shipping_address,
+        shiprocket_order_id: typedOrder.shiprocket_order_id,
+        shiprocket_shipment_id: typedOrder.shiprocket_shipment_id,
+        awb_code: typedOrder.awb_code,
+        order_items: typedOrder.order_items,
+      },
+      { mode: "fulfill" }
+    );
     return NextResponse.json({ data: { pushed: true }, error: null });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Shiprocket push failed";
+    const message = formatShiprocketPushError(err);
     console.error("Push to Shiprocket failed:", err);
     return NextResponse.json({ data: null, error: message }, { status: 502 });
   }

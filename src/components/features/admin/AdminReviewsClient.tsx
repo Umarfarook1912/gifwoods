@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "./DataTable";
-import { Input } from "@/components/ui/input";
+import { AdminPageHeader, AdminSearchInput } from "./AdminListSection";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,10 +18,13 @@ import {
 import { StarRating } from "@/components/shared/StarRating";
 import { formatDate } from "@/lib/utils/formatters";
 import { API_ENDPOINTS } from "@/constants/api";
+import { ADMIN_PAGE, ADMIN_TABLE } from "@/constants/admin-ui";
 import { CONFIRMATIONS } from "@/constants/confirmations";
 import { useConfirm } from "@/hooks/useConfirm";
+import { APP_ERRORS } from "@/constants/errors";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
-import { Check, X, Trash2, Search, MessageSquare, RefreshCw } from "lucide-react";
+import { Check, X, Trash2, MessageSquare, RefreshCw } from "lucide-react";
 import type { Review } from "@/types/review";
 
 interface Props {
@@ -112,28 +115,28 @@ export function AdminReviewsClient({ initialReviews }: Props) {
       toast.success("Admin reply updated successfully!");
       setReplyingReviewId(null);
       setReplyText("");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to save reply");
+    } catch (err) {
+      toastError(err, APP_ERRORS.REVIEW_UPDATE_FAILED);
     } finally {
       setSubmittingReply(false);
     }
   };
 
   return (
-    <div className="p-6 md:p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-2xl font-bold text-dark">Reviews</h1>
+    <div className={ADMIN_PAGE.shell}>
+      <AdminPageHeader title="Reviews">
         <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2">
           <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
           Refresh
         </Button>
-      </div>
+      </AdminPageHeader>
 
-      <div className="flex gap-3 mb-6 flex-wrap">
-        <div className="relative flex-1 min-w-48">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search reviews..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
-        </div>
+      <div className={ADMIN_PAGE.filters}>
+        <AdminSearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Search reviews..."
+        />
         <Select value={approvalFilter} onValueChange={(v) => v && setApprovalFilter(v)}>
           <SelectTrigger className="w-36"><SelectValue placeholder="Approval" /></SelectTrigger>
           <SelectContent>
@@ -153,33 +156,35 @@ export function AdminReviewsClient({ initialReviews }: Props) {
 
       <DataTable
         columns={[
-          { key: "product", label: "Product", render: (r) => {
+          { key: "product", label: "Product", className: ADMIN_TABLE.userCell, render: (r) => {
             const product = r.product as { name: string } | undefined;
-            return <p className="text-sm font-medium max-w-[160px] truncate">{product?.name ?? "—"}</p>;
+            return <p className="font-medium truncate">{product?.name ?? "—"}</p>;
           }},
-          { key: "user", label: "Customer", render: (r) => {
+          { key: "user", label: "Customer", className: "max-w-[160px] whitespace-normal", render: (r) => {
             const user = r.user as { name: string; email: string } | undefined;
-            return <p className="text-xs text-warm-gray">{user?.name ?? user?.email ?? "—"}</p>;
+            return <p className="text-xs text-warm-gray truncate">{user?.name ?? user?.email ?? "—"}</p>;
           }},
-          { key: "rating", label: "Rating", render: (r) => <StarRating rating={r.rating} size="sm" /> },
-          { key: "comment", label: "Comment & Admin Reply", render: (r) => (
-            <div className="space-y-1 max-w-xs">
-              <p className="text-xs text-secondary-dark">{r.comment}</p>
+          { key: "rating", label: "Rating", className: "whitespace-nowrap", render: (r) => <StarRating rating={r.rating} size="sm" /> },
+          { key: "comment", label: "Comment", className: "max-w-[240px] whitespace-normal", render: (r) => (
+            <div className="space-y-1">
+              <p className="text-xs text-secondary-dark line-clamp-2">{r.comment}</p>
               {r.admin_reply && (
-                <p className="text-[10px] text-gold font-medium bg-gold/5 px-2 py-0.5 rounded border border-gold/10 truncate">
+                <p className="text-[10px] text-gold font-medium bg-gold/5 px-2 py-0.5 rounded border border-gold/10 line-clamp-1">
                   Reply: {r.admin_reply}
                 </p>
               )}
             </div>
           )},
-          { key: "is_approved", label: "Status", render: (r) => (
+          { key: "is_approved", label: "Status", className: "whitespace-nowrap", render: (r) => (
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${r.is_approved ? "bg-emerald-100 text-emerald-700" : "bg-yellow-100 text-yellow-700"}`}>
               {r.is_approved ? "Approved" : "Pending"}
             </span>
           )},
-          { key: "created_at", label: "Date", render: (r) => <span className="text-xs text-warm-gray">{formatDate(r.created_at)}</span> },
-          { key: "actions", label: "", render: (r) => (
-            <div className="flex gap-1">
+          { key: "created_at", label: "Date", className: "whitespace-nowrap text-warm-gray", render: (r) => (
+            <span className="text-xs">{formatDate(r.created_at)}</span>
+          )},
+          { key: "actions", label: "Actions", render: (r) => (
+            <div className="flex justify-end gap-1">
               <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-gold" onClick={() => openReplyModal(r)} title="Reply / Edit Reply">
                 <MessageSquare className="h-3.5 w-3.5" />
               </Button>

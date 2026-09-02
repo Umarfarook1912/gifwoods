@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { createClient } from "@/lib/supabase/server";
 import { auth, hasApiPermission } from "@/lib/auth/auth";
+import { apiError } from "@/lib/errors/api-response";
+import { toUserErrorMessage } from "@/lib/errors/user-message";
 import { productSchema } from "@/lib/utils/validators";
 import { ITEMS_PER_PAGE } from "@/constants/ui";
-import type { ApiResponse, PaginatedResponse } from "@/types/common";
+import type { PaginatedResponse } from "@/types/common";
 import type { Product } from "@/types/product";
 
 export async function GET(request: Request) {
@@ -75,10 +78,7 @@ export async function GET(request: Request) {
   const { data, error, count } = await query;
 
   if (error) {
-    return NextResponse.json<ApiResponse<null>>(
-      { data: null, error: error.message },
-      { status: 500 }
-    );
+    return apiError(error, APP_ERRORS.PRODUCT_LOAD_FAILED);
   }
 
   const products = (data ?? []).map((p) => {
@@ -111,11 +111,7 @@ export async function POST(request: Request) {
   const body = await request.json();
   const parsed = productSchema.safeParse(body);
   if (!parsed.success) {
-    const firstIssue = parsed.error.issues[0];
-    const errorMsg = firstIssue
-      ? `${firstIssue.path.length ? firstIssue.path.join(".") + ": " : ""}${firstIssue.message}`
-      : "Invalid product data";
-    return NextResponse.json({ data: null, error: errorMsg }, { status: 400 });
+    return NextResponse.json({ data: null, error: APP_ERRORS.VALIDATION }, { status: 400 });
   }
 
   const { new_category_name, ...productData } = parsed.data;
@@ -151,7 +147,11 @@ export async function POST(request: Request) {
         .single();
 
       if (insertCatError) {
-        return NextResponse.json({ data: null, error: `Failed to create category: ${insertCatError.message}` }, { status: 500 });
+        console.error(APP_ERRORS.CATEGORY_ADD_FAILED, insertCatError);
+        return NextResponse.json(
+          { data: null, error: toUserErrorMessage(insertCatError, APP_ERRORS.CATEGORY_ADD_FAILED) },
+          { status: 500 }
+        );
       }
 
       newCategoryObj = newCat;
@@ -173,7 +173,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+    return apiError(error, APP_ERRORS.PRODUCT_SAVE_FAILED);
   }
 
   return NextResponse.json({ data, newCategory: newCategoryObj, error: null }, { status: 201 });

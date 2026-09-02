@@ -4,15 +4,19 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "./DataTable";
 import { RichTextEditor } from "./RichTextEditor";
+import { AdminPageHeader, AdminSearchInput } from "./AdminListSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { API_ENDPOINTS } from "@/constants/api";
+import { ADMIN_PAGE, ADMIN_TABLE } from "@/constants/admin-ui";
 import { categoryDeleteConfirmation } from "@/constants/confirmations";
 import { useConfirm } from "@/hooks/useConfirm";
+import { APP_ERRORS } from "@/constants/errors";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
-import { Plus, Trash2, Search, RefreshCw } from "lucide-react";
+import { Plus, Trash2, RefreshCw } from "lucide-react";
 import type { Category } from "@/types/product";
 
 type CategoryRow = Category & { product_count: number };
@@ -87,7 +91,7 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
       setNewDescription("");
       toast.success(`Category "${json.data.name}" added`);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to add category");
+      toastError(e, APP_ERRORS.CATEGORY_ADD_FAILED);
     } finally {
       setAdding(false);
     }
@@ -105,16 +109,15 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
       setCategories((prev) => prev.filter((c) => c.id !== category.id));
       toast.success(`Category "${category.name}" removed`);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to delete category");
+      toastError(e, APP_ERRORS.CATEGORY_DELETE_FAILED);
     } finally {
       setDeletingId(null);
     }
   };
 
   return (
-    <div className="p-6 md:p-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-dark">Categories</h1>
+    <div className={ADMIN_PAGE.shell}>
+      <AdminPageHeader title="Categories">
         <Button
           variant="outline"
           size="sm"
@@ -125,7 +128,7 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
           <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
           Refresh
         </Button>
-      </div>
+      </AdminPageHeader>
 
       <div className="mb-6 space-y-3 rounded-xl border border-border bg-cream/40 p-4">
         <div className="flex flex-wrap items-end gap-3">
@@ -163,31 +166,30 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
         </div>
       </div>
 
-      <div className="relative mb-4 max-w-sm">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search categories..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
-      </div>
+      <AdminSearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Search categories..."
+        className="max-w-sm"
+      />
 
       <DataTable
         columns={[
           {
             key: "name",
             label: "Category",
+            className: ADMIN_TABLE.userCell,
             render: (c) => (
-              <div>
-                <p className="text-sm font-medium text-dark">{c.name}</p>
-                <p className="text-xs text-warm-gray">{c.slug}</p>
+              <div className="min-w-0">
+                <p className="font-medium text-dark">{c.name}</p>
+                <p className="text-xs text-warm-gray truncate">{c.slug}</p>
               </div>
             ),
           },
           {
             key: "product_count",
             label: "Products",
+            className: "whitespace-nowrap",
             render: (c) =>
               c.product_count > 0 ? (
                 <Badge className="border-gold/30 bg-gold/10 text-xs text-gold">
@@ -199,26 +201,28 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
           },
           {
             key: "actions",
-            label: "",
+            label: "Actions",
             render: (c) => (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 hover:text-destructive"
-                onClick={() => handleDelete(c)}
-                disabled={deletingId === c.id}
-                title={
-                  c.product_count > 0
-                    ? "Categories with products cannot be deleted"
-                    : "Delete category"
-                }
-              >
-                {deletingId === c.id ? (
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Trash2 className="h-3.5 w-3.5" />
-                )}
-              </Button>
+              <div className="flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 hover:text-destructive"
+                  onClick={() => handleDelete(c)}
+                  disabled={deletingId === c.id}
+                  title={
+                    c.product_count > 0
+                      ? "Categories with products cannot be deleted"
+                      : "Delete category"
+                  }
+                >
+                  {deletingId === c.id ? (
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-3.5 w-3.5" />
+                  )}
+                </Button>
+              </div>
             ),
           },
         ]}

@@ -15,6 +15,7 @@ export interface ShiprocketOrderPayload {
   order_date: string;
   pickup_location: string;
   billing_customer_name: string;
+  billing_last_name: string;
   billing_phone: string;
   billing_address: string;
   billing_city: string;

@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { SITE_NAME, SITE_TAGLINE } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
 import { buildLoginHref, sanitizeCallbackUrl } from "@/lib/auth/callback-url";
+import { APP_ERRORS } from "@/constants/errors";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
 import { User, Mail, Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -86,7 +88,7 @@ export function RegisterForm() {
         if (res.status === 409) {
           setFieldErrors({ email: data.error });
         } else {
-          toast.error(data.error ?? "Registration failed. Please try again.");
+          toastError(data.error, APP_ERRORS.REGISTRATION_FAILED);
         }
         setLoading(false);
         return;
@@ -108,8 +110,8 @@ export function RegisterForm() {
       } else if (result?.url) {
         window.location.href = result.url;
       }
-    } catch {
-      toast.error("Something went wrong. Please try again.");
+    } catch (err) {
+      toastError(err, APP_ERRORS.GENERIC);
       setLoading(false);
     }
   };

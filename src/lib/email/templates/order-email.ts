@@ -129,6 +129,12 @@ export function buildCustomerOrderEmailHtml(payload: OrderEmailPayload): string 
   const shortId = formatOrderId(payload.orderId);
   const name = escapeHtml(payload.customerName ?? "Valued Customer");
   const orderUrl = `${process.env.NEXT_PUBLIC_APP_URL}/orders/${payload.orderId}`;
+  const deliveryRow = payload.estimatedDeliveryDate
+    ? `<tr>
+          <td style="padding:0 16px 14px;color:${COLORS.muted};font-size:13px;">Est. delivery</td>
+          <td style="padding:0 16px 14px;color:${COLORS.gold};font-size:13px;font-weight:700;text-align:right;">${escapeHtml(payload.estimatedDeliveryDate)}</td>
+        </tr>`
+    : "";
 
   return wrapEmailLayout({
     title: "Order confirmed",
@@ -145,6 +151,7 @@ export function buildCustomerOrderEmailHtml(payload: OrderEmailPayload): string 
           <td style="padding:0 16px 14px;color:${COLORS.muted};font-size:13px;">Payment</td>
           <td style="padding:0 16px 14px;color:#15803d;font-size:13px;font-weight:700;text-align:right;">Paid</td>
         </tr>
+        ${deliveryRow}
       </table>
       ${buildOrderItemsTable(payload.items)}
       ${buildTotalsTable(payload)}

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
+import { apiError } from "@/lib/errors/api-response";
 import { createClient } from "@/lib/supabase/server";
 import type { Order } from "@/types/order";
 
@@ -35,7 +37,7 @@ export async function GET(request: Request) {
   const { data, error, count } = await query;
 
   if (error) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+    return apiError(error, APP_ERRORS.GENERIC);
   }
 
   return NextResponse.json({

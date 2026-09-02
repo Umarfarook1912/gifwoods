@@ -26,8 +26,11 @@ export const ROUTES = {
     PRODUCTS: "/admin/products",
     CATEGORIES: "/admin/categories",
     ORDERS: "/admin/orders",
-    USERS: "/admin/users",
+    ADMINS: "/admin/admins",
+    CUSTOMERS: "/admin/customers",
     REVIEWS: "/admin/reviews",
+    /** @deprecated Use ADMIN.CUSTOMERS */
+    USERS: "/admin/customers",
   },
 } as const;
 

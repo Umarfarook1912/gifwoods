@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
+import { apiError } from "@/lib/errors/api-response";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPaymentStatus } from "@/lib/orders/status";
 import { isCustomizationComplete } from "@/lib/customization";
@@ -113,7 +115,7 @@ export async function PATCH(
     .single();
 
   if (updErr) {
-    return NextResponse.json({ data: null, error: updErr.message }, { status: 500 });
+    return apiError(updErr, APP_ERRORS.CUSTOMIZATION_SUBMIT_FAILED);
   }
 
   return NextResponse.json({ data: updated, error: null });

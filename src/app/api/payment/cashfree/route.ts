@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
 import {
   createCashfreeOrder,
   createCashfreeOrderId,
 } from "@/lib/payment/cashfree";
+import { apiError } from "@/lib/errors/api-response";
+import { toUserErrorMessage } from "@/lib/errors/user-message";
 import { createClient } from "@/lib/supabase/server";
 import { calculateShipping } from "@/lib/orders/pricing";
 import { API_ENDPOINTS } from "@/constants/api";
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
   const body = await request.json();
   const parsed = orderPayloadSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ data: null, error: parsed.error.message }, { status: 400 });
+    return NextResponse.json({ data: null, error: APP_ERRORS.VALIDATION }, { status: 400 });
   }
 
   const supabase = await createClient();
@@ -87,7 +90,11 @@ export async function POST(request: Request) {
     .single();
 
   if (orderError || !order) {
-    return NextResponse.json({ data: null, error: orderError?.message }, { status: 500 });
+    console.error(APP_ERRORS.ORDER_CREATE_FAILED, orderError);
+    return NextResponse.json(
+      { data: null, error: toUserErrorMessage(orderError, APP_ERRORS.ORDER_CREATE_FAILED) },
+      { status: 500 }
+    );
   }
 
   const { error: itemsError } = await supabase.from("order_items").insert(
@@ -101,10 +108,7 @@ export async function POST(request: Request) {
   );
   if (itemsError) {
     await supabase.from("orders").delete().eq("id", order.id);
-    return NextResponse.json(
-      { data: null, error: itemsError.message },
-      { status: 500 }
-    );
+    return apiError(itemsError, APP_ERRORS.ORDER_CREATE_FAILED);
   }
 
   try {
@@ -137,12 +141,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     await supabase.from("orders").update({ status: "cancelled" }).eq("id", order.id);
-    return NextResponse.json(
-      {
-        data: null,
-        error: error instanceof Error ? error.message : "Payment initiation failed",
-      },
-      { status: 502 }
-    );
+    return apiError(error, APP_ERRORS.PAYMENT_INIT_FAILED, 502);
   }
 }

@@ -3,16 +3,19 @@ import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { redirect, notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { CreditCard, ExternalLink, Package } from "lucide-react";
+import { CalendarDays, CreditCard } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Separator } from "@/components/ui/separator";
 import { ReviewForm } from "@/components/features/reviews/ReviewForm";
 import { PaymentReturnNotice } from "@/components/features/orders/PaymentReturnNotice";
 import { OrderStatusBadges } from "@/components/shared/OrderStatusBadges";
 import { OrderItemCustomization } from "@/components/features/orders/OrderItemCustomization";
+import { OrderTracking } from "@/components/features/orders/OrderTracking";
 import { formatPrice, formatDate, formatOrderId } from "@/lib/utils/formatters";
 import { getPaymentStatus } from "@/lib/orders/status";
+import { getShiprocketDeliveryEstimate } from "@/lib/shipping/delivery-estimate";
 import { ROUTES } from "@/constants/routes";
+import { DELIVERY_COPY } from "@/constants/shipping";
 import { buildLoginHref } from "@/lib/auth/callback-url";
 import type { Order, OrderItem } from "@/types/order";
 import type { Product } from "@/types/product";
@@ -49,6 +52,26 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
   const addr = typedOrder.shipping_address;
   const isPaid = getPaymentStatus(typedOrder) === "paid";
   const isOwner = typedOrder.user_id === userId;
+  const showTracking = ["processing", "shipped", "delivered"].includes(typedOrder.status);
+
+  // Server-side delivery estimate using saved delivery pincode
+  let formattedDeliveryDate: string | null = null;
+  if (showTracking && addr?.pincode) {
+    try {
+      const firstProduct = typedOrder.order_items?.[0]?.product as Product | undefined;
+      const estimate = await getShiprocketDeliveryEstimate({
+        pincode: addr.pincode,
+        product: firstProduct ?? { customization_text: false, customization_image: false },
+        pickupPostcode: process.env.SHIPROCKET_PICKUP_PINCODE ?? "",
+        declaredValue: Number(typedOrder.total),
+      });
+      if (estimate.serviceable && estimate.formattedDate) {
+        formattedDeliveryDate = estimate.formattedDate;
+      }
+    } catch {
+      // Non-blocking — shipping estimate failure must not break the page
+    }
+  }
 
   return (
     <div className="min-h-screen bg-cream py-10">
@@ -63,6 +86,33 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
           </div>
           <OrderStatusBadges order={typedOrder} />
         </div>
+
+        {/* Expected delivery date */}
+        {formattedDeliveryDate && showTracking && (
+          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-gold/30 bg-gold/5 p-5">
+            <CalendarDays className="h-5 w-5 text-gold shrink-0" />
+            <div>
+              <p className="text-xs text-warm-gray uppercase tracking-wide font-medium">
+                {DELIVERY_COPY.EXPECTED_DELIVERY_BY}
+              </p>
+              <p className="text-lg font-bold text-dark mt-0.5">{formattedDeliveryDate}</p>
+              {typedOrder.courier_name && (
+                <p className="text-xs text-warm-gray mt-0.5">via {typedOrder.courier_name}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Live tracking timeline */}
+        {typedOrder.awb_code && showTracking && (
+          <OrderTracking
+            orderId={typedOrder.id}
+            awbCode={typedOrder.awb_code}
+            courierName={typedOrder.courier_name}
+            trackingUrl={typedOrder.tracking_url}
+            status={typedOrder.status}
+          />
+        )}
 
         {/* Order items */}
         <div className="bg-white rounded-2xl border border-border p-6 mb-6">
@@ -127,39 +177,6 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
           </div>
         </div>
 
-        {/* Tracking section — show when AWB is assigned */}
-        {typedOrder.awb_code &&
-          ["processing", "shipped", "delivered"].includes(typedOrder.status) && (
-          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-border bg-white p-5">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/15">
-              <Package className="h-4 w-4 text-gold" />
-            </span>
-            <div className="flex-1">
-              <h2 className="font-semibold text-dark">Shipment Tracking</h2>
-              <p className="mt-1 text-sm text-warm-gray">
-                Courier:{" "}
-                <span className="font-medium text-dark">
-                  {typedOrder.courier_name ?? "Assigned"}
-                </span>
-              </p>
-              <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-                AWB: {typedOrder.awb_code}
-              </p>
-              {typedOrder.tracking_url && (
-                <a
-                  href={typedOrder.tracking_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-gold hover:text-gold-dark"
-                >
-                  Track your order
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </a>
-              )}
-            </div>
-          </div>
-        )}
-
         {typedOrder.payment_id && (
           <div className="mb-6 flex items-start gap-3 rounded-2xl border border-border bg-white p-5">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/15">
@@ -199,10 +216,7 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
               return (
                 <div key={item.id} className="mb-8">
                   <p className="font-medium text-dark mb-4">{product.name}</p>
-                  <ReviewForm
-                    productId={product.id}
-                    orderId={typedOrder.id}
-                  />
+                  <ReviewForm productId={product.id} orderId={typedOrder.id} />
                   <Separator className="mt-6" />
                 </div>
               );

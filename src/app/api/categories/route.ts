@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { createClient } from "@/lib/supabase/server";
 import { auth, hasApiPermission } from "@/lib/auth/auth";
+import { apiError } from "@/lib/errors/api-response";
 import { slugify } from "@/lib/utils/formatters";
 
 export async function GET(request: Request) {
@@ -26,7 +28,7 @@ export async function GET(request: Request) {
   const { data, error } = await query;
 
   if (error) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+    return apiError(error, APP_ERRORS.CATEGORY_LOAD_FAILED);
   }
 
   const categories = (data ?? []).map((row) => {
@@ -79,7 +81,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+    return apiError(error, APP_ERRORS.CATEGORY_ADD_FAILED);
   }
 
   return NextResponse.json({ data, error: null }, { status: 201 });

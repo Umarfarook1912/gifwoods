@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
+import { apiError } from "@/lib/errors/api-response";
 import { reviewSchema } from "@/lib/utils/validators";
 import { getProductReviews, getAllReviews, createReview } from "@/lib/supabase/reviews-db";
 import { createClient } from "@/lib/supabase/server";
@@ -18,8 +20,8 @@ export async function GET(request: Request) {
       const data = await getAllReviews();
       return NextResponse.json({ data, error: null });
     }
-  } catch (error: any) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+  } catch (error) {
+    return apiError(error, APP_ERRORS.GENERIC);
   }
 }
 
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
   const body = await request.json();
   const parsed = reviewSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ data: null, error: parsed.error.message }, { status: 400 });
+    return NextResponse.json({ data: null, error: APP_ERRORS.VALIDATION }, { status: 400 });
   }
 
   const userId = session.user.supabaseId ?? session.user.id;
@@ -71,7 +73,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ data, error: null }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+  } catch (error) {
+    return apiError(error, APP_ERRORS.REVIEW_SUBMIT_FAILED);
   }
 }

@@ -11,6 +11,8 @@ import {
 import { InteractiveBarChart } from "./InteractiveBarChart";
 import { DashboardStatusChart } from "./DashboardStatusChart";
 import { API_ENDPOINTS } from "@/constants/api";
+import { APP_ERRORS } from "@/constants/errors";
+import { toUserErrorMessage } from "@/lib/errors/user-message";
 import {
   DASHBOARD_COPY,
   DASHBOARD_METRICS,
@@ -55,7 +57,7 @@ export function AdminAnalyticsPanel({ initialData }: Props) {
         setData(json.data as AnalyticsSeriesResponse);
       } catch (e) {
         if (e instanceof DOMException && e.name === "AbortError") return;
-        setError(e instanceof Error ? e.message : "Failed to load analytics");
+        setError(toUserErrorMessage(e, APP_ERRORS.ANALYTICS_LOAD_FAILED));
       } finally {
         setLoading(false);
       }

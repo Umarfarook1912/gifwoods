@@ -10,16 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Loader2, Shield } from "lucide-react";
+import { APP_ERRORS } from "@/constants/errors";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
-
-const AVAILABLE_PERMISSIONS = [
-  { id: "dashboard", label: "Dashboard", description: "Access to view KPIs, analytics and store activity charts." },
-  { id: "products", label: "Products", description: "Create, view, modify and delete catalog products." },
-  { id: "categories", label: "Categories", description: "Organise products into sub-groups and taxonomies." },
-  { id: "orders", label: "Orders", description: "View purchases, update fulfillment statuses, track payment status." },
-  { id: "users", label: "Users & Admins", description: "Manage database profiles and assign admin credentials." },
-  { id: "reviews", label: "Reviews", description: "Moderate, approve or delete client product testimonials." },
-];
+import { ROUTES } from "@/constants/routes";
+import { ADMIN_PERMISSIONS, expandLegacyPermissions } from "@/constants/admin-permissions";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -50,12 +45,12 @@ export default function EditAdminPage({ params }: Props) {
           setName(profile.name || "");
           setEmail(profile.email || "");
           setAccStatus(profile.status || "active");
-          setSelectedPermissions(profile.permissions || []);
+          setSelectedPermissions(expandLegacyPermissions(profile.permissions || []));
         } else {
-          toast.error("Failed to load user profile.");
+          toastError(json.error, APP_ERRORS.NOT_FOUND);
         }
       })
-      .catch(() => toast.error("An error occurred while loading user profile."))
+      .catch((err) => toastError(err, APP_ERRORS.GENERIC))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -82,10 +77,10 @@ export default function EditAdminPage({ params }: Props) {
   };
 
   const handleSelectAll = () => {
-    if (selectedPermissions.length === AVAILABLE_PERMISSIONS.length) {
+    if (selectedPermissions.length === ADMIN_PERMISSIONS.length) {
       setSelectedPermissions([]);
     } else {
-      setSelectedPermissions(AVAILABLE_PERMISSIONS.map((p) => p.id));
+      setSelectedPermissions(ADMIN_PERMISSIONS.map((p) => p.id));
     }
   };
 
@@ -120,12 +115,12 @@ export default function EditAdminPage({ params }: Props) {
         toast.success("Admin details updated successfully.");
         
         // If editing own details (Super Admin editing themselves), they can check status
-        router.push("/admin/users");
+        router.push(ROUTES.ADMIN.ADMINS);
       } else {
-        toast.error(json.error || "Failed to update Admin details.");
+        toastError(json.error, APP_ERRORS.ADMIN_UPDATE_FAILED);
       }
     } catch (err) {
-      toast.error("An error occurred. Please try again.");
+      toastError(err, APP_ERRORS.GENERIC);
     } finally {
       setSaving(false);
     }
@@ -135,7 +130,7 @@ export default function EditAdminPage({ params }: Props) {
     <div className="p-6 md:p-8 max-w-4xl space-y-6">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" asChild className="shrink-0">
-          <Link href="/admin/users">
+          <Link href={ROUTES.ADMIN.ADMINS}>
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
@@ -226,12 +221,12 @@ export default function EditAdminPage({ params }: Props) {
               onClick={handleSelectAll}
               className="text-xs font-semibold"
             >
-              {selectedPermissions.length === AVAILABLE_PERMISSIONS.length ? "Deselect All" : "Select All"}
+              {selectedPermissions.length === ADMIN_PERMISSIONS.length ? "Deselect All" : "Select All"}
             </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {AVAILABLE_PERMISSIONS.map((perm) => {
+            {ADMIN_PERMISSIONS.map((perm) => {
               const isChecked = selectedPermissions.includes(perm.id);
               return (
                 <div
@@ -268,7 +263,7 @@ export default function EditAdminPage({ params }: Props) {
 
         <div className="flex justify-end gap-3 pt-4">
           <Button variant="outline" asChild disabled={saving}>
-            <Link href="/admin/users">Cancel</Link>
+            <Link href={ROUTES.ADMIN.ADMINS}>Cancel</Link>
           </Button>
           <Button type="submit" disabled={saving} className="bg-dark text-white hover:bg-secondary-dark font-semibold">
             {saving ? (

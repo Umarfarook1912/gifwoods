@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
+import { apiError } from "@/lib/errors/api-response";
+import { toUserErrorMessage } from "@/lib/errors/user-message";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
@@ -23,11 +26,15 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+      console.error(APP_ERRORS.PASSWORD_UPDATE_FAILED, error);
+      return NextResponse.json(
+        { data: null, error: toUserErrorMessage(error, APP_ERRORS.PASSWORD_UPDATE_FAILED) },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ data: { success: true }, error: null });
-  } catch (error: any) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+  } catch (error) {
+    return apiError(error, APP_ERRORS.PASSWORD_UPDATE_FAILED);
   }
 }

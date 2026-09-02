@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { createClient } from "@/lib/supabase/server";
 import { auth, hasApiPermission } from "@/lib/auth/auth";
+import { apiError } from "@/lib/errors/api-response";
+import { toUserErrorMessage } from "@/lib/errors/user-message";
 import { productSchema } from "@/lib/utils/validators";
 
 export async function GET(
@@ -39,11 +42,7 @@ export async function PATCH(
   const body = await request.json();
   const parsed = productSchema.partial().safeParse(body);
   if (!parsed.success) {
-    const firstIssue = parsed.error.issues[0];
-    const errorMsg = firstIssue
-      ? `${firstIssue.path.length ? firstIssue.path.join(".") + ": " : ""}${firstIssue.message}`
-      : "Invalid product data";
-    return NextResponse.json({ data: null, error: errorMsg }, { status: 400 });
+    return NextResponse.json({ data: null, error: APP_ERRORS.VALIDATION }, { status: 400 });
   }
 
   const { new_category_name, ...productData } = parsed.data;
@@ -79,7 +78,11 @@ export async function PATCH(
         .single();
 
       if (insertCatError) {
-        return NextResponse.json({ data: null, error: `Failed to create category: ${insertCatError.message}` }, { status: 500 });
+        console.error(APP_ERRORS.CATEGORY_ADD_FAILED, insertCatError);
+        return NextResponse.json(
+          { data: null, error: toUserErrorMessage(insertCatError, APP_ERRORS.CATEGORY_ADD_FAILED) },
+          { status: 500 }
+        );
       }
 
       newCategoryObj = newCat;
@@ -100,7 +103,7 @@ export async function PATCH(
     .single();
 
   if (error) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+    return apiError(error, APP_ERRORS.PRODUCT_SAVE_FAILED);
   }
 
   return NextResponse.json({ data, newCategory: newCategoryObj, error: null });
@@ -132,7 +135,7 @@ export async function DELETE(
       .eq("id", id);
 
     if (error) {
-      return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+      return apiError(error, APP_ERRORS.PRODUCT_DELETE_FAILED);
     }
     return NextResponse.json({ data: { id, action: "archived" }, error: null });
   }
@@ -140,7 +143,7 @@ export async function DELETE(
   const { error } = await supabase.from("products").delete().eq("id", id);
 
   if (error) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+    return apiError(error, APP_ERRORS.PRODUCT_DELETE_FAILED);
   }
 
   return NextResponse.json({ data: { id, action: "deleted" }, error: null });

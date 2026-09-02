@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
+import { mapAuthErrorMessage } from "@/lib/errors/user-message";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
@@ -57,7 +59,10 @@ export async function POST(request: Request) {
           { status: 409 }
         );
       }
-      return NextResponse.json({ error: authError.message }, { status: 400 });
+      return NextResponse.json(
+        { error: mapAuthErrorMessage(authError.message, APP_ERRORS.REGISTRATION_FAILED) },
+        { status: 400 }
+      );
     }
 
     if (!authData.user) {
@@ -87,7 +92,7 @@ export async function POST(request: Request) {
       await supabase.auth.admin.deleteUser(authData.user.id);
       console.error("Profile creation error:", profileError.message);
       return NextResponse.json(
-        { error: "Account setup failed. Please try again." },
+        { error: APP_ERRORS.ACCOUNT_SETUP_FAILED },
         { status: 500 }
       );
     }
@@ -96,7 +101,7 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("Register route error:", err);
     return NextResponse.json(
-      { error: "Internal server error. Please try again." },
+      { error: APP_ERRORS.REGISTRATION_FAILED },
       { status: 500 }
     );
   }

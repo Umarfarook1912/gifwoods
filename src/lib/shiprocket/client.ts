@@ -7,6 +7,7 @@ import type {
   ShiprocketTrackingResponse,
   ShiprocketServiceabilityResponse,
 } from "@/types/shiprocket";
+import { SHIPROCKET_ERRORS } from "@/constants/shipping";
 
 // In-memory token cache (valid for 24 h)
 let cachedToken: string | null = null;
@@ -30,7 +31,8 @@ async function getToken(): Promise<string> {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Shiprocket auth failed: ${text}`);
+    console.error("Shiprocket auth failed:", text);
+    throw new Error(SHIPROCKET_ERRORS.PUSH_FAILED);
   }
 
   const data = (await res.json()) as ShiprocketTokenResponse;
@@ -56,7 +58,8 @@ async function shiprocketFetch<T>(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Shiprocket API error [${res.status}] ${path}: ${text}`);
+    console.error(`Shiprocket API error [${res.status}] ${path}:`, text);
+    throw new Error(SHIPROCKET_ERRORS.PUSH_FAILED);
   }
 
   return res.json() as Promise<T>;
@@ -72,11 +75,17 @@ export async function createShiprocketOrder(
 }
 
 export async function assignAWB(
-  shipmentId: number | string
+  shipmentId: number | string,
+  courierId?: number
 ): Promise<ShiprocketAWBResponse> {
+  const body: { shipment_id: string; courier_id?: number } = {
+    shipment_id: String(shipmentId),
+  };
+  if (courierId) body.courier_id = courierId;
+
   return shiprocketFetch<ShiprocketAWBResponse>("/courier/assign/awb", {
     method: "POST",
-    body: JSON.stringify({ shipment_id: String(shipmentId) }),
+    body: JSON.stringify(body),
   });
 }
 

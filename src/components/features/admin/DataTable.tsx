@@ -1,19 +1,11 @@
 "use client";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
-
 import { cn } from "@/lib/utils/cn";
+import { ADMIN_TABLE } from "@/constants/admin-ui";
 
 function getPageNumbers(currentPage: number, totalPages: number) {
   if (totalPages <= 7) {
@@ -68,6 +60,19 @@ interface Props<T> {
   keyExtractor: (row: T) => string;
 }
 
+function isActionColumn<T>(col: Column<T>): boolean {
+  return col.key === "actions" || col.label === "Actions" || col.label === "";
+}
+
+function columnClass<T>(col: Column<T>, type: "head" | "cell"): string {
+  const isActions = isActionColumn(col);
+  return cn(
+    type === "head" ? ADMIN_TABLE.head : ADMIN_TABLE.cell,
+    isActions && ADMIN_TABLE.actions,
+    col.className
+  );
+}
+
 export function DataTable<T>({
   columns,
   data,
@@ -84,60 +89,67 @@ export function DataTable<T>({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-border overflow-hidden">
-        <Table className="table-fixed w-full">
-          <TableHeader>
-            <TableRow className="bg-muted/50">
+      <div className="overflow-x-auto rounded-xl border border-border bg-white shadow-sm">
+        <table className="w-full min-w-[640px] table-auto border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-border bg-cream/60">
               {columns.map((col) => (
-                <TableHead key={String(col.key)} className={col.className}>
+                <th key={String(col.key)} className={columnClass(col, "head")}>
                   {col.label}
-                </TableHead>
+                </th>
               ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+            </tr>
+          </thead>
+          <tbody>
             {loading ? (
               Array.from({ length: 5 }, (_, i) => (
-                <TableRow key={i}>
+                <tr key={i} className="border-b border-border/60">
                   {columns.map((col) => (
-                    <TableCell key={String(col.key)}>
-                      <Skeleton className="h-4 w-full" />
-                    </TableCell>
+                    <td key={String(col.key)} className={columnClass(col, "cell")}>
+                      <Skeleton className="h-4 w-full max-w-[12rem]" />
+                    </td>
                   ))}
-                </TableRow>
+                </tr>
               ))
             ) : data.length === 0 ? (
-              <TableRow>
-                <TableCell
+              <tr>
+                <td
                   colSpan={columns.length}
-                  className="text-center py-12 text-muted-foreground"
+                  className="px-4 py-14 text-center text-sm text-warm-gray"
                 >
                   {emptyMessage}
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ) : (
-              data.map((row) => (
-                <TableRow key={keyExtractor(row)} className="hover:bg-muted/30 transition-colors">
+              data.map((row, rowIndex) => (
+                <tr
+                  key={keyExtractor(row)}
+                  className={cn(
+                    "border-b border-border/60 transition-colors hover:bg-cream/40",
+                    rowIndex % 2 === 1 && "bg-cream/20"
+                  )}
+                >
                   {columns.map((col) => (
-                    <TableCell key={String(col.key)} className={col.className}>
+                    <td key={String(col.key)} className={columnClass(col, "cell")}>
                       {col.render
                         ? col.render(row)
                         : String((row as Record<string, unknown>)[String(col.key)] ?? "")}
-                    </TableCell>
+                    </td>
                   ))}
-                </TableRow>
+                </tr>
               ))
             )}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
 
       {totalPages > 1 && (
-        <div className="flex flex-col gap-4 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between text-sm">
-          <span className="text-muted-foreground text-center sm:text-left">
-            Showing {Math.min((page - 1) * limit + 1, total)}–{Math.min(page * limit, total)} of {total}
+        <div className="flex flex-col gap-3 border-t border-border pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-warm-gray text-center sm:text-left">
+            Showing {Math.min((page - 1) * limit + 1, total)}–{Math.min(page * limit, total)} of{" "}
+            {total}
           </span>
-          <div className="flex flex-wrap items-center gap-1.5 justify-center sm:justify-end">
+          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:justify-end">
             <Button
               variant="outline"
               size="sm"
@@ -152,7 +164,7 @@ export function DataTable<T>({
                 return (
                   <span
                     key={`dots-${idx}`}
-                    className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground text-xs"
+                    className="inline-flex h-8 w-8 items-center justify-center text-xs text-warm-gray"
                   >
                     ...
                   </span>
@@ -168,10 +180,10 @@ export function DataTable<T>({
                   onClick={() => onPageChange?.(p as number)}
                   disabled={isCurrent}
                   className={cn(
-                    "h-8 w-8 p-0 text-xs font-semibold transition-all",
+                    "h-8 w-8 p-0 text-xs font-semibold",
                     isCurrent
-                      ? "bg-dark text-white hover:bg-dark cursor-default disabled:opacity-100"
-                      : "border-border text-muted-foreground hover:bg-muted"
+                      ? "bg-dark text-white hover:bg-dark disabled:opacity-100"
+                      : "border-border text-warm-gray hover:bg-cream"
                   )}
                 >
                   {p}

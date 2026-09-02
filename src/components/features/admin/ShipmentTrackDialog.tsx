@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, MapPin, PackageCheck, Truck } from "lucide-react";
 import { API_ENDPOINTS } from "@/constants/api";
+import { APP_ERRORS } from "@/constants/errors";
+import { toUserErrorMessage } from "@/lib/errors/user-message";
 import type { ShiprocketTrackingResponse, ShiprocketTrackingActivity } from "@/types/shiprocket";
 
 interface Props {
@@ -36,7 +38,7 @@ export function ShipmentTrackDialog({ orderId, awbCode, onClose }: Props) {
       const res = await fetch(API_ENDPOINTS.ORDER_TRACK(orderId));
       const json = (await res.json()) as { data: ShiprocketTrackingResponse | null; error: string | null };
       if (!res.ok || !json.data) {
-        setError(json.error ?? "Failed to fetch tracking");
+        setError(toUserErrorMessage(json.error, APP_ERRORS.TRACKING_LOAD_FAILED));
         return;
       }
       const td = json.data.tracking_data;
@@ -45,8 +47,8 @@ export function ShipmentTrackDialog({ orderId, awbCode, onClose }: Props) {
         td.shipment_track_activities ?? td.shipment_track ?? []
       );
       setFetched(true);
-    } catch {
-      setError("Network error");
+    } catch (err) {
+      setError(toUserErrorMessage(err, APP_ERRORS.NETWORK));
     } finally {
       setLoading(false);
     }

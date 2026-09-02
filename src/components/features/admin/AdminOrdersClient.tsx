@@ -1,23 +1,28 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { DataTable } from "./DataTable";
 import { OrderStatusDialog } from "./OrderStatusDialog";
 import { OrderStatusBadges } from "@/components/shared/OrderStatusBadges";
 import { ShipmentTrackDialog } from "./ShipmentTrackDialog";
+import { AdminPageHeader, AdminSearchInput } from "./AdminListSection";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AdminOrderCustomization } from "./AdminOrderCustomization";
 import { AdminCustomizationDialog } from "./AdminCustomizationDialog";
 import { formatPrice, formatDate } from "@/lib/utils/formatters";
 import { getOrderProductSummary } from "@/lib/orders/display";
-import { Eye, ListRestart, Loader2, Search, Truck, Trash2 } from "lucide-react";
+import { ADMIN_PAGE, ADMIN_TABLE } from "@/constants/admin-ui";
+import { Eye, ListRestart, Loader2, Truck, Trash2 } from "lucide-react";
 import { ORDER_STATUSES } from "@/constants/ui";
 import { CUSTOMIZATION_COPY } from "@/constants/customization";
 import { useConfirm } from "@/hooks/useConfirm";
 import { CONFIRMATIONS } from "@/constants/confirmations";
 import { API_ENDPOINTS } from "@/constants/api";
+import { APP_ERRORS } from "@/constants/errors";
+import { SHIPROCKET_ERRORS } from "@/constants/shipping";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
 import type { Order, OrderStatus } from "@/types/order";
 import type { UserProfile } from "@/types/user";
@@ -27,6 +32,7 @@ interface Props {
 }
 
 export function AdminOrdersClient({ initialOrders }: Props) {
+  const router = useRouter();
   const confirm = useConfirm();
   const [orders, setOrders] = useState(initialOrders);
   const [search, setSearch] = useState("");
@@ -77,13 +83,13 @@ export function AdminOrdersClient({ initialOrders }: Props) {
       const res = await fetch(API_ENDPOINTS.ORDER(id), { method: "DELETE" });
       const json = await res.json();
       if (!res.ok || json.error) {
-        toast.error(json.error ?? "Failed to delete order");
+        toastError(json.error, APP_ERRORS.ORDER_DELETE_FAILED);
         return;
       }
       setOrders((prev) => prev.filter((o) => o.id !== id));
       toast.success("Order deleted permanently");
     } catch (err) {
-      toast.error("Failed to delete order");
+      toastError(err, APP_ERRORS.ORDER_DELETE_FAILED);
       console.error(err);
     }
   };
@@ -96,26 +102,28 @@ export function AdminOrdersClient({ initialOrders }: Props) {
       });
       const json = await res.json();
       if (!res.ok || json.error) {
-        toast.error(json.error ?? "Failed to push to Shiprocket");
+        toastError(json.error, SHIPROCKET_ERRORS.PUSH_FAILED);
         return;
       }
       toast.success("Shipment created on Shiprocket");
-    } catch {
-      toast.error("Network error — could not push to Shiprocket");
+      router.refresh();
+    } catch (err) {
+      toastError(err, SHIPROCKET_ERRORS.PUSH_FAILED);
     } finally {
       setPushingId(null);
     }
   };
 
   return (
-    <div className="p-6 md:p-8">
-      <h1 className="font-display text-2xl font-bold text-dark mb-6">Orders</h1>
+    <div className={ADMIN_PAGE.shell}>
+      <AdminPageHeader title="Orders" />
 
-      <div className="flex gap-3 mb-6 flex-wrap">
-        <div className="relative flex-1 min-w-48">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search by ID, name, email..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
-        </div>
+      <div className={ADMIN_PAGE.filters}>
+        <AdminSearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Search by ID, name, email..."
+        />
         <Select value={statusFilter} onValueChange={(v) => v && setStatusFilter(v)}>
           <SelectTrigger className="w-36"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
@@ -127,16 +135,16 @@ export function AdminOrdersClient({ initialOrders }: Props) {
 
       <DataTable
         columns={[
-          { key: "product", label: "Product", className: "whitespace-normal max-w-[10rem] sm:max-w-[14rem]", render: (o) => (
-            <span className="text-sm font-semibold text-dark line-clamp-2">
+          { key: "product", label: "Product", className: `${ADMIN_TABLE.userCell} whitespace-normal`, render: (o) => (
+            <span className="font-semibold text-dark line-clamp-2">
               {getOrderProductSummary(o)}
             </span>
           )},
-          { key: "user", label: "Customer", className: "whitespace-normal", render: (o) => {
+          { key: "user", label: "Customer", className: "max-w-[180px] whitespace-normal", render: (o) => {
             const user = o.user as UserProfile | null;
             return <div><p className="text-sm font-medium">{user?.name ?? "—"}</p><p className="text-xs text-warm-gray break-all">{user?.email}</p></div>;
           }},
-          { key: "total", label: "Total", render: (o) => <span className="font-semibold">{formatPrice(o.total)}</span> },
+          { key: "total", label: "Total", className: "whitespace-nowrap font-semibold", render: (o) => formatPrice(o.total) },
           { key: "shipment", label: "Shipment", render: (o) => (
             o.awb_code ? (
               <div className="text-xs">
@@ -153,9 +161,11 @@ export function AdminOrdersClient({ initialOrders }: Props) {
           { key: "status", label: "Statuses", className: "whitespace-normal", render: (o) => (
             <OrderStatusBadges order={o} compact />
           )},
-          { key: "created_at", label: "Date", render: (o) => <span className="text-xs text-warm-gray">{formatDate(o.created_at)}</span> },
-          { key: "actions", label: "", render: (o) => (
-            <div className="flex items-center gap-1">
+          { key: "created_at", label: "Date", className: "whitespace-nowrap text-warm-gray", render: (o) => (
+            <span className="text-xs">{formatDate(o.created_at)}</span>
+          )},
+          { key: "actions", label: "Actions", render: (o) => (
+            <div className="flex items-center justify-end gap-1">
               <Button
                 variant="ghost"
                 size="icon"

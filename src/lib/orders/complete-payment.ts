@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendOrderConfirmationEmail } from "@/lib/email/nodemailer";
 import { sendAdminOrderEmail } from "@/lib/email/admin-order-email";
 import { createShiprocketShipment } from "@/lib/shiprocket/create-shipment";
+import { getShiprocketDeliveryEstimate } from "@/lib/shipping/delivery-estimate";
 import type { OrderEmailLineItem } from "@/types/email";
 import type { ShippingAddress } from "@/types/order";
 
@@ -13,7 +14,7 @@ interface OrderUser {
 interface PaidOrderItem {
   quantity: number;
   unit_price: number;
-  product: { name: string } | null;
+  product: { name: string; customization_text?: boolean; customization_image?: boolean } | null;
 }
 
 interface PaidOrder {
@@ -45,7 +46,7 @@ export async function completePaidOrder(
   const { data: current, error: fetchError } = await supabase
     .from("orders")
     .select(
-      "id, status, subtotal, shipping_cost, total, confirmation_email_sent_at, shipping_address, user:profiles(name, email), order_items(quantity, unit_price, product:products(name))"
+      "id, status, subtotal, shipping_cost, total, confirmation_email_sent_at, shipping_address, user:profiles(name, email), order_items(quantity, unit_price, product:products(name, customization_text, customization_image))"
     )
     .eq("id", orderId)
     .single();
@@ -73,6 +74,7 @@ export async function completePaidOrder(
     await createShiprocketShipment({
       id: order.id,
       subtotal: order.subtotal,
+      total: order.total,
       shipping_address: order.shipping_address,
       order_items: order.order_items,
     });
@@ -81,6 +83,26 @@ export async function completePaidOrder(
   }
 
   if (!order.user?.email || order.confirmation_email_sent_at) return;
+
+  // Calculate delivery estimate to include in confirmation email
+  let estimatedDeliveryDate: string | null = null;
+  const pincode = (order.shipping_address as { pincode?: string }).pincode;
+  if (pincode) {
+    try {
+      const firstProduct = order.order_items?.[0]?.product;
+      const estimate = await getShiprocketDeliveryEstimate({
+        pincode,
+        product: firstProduct ?? { customization_text: false, customization_image: false },
+        pickupPostcode: process.env.SHIPROCKET_PICKUP_PINCODE ?? "",
+        declaredValue: Number(order.total),
+      });
+      if (estimate.serviceable && estimate.formattedDate) {
+        estimatedDeliveryDate = estimate.formattedDate;
+      }
+    } catch {
+      // Non-blocking
+    }
+  }
 
   const items = mapEmailItems(order.order_items);
   const emailPayload = {
@@ -98,6 +120,7 @@ export async function completePaidOrder(
     sendOrderConfirmationEmail({
       to: order.user.email,
       userName: order.user.name,
+      estimatedDeliveryDate,
       ...emailPayload,
     }),
     sendAdminOrderEmail(emailPayload),

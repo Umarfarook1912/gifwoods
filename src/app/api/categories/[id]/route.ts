@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { createClient } from "@/lib/supabase/server";
 import { auth, hasApiPermission } from "@/lib/auth/auth";
+import { apiError } from "@/lib/errors/api-response";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -33,7 +35,7 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
   const { error } = await supabase.from("categories").delete().eq("id", id);
 
   if (error) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+    return apiError(error, APP_ERRORS.CATEGORY_DELETE_FAILED);
   }
 
   return NextResponse.json({ data: { id }, error: null });

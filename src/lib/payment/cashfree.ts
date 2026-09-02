@@ -5,6 +5,7 @@ import type {
   CashfreeOrderStatusResponse,
   CashfreePaymentResponse,
 } from "@/types/payment";
+import { APP_ERRORS } from "@/constants/errors";
 
 const CASHFREE_BASE_URL =
   process.env.CASHFREE_ENV === "PROD"
@@ -36,8 +37,9 @@ export async function createCashfreeOrder(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message ?? "Cashfree order creation failed");
+    const error = await response.json().catch(() => null);
+    console.error("Cashfree order creation failed:", error);
+    throw new Error(APP_ERRORS.PAYMENT_INIT_FAILED);
   }
 
   return response.json() as Promise<CashfreeOrderResponse>;
@@ -50,7 +52,7 @@ export async function getCashfreeOrder(
     headers: CASHFREE_HEADERS,
     cache: "no-store",
   });
-  if (!response.ok) throw new Error("Unable to verify Cashfree order");
+  if (!response.ok) throw new Error(APP_ERRORS.PAYMENT_FAILED);
   return response.json() as Promise<CashfreeOrderStatusResponse>;
 }
 

@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth/auth";
 import { NextResponse } from "next/server";
 import { ROUTES } from "@/constants/routes";
 import { buildLoginHref } from "@/lib/auth/callback-url";
+import { getAdminRoutePermission, hasAdminModuleAccess } from "@/constants/admin-permissions";
 
 const ADMIN_PATHS = ["/admin"];
 const AUTH_REQUIRED_PATHS = ["/orders", "/checkout", "/profile"];
@@ -34,13 +35,10 @@ export default auth((req) => {
     // Granular permission check for admins
     if (role === "admin") {
       const permissions = session.user.permissions || [];
-      const adminPathParts = pathname.split("/");
-      const moduleName = adminPathParts[2]; // e.g. "products" from "/admin/products"
-      
-      if (moduleName && moduleName !== "403") {
-        if (!permissions.includes(moduleName)) {
-          return NextResponse.redirect(new URL("/admin/403", req.url));
-        }
+      const requiredPermission = getAdminRoutePermission(pathname);
+
+      if (requiredPermission && !hasAdminModuleAccess(permissions, requiredPermission)) {
+        return NextResponse.redirect(new URL("/admin/403", req.url));
       }
     }
   }

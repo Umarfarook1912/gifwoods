@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
+import { apiError } from "@/lib/errors/api-response";
 import { getAddresses, createAddress } from "@/lib/supabase/profile-db";
 
 export async function GET() {
@@ -12,8 +14,8 @@ export async function GET() {
     const userId = session.user.supabaseId ?? session.user.id;
     const data = await getAddresses(userId);
     return NextResponse.json({ data, error: null });
-  } catch (error: any) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+  } catch (error) {
+    return apiError(error, APP_ERRORS.GENERIC);
   }
 }
 
@@ -47,7 +49,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ data, error: null }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+  } catch (error) {
+    return apiError(error, APP_ERRORS.ADDRESS_SAVE_FAILED);
   }
 }

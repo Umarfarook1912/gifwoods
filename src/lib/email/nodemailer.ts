@@ -16,6 +16,7 @@ interface OrderConfirmationProps {
   subtotal: number;
   shippingCost: number;
   items: OrderEmailLineItem[];
+  estimatedDeliveryDate?: string | null;
 }
 
 export async function sendOrderConfirmationEmail({
@@ -26,6 +27,7 @@ export async function sendOrderConfirmationEmail({
   subtotal,
   shippingCost,
   items,
+  estimatedDeliveryDate,
 }: OrderConfirmationProps) {
   const name = userName ?? "Valued Customer";
 
@@ -41,6 +43,7 @@ export async function sendOrderConfirmationEmail({
       subtotal,
       shippingCost,
       total,
+      estimatedDeliveryDate,
     }),
   });
 }

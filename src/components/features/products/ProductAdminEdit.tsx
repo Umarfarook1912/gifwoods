@@ -9,6 +9,8 @@ import { AdminProductForm } from "@/components/features/admin/AdminProductForm";
 import { API_ENDPOINTS } from "@/constants/api";
 import { PRODUCT_EDIT_LABEL } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
+import { APP_ERRORS } from "@/constants/errors";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
 import type { Category, Product } from "@/types/product";
 
@@ -38,7 +40,7 @@ export function ProductAdminEdit({ product, onUpdated }: Props) {
       if (!res.ok || json.error) throw new Error(json.error ?? "Failed to load categories");
       setCategories(json.data ?? []);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to load categories");
+      toastError(e, APP_ERRORS.CATEGORY_LOAD_FAILED);
       setOpen(false);
     } finally {
       setLoadingCategories(false);

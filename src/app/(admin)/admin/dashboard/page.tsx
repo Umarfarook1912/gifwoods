@@ -12,8 +12,7 @@ import {
 } from "@/lib/admin/dashboard-stats";
 import { formatPrice } from "@/lib/utils/formatters";
 import { getOrderProductSummary } from "@/lib/orders/display";
-import type { OrderStatusSummary } from "@/lib/orders/status";
-import type { Order } from "@/types/order";
+import { ADMIN_PAGE } from "@/constants/admin-ui";
 
 export const metadata: Metadata = { title: "Admin Dashboard" };
 export const dynamic = "force-dynamic";
@@ -47,7 +46,7 @@ export default async function AdminDashboardPage() {
       value: kpis.products,
       href: ROUTES.ADMIN.PRODUCTS,
     },
-    { key: "users" as const, label: "Total Users", value: kpis.users, href: ROUTES.ADMIN.USERS },
+    { key: "users" as const, label: "Total Users", value: kpis.users, href: ROUTES.ADMIN.CUSTOMERS },
     {
       key: "reviews" as const,
       label: "Pending Reviews",
@@ -57,7 +56,7 @@ export default async function AdminDashboardPage() {
   ];
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl space-y-8">
+    <div className={`${ADMIN_PAGE.shell} max-w-6xl`}>
       <div>
         <h1 className="font-display text-2xl font-bold text-dark">{DASHBOARD_COPY.TITLE}</h1>
         <p className="text-sm text-warm-gray mt-1">{DASHBOARD_COPY.SUBTITLE}</p>

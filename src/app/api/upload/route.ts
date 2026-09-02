@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
+import { apiError } from "@/lib/errors/api-response";
 import { CUSTOMIZATION_UPLOAD } from "@/constants/customization";
 import { avatarFolder, uploadToImageKit } from "@/lib/imagekit/upload";
 
@@ -35,7 +37,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ data: { url: uploaded.url }, error: null });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to upload file";
-    return NextResponse.json({ data: null, error: message }, { status: 500 });
+    return apiError(error, APP_ERRORS.UPLOAD_FAILED);
   }
 }

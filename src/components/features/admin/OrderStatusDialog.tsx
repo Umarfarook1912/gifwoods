@@ -19,6 +19,8 @@ import {
 import { API_ENDPOINTS } from "@/constants/api";
 import { FULFILLMENT_STATUSES } from "@/constants/ui";
 import { getOrderProductSummary } from "@/lib/orders/display";
+import { APP_ERRORS } from "@/constants/errors";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
 import type { Order, OrderStatus } from "@/types/order";
 
@@ -51,7 +53,7 @@ export function OrderStatusDialog({ order, onClose, onUpdated }: Props) {
       toast.success("Order status updated");
       onClose();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Update failed");
+      toastError(error, APP_ERRORS.ORDER_UPDATE_FAILED);
     } finally {
       setSaving(false);
     }

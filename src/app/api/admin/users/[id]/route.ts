@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
+import { mapAuthErrorMessage, toUserErrorMessage } from "@/lib/errors/user-message";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function PUT(
@@ -36,7 +38,10 @@ export async function PUT(
         password: password,
       });
       if (authError) {
-        return NextResponse.json({ error: authError.message }, { status: 400 });
+        return NextResponse.json(
+          { error: mapAuthErrorMessage(authError.message, APP_ERRORS.ADMIN_UPDATE_FAILED) },
+          { status: 400 }
+        );
       }
     }
 
@@ -55,7 +60,11 @@ export async function PUT(
       .single();
 
     if (profileError) {
-      return NextResponse.json({ error: profileError.message }, { status: 500 });
+      console.error(APP_ERRORS.ADMIN_UPDATE_FAILED, profileError);
+      return NextResponse.json(
+        { error: toUserErrorMessage(profileError, APP_ERRORS.ADMIN_UPDATE_FAILED) },
+        { status: 500 }
+      );
     }
 
     // 3. Update auth metadata (name) if changed
@@ -69,7 +78,7 @@ export async function PUT(
   } catch (err) {
     console.error("Admin user update API error:", err);
     return NextResponse.json(
-      { error: "Internal server error." },
+      { error: APP_ERRORS.ADMIN_UPDATE_FAILED },
       { status: 500 }
     );
   }
@@ -92,14 +101,18 @@ export async function DELETE(
     const { error } = await supabase.auth.admin.deleteUser(id);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error(APP_ERRORS.ADMIN_DELETE_FAILED, error);
+      return NextResponse.json(
+        { error: toUserErrorMessage(error, APP_ERRORS.ADMIN_DELETE_FAILED) },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Admin user delete API error:", err);
     return NextResponse.json(
-      { error: "Internal server error." },
+      { error: APP_ERRORS.ADMIN_DELETE_FAILED },
       { status: 500 }
     );
   }

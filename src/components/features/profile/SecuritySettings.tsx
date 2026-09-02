@@ -5,6 +5,8 @@ import { Lock, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { APP_ERRORS } from "@/constants/errors";
+import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
 
 export function SecuritySettings() {
@@ -35,8 +37,8 @@ export function SecuritySettings() {
       toast.success("Password changed successfully!");
       setPassword("");
       setConfirmPassword("");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update password");
+    } catch (err) {
+      toastError(err, APP_ERRORS.PASSWORD_UPDATE_FAILED);
     } finally {
       setLoading(false);
     }

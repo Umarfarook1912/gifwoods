@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth, hasApiPermission } from "@/lib/auth/auth";
+import { apiError } from "@/lib/errors/api-response";
 import { createClient } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/nodemailer";
 import { FULFILLMENT_STATUSES } from "@/constants/ui";
@@ -64,7 +66,7 @@ export async function PATCH(
     .select("*, user:profiles(id, name, email)")
     .single();
 
-  if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+  if (error) return apiError(error, APP_ERRORS.ORDER_UPDATE_FAILED);
 
   const typedData = data as {
     tracking_url?: string | null;
@@ -102,7 +104,7 @@ export async function DELETE(
   const { error } = await supabase.from("orders").delete().eq("id", id);
 
   if (error) {
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+    return apiError(error, APP_ERRORS.ORDER_DELETE_FAILED);
   }
 
   return NextResponse.json({ data: { id, action: "deleted" }, error: null });

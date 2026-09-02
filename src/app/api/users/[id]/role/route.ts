@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
+import { toUserErrorMessage } from "@/lib/errors/user-message";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function PATCH(
@@ -26,6 +28,12 @@ export async function PATCH(
     .select()
     .single();
 
-  if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 });
+  if (error) {
+    console.error(APP_ERRORS.ADMIN_PROMOTE_FAILED, error);
+    return NextResponse.json(
+      { data: null, error: toUserErrorMessage(error, APP_ERRORS.ADMIN_PROMOTE_FAILED) },
+      { status: 500 }
+    );
+  }
   return NextResponse.json({ data, error: null });
 }

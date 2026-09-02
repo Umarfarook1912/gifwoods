@@ -14,4 +14,5 @@ export interface OrderEmailPayload {
   shippingCost: number;
   total: number;
   paymentId?: string;
+  estimatedDeliveryDate?: string | null;
 }

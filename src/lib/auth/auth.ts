@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { hasAdminModuleAccess } from "@/constants/admin-permissions";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -189,7 +190,7 @@ export function hasApiPermission(session: any, requiredPermission?: string): boo
   if (role === "super_admin") return true;
   if (role === "admin") {
     if (!requiredPermission) return true;
-    return session.user?.permissions?.includes(requiredPermission) ?? false;
+    return hasAdminModuleAccess(session.user?.permissions, requiredPermission);
   }
   return false;
 }

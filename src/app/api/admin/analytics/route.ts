@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { APP_ERRORS } from "@/constants/errors";
 import { auth, hasApiPermission } from "@/lib/auth/auth";
+import { apiError } from "@/lib/errors/api-response";
 import { getAnalyticsSeries } from "@/lib/admin/dashboard-stats";
 import type { DashboardMetricKey } from "@/types/admin-dashboard";
 
@@ -24,7 +26,6 @@ export async function GET(request: Request) {
     const data = await getAnalyticsSeries(days, metric);
     return NextResponse.json({ data, error: null });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to load analytics";
-    return NextResponse.json({ data: null, error: message }, { status: 500 });
+    return apiError(err, APP_ERRORS.ANALYTICS_LOAD_FAILED);
   }
 }
