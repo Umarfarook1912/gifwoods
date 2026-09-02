@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { ProductImageGallery } from "./ProductImageGallery";
 import { ProductShareButton } from "./ProductShareButton";
 import { ProductAdminEdit } from "./ProductAdminEdit";
+import { DeliveryEstimate } from "./DeliveryEstimate";
 import { StarRating } from "@/components/shared/StarRating";
 import { useCartStore } from "@/hooks/useCartStore";
 import { formatPrice, formatDiscount } from "@/lib/utils/formatters";
@@ -116,6 +117,8 @@ export function ProductDetailClient({ product: initialProduct }: Props) {
         </div>
 
         <Separator className="mb-6" />
+
+        <DeliveryEstimate product={product} />
 
         {productNotice(getCustomizationNeed(product)) && (
           <p className="mb-6 rounded-xl border border-gold/30 bg-gold/5 px-4 py-3 text-sm text-dark">

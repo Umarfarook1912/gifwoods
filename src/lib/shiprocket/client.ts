@@ -5,6 +5,7 @@ import type {
   ShiprocketAWBResponse,
   ShiprocketPickupResponse,
   ShiprocketTrackingResponse,
+  ShiprocketServiceabilityResponse,
 } from "@/types/shiprocket";
 
 // In-memory token cache (valid for 24 h)
@@ -106,4 +107,33 @@ export async function cancelShiprocketOrder(
     method: "POST",
     body: JSON.stringify({ ids: [Number(shiprocketOrderId)] }),
   });
+}
+
+interface ServiceabilityParams {
+  pickupPostcode: string;
+  deliveryPostcode: string;
+  weightKg?: number;
+  cod?: 0 | 1;
+  declaredValue: number;
+}
+
+export async function checkCourierServiceability({
+  pickupPostcode,
+  deliveryPostcode,
+  weightKg = 1,
+  cod = 0,
+  declaredValue,
+}: ServiceabilityParams): Promise<ShiprocketServiceabilityResponse> {
+  const query = new URLSearchParams({
+    pickup_postcode: pickupPostcode,
+    delivery_postcode: deliveryPostcode,
+    cod: String(cod),
+    weight: String(weightKg),
+    declared_value: String(Math.max(1, Math.round(declaredValue))),
+    is_return: "0",
+  });
+
+  return shiprocketFetch<ShiprocketServiceabilityResponse>(
+    `/courier/serviceability/?${query.toString()}`
+  );
 }

@@ -15,4 +15,6 @@ export const QUERY_KEYS = {
   ADMIN_ORDERS: ["admin", "orders"] as const,
   ADMIN_PRODUCTS: ["admin", "products"] as const,
   ADMIN_REVIEWS: ["admin", "reviews"] as const,
+  DELIVERY_ESTIMATE: (pincode: string, price: number, personalized: boolean) =>
+    ["shipping", "delivery-estimate", pincode, price, personalized] as const,
 } as const;

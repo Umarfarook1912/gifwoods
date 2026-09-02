@@ -4,7 +4,6 @@ import { sendOrderStatusEmail } from "@/lib/email/nodemailer";
 import type { OrderStatus } from "@/types/order";
 
 // Shiprocket status codes → our order statuses
-// SR status reference: https://apiv2.shiprocket.in/v1/external/courier/track
 const SR_STATUS_MAP: Record<string, OrderStatus> = {
   "PICKED UP": "shipped",
   "IN TRANSIT": "shipped",
@@ -43,7 +42,6 @@ export async function POST(request: Request) {
 
   const supabase = createAdminClient();
 
-  // Look up order by AWB
   const { data: order, error: fetchError } = await supabase
     .from("orders")
     .select("id, status, tracking_url, user:profiles(name, email)")
@@ -51,18 +49,15 @@ export async function POST(request: Request) {
     .single();
 
   if (fetchError || !order) {
-    // Unknown AWB — return 200 so Shiprocket doesn't retry endlessly
-    console.warn(`Shiprocket webhook: AWB ${awbCode} not found in DB`);
+    console.warn(`Delivery webhook: AWB ${awbCode} not found in DB`);
     return NextResponse.json({ received: true });
   }
 
   const newStatus = SR_STATUS_MAP[srStatus];
   if (!newStatus) {
-    // Status we don't track — acknowledge and move on
     return NextResponse.json({ received: true });
   }
 
-  // Avoid downgrading status (e.g., delivered → shipped)
   const STATUS_RANK: Record<OrderStatus, number> = {
     pending: 0,
     processing: 1,
@@ -76,18 +71,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true });
   }
 
-  // Update order status
   const { error: updateError } = await supabase
     .from("orders")
     .update({ status: newStatus })
     .eq("id", order.id);
 
   if (updateError) {
-    console.error("Shiprocket webhook: DB update failed", updateError);
+    console.error("Delivery webhook: DB update failed", updateError);
     return NextResponse.json({ error: "DB error" }, { status: 500 });
   }
 
-  // Send status email
   const typedOrder = order as unknown as {
     id: string;
     status: string;
@@ -104,7 +97,7 @@ export async function POST(request: Request) {
         trackingUrl: newStatus === "shipped" ? typedOrder.tracking_url : null,
       });
     } catch (emailErr) {
-      console.error("Shiprocket webhook: email failed", emailErr);
+      console.error("Delivery webhook: email failed", emailErr);
     }
   }
 

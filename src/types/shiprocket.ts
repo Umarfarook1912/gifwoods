@@ -80,3 +80,21 @@ export interface ShiprocketShipmentResult {
   courier_name: string;
   tracking_url: string;
 }
+
+export interface ShiprocketCourierCompany {
+  courier_company_id?: number;
+  courier_name?: string;
+  etd?: string;
+  edd?: string;
+  estimated_delivery_days?: string | number;
+  etd_hours?: number;
+  blocked?: number;
+}
+
+export interface ShiprocketServiceabilityResponse {
+  data?: {
+    available_courier_companies?: ShiprocketCourierCompany[];
+  };
+  status?: number;
+  message?: string;
+}

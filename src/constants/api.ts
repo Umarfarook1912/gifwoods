@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   PAYMENT_CASHFREE: "/api/payment/cashfree",
   PAYMENT_VERIFY: "/api/payment/cashfree/verify",
   WEBHOOK_CASHFREE: "/api/webhooks/cashfree",
+  WEBHOOK_DELIVERY_UPDATES: "/api/webhooks/delivery-updates",
   EMAIL: "/api/email",
   CART: "/api/cart",
   USERS: "/api/users",
@@ -22,6 +23,7 @@ export const API_ENDPOINTS = {
   PROFILE_ADDRESSES: "/api/profile/addresses",
   UPLOAD: "/api/upload",
   ADMIN_ANALYTICS: "/api/admin/analytics",
+  SHIPPING_DELIVERY_ESTIMATE: "/api/shipping/delivery-estimate",
   COUNTRY_CALLING_CODES:
     "https://countriesnow.space/api/v0.1/countries/codes",
 } as const;
