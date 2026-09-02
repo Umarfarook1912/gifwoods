@@ -7,13 +7,14 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordStrengthIndicator } from "@/components/features/auth/PasswordStrengthIndicator";
 import { SITE_NAME, SITE_TAGLINE } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
 import { buildLoginHref, sanitizeCallbackUrl } from "@/lib/auth/callback-url";
 import { APP_ERRORS } from "@/constants/errors";
 import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
-import { User, Mail, Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FieldErrors {
@@ -35,14 +36,6 @@ export function RegisterForm() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-
-  // ── Password strength indicator ───────────────────────────────────────────
-  const strength = {
-    length: password.length >= 6,
-    upper: /[A-Z]/.test(password),
-    number: /[0-9]/.test(password),
-  };
-  const strengthScore = Object.values(strength).filter(Boolean).length;
 
   // ── Validation ─────────────────────────────────────────────────────────────
   const validate = (): FieldErrors => {
@@ -203,39 +196,7 @@ export function RegisterForm() {
                 </button>
               </div>
               {fieldErrors.password && <p className="text-xs text-destructive">{fieldErrors.password}</p>}
-
-              {/* Strength indicators */}
-              {password.length > 0 && (
-                <div className="space-y-1.5 pt-1">
-                  <div className="flex gap-1">
-                    {[0, 1, 2].map((i) => (
-                      <div
-                        key={i}
-                        className={cn(
-                          "h-1 flex-1 rounded-full transition-colors duration-300",
-                          strengthScore > i
-                            ? strengthScore === 1 ? "bg-destructive"
-                            : strengthScore === 2 ? "bg-amber-400"
-                            : "bg-emerald-500"
-                            : "bg-muted"
-                        )}
-                      />
-                    ))}
-                  </div>
-                  <ul className="space-y-0.5">
-                    {[
-                      { key: "length", label: "At least 6 characters" },
-                      { key: "upper", label: "One uppercase letter" },
-                      { key: "number", label: "One number" },
-                    ].map(({ key, label }) => (
-                      <li key={key} className={cn("flex items-center gap-1.5 text-xs transition-colors", strength[key as keyof typeof strength] ? "text-emerald-600" : "text-muted-foreground")}>
-                        <CheckCircle2 className="h-3 w-3 shrink-0" />
-                        {label}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <PasswordStrengthIndicator password={password} />
             </div>
 
             {/* Confirm password */}

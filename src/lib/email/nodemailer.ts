@@ -1,9 +1,11 @@
 import { SITE_NAME } from "@/constants/ui";
+import { AUTH_COPY } from "@/constants/auth";
 import { getAdminEmail, sendEmail } from "@/lib/email/transporter";
 import { buildCustomerOrderEmailHtml } from "@/lib/email/templates/order-email";
 import {
   buildContactEmailHtml,
   buildOrderStatusEmailHtml,
+  buildPasswordResetEmailHtml,
   buildWelcomeEmailHtml,
 } from "@/lib/email/templates/simple-emails";
 import type { OrderEmailLineItem } from "@/types/email";
@@ -124,5 +126,31 @@ export async function sendContactEmail({
     replyTo: email,
     subject: `New contact message — ${SITE_NAME}`,
     html: buildContactEmailHtml({ name, email, phone, message }),
+  });
+}
+
+interface PasswordResetEmailProps {
+  to: string;
+  userName: string | null;
+  resetUrl: string;
+}
+
+export async function sendPasswordResetEmail({
+  to,
+  userName,
+  resetUrl,
+}: PasswordResetEmailProps) {
+  const name = userName ?? "Customer";
+
+  await sendEmail({
+    to,
+    toName: name,
+    subject: `${AUTH_COPY.PASSWORD_RESET_EMAIL_SUBJECT} — ${SITE_NAME}`,
+    html: buildPasswordResetEmailHtml({
+      userName,
+      resetUrl,
+      ctaLabel: AUTH_COPY.PASSWORD_RESET_EMAIL_CTA,
+      expiryNote: AUTH_COPY.PASSWORD_RESET_EMAIL_EXPIRY,
+    }),
   });
 }

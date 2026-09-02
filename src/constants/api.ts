@@ -1,5 +1,6 @@
 export const API_ENDPOINTS = {
   AUTH: "/api/auth",
+  AUTH_FORGOT_PASSWORD: "/api/auth/forgot-password",
   PRODUCTS: "/api/products",
   PRODUCT: (id: string) => `/api/products/${id}`,
   CATEGORIES: "/api/categories",

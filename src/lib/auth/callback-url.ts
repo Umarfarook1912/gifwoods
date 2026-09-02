@@ -22,6 +22,13 @@ export function sanitizeCallbackUrl(
     return fallback;
   }
 
+  if (
+    decoded.startsWith(ROUTES.FORGOT_PASSWORD) ||
+    decoded.startsWith(ROUTES.RESET_PASSWORD)
+  ) {
+    return fallback;
+  }
+
   return decoded;
 }
 

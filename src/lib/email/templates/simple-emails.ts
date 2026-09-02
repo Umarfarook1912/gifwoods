@@ -135,3 +135,26 @@ export function buildContactEmailHtml(options: {
     `,
   });
 }
+
+export function buildPasswordResetEmailHtml(options: {
+  userName: string | null;
+  resetUrl: string;
+  expiryNote: string;
+  ctaLabel: string;
+}): string {
+  const name = escapeHtml(options.userName ?? "there");
+
+  return wrapEmailLayout({
+    title: "Reset your password",
+    preheader: "Use the link below to set a new password for your account.",
+    bodyHtml: `
+      <h1 style="margin:0 0 8px;color:${DARK};font-size:24px;font-weight:700;">Reset your password</h1>
+      <p style="margin:0 0 12px;color:${MUTED};font-size:15px;line-height:1.6;">Hi ${name},</p>
+      <p style="margin:0 0 20px;color:${MUTED};font-size:15px;line-height:1.6;">
+        We received a request to reset the password for your ${escapeHtml(SITE_NAME)} account. Click the button below to choose a new password.
+      </p>
+      ${ctaButton(options.resetUrl, options.ctaLabel)}
+      <p style="margin:24px 0 0;color:${MUTED};font-size:12px;line-height:1.5;">${escapeHtml(options.expiryNote)}</p>
+    `,
+  });
+}

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { SITE_NAME, SITE_TAGLINE } from "@/constants/ui";
+import { AUTH_COPY, AUTH_QUERY } from "@/constants/auth";
 import { ROUTES } from "@/constants/routes";
 import { sanitizeCallbackUrl, buildRegisterHref } from "@/lib/auth/callback-url";
 import { toast } from "sonner";
@@ -28,10 +29,13 @@ export function LoginForm() {
   const callbackUrl = sanitizeCallbackUrl(searchParams.get("callbackUrl"), ROUTES.HOME);
 
   useEffect(() => {
-    if (errorParam === "InactiveAccount") {
+    if (errorParam === AUTH_QUERY.INACTIVE_ACCOUNT) {
       toast.error("Your account has been deactivated. Please contact the administrator.");
     }
-  }, [errorParam]);
+    if (searchParams.get(AUTH_QUERY.RESET_SUCCESS) === AUTH_QUERY.RESET_SUCCESS_VALUE) {
+      toast.success(AUTH_COPY.RESET_PASSWORD_SUCCESS_LOGIN);
+    }
+  }, [errorParam, searchParams]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,9 +123,17 @@ export function LoginForm() {
 
             {/* Password */}
             <div className="space-y-1.5">
-              <Label htmlFor="login-password" className="text-sm font-medium text-dark">
-                Password
-              </Label>
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="login-password" className="text-sm font-medium text-dark">
+                  Password
+                </Label>
+                <Link
+                  href={ROUTES.FORGOT_PASSWORD}
+                  className="text-xs text-gold font-semibold hover:underline"
+                >
+                  {AUTH_COPY.FORGOT_PASSWORD_LINK}
+                </Link>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input

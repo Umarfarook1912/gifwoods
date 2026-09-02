@@ -12,6 +12,8 @@ export const APP_ERRORS = {
   PROFILE_SAVE_FAILED: "Failed to save profile. Please try again.",
   AVATAR_UPLOAD_FAILED: "Failed to upload avatar. Please try again.",
   PASSWORD_UPDATE_FAILED: "Failed to update password. Please try again.",
+  PASSWORD_RESET_FAILED: "Could not send reset instructions. Please try again.",
+  PASSWORD_RESET_INVALID: "This reset link is invalid or has expired. Please request a new one.",
   ADDRESS_SAVE_FAILED: "Failed to save address. Please try again.",
   ADDRESS_DELETE_FAILED: "Failed to delete address. Please try again.",
 

@@ -14,6 +14,8 @@ export const ROUTES = {
     `/profile?tab=${tab}`,
   LOGIN: "/login",
   REGISTER: "/register",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
   ABOUT: "/about",
   CONTACT: "/contact",
   FAQS: "/faqs",
