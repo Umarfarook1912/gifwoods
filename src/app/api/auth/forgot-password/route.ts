@@ -1,24 +1,13 @@
 import { NextResponse } from "next/server";
-import { AUTH_PROVIDERS } from "@/constants/auth";
 import { APP_ERRORS } from "@/constants/errors";
-import { ROUTES } from "@/constants/routes";
 import { sendPasswordResetEmail } from "@/lib/email/nodemailer";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { isGoogleOnlyUser } from "@/lib/auth/user-service";
+import { getUserProfileByEmail } from "@/lib/db/users";
+import { createResetToken } from "@/lib/db/password-reset-tokens";
+import { ROUTES } from "@/constants/routes";
+import crypto from "crypto";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function normalizeEmail(email: string): string {
-  return email.toLowerCase().trim();
-}
-
-function isGoogleOnlyAccount(
-  identities: Array<{ provider?: string }> | undefined
-): boolean {
-  if (!identities?.length) return false;
-  return identities.every(
-    (identity) => identity.provider === AUTH_PROVIDERS.GOOGLE
-  );
-}
 
 export async function POST(request: Request) {
   try {
@@ -32,8 +21,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const email = normalizeEmail(rawEmail);
-
+    const email = rawEmail.toLowerCase().trim();
     if (!EMAIL_REGEX.test(email)) {
       return NextResponse.json(
         { success: false, error: "Please enter a valid email address." },
@@ -41,27 +29,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = createAdminClient();
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("id, name, status")
-      .eq("email", email)
-      .maybeSingle();
-
+    const profile = await getUserProfileByEmail(email);
     if (!profile || profile.status === "inactive") {
+      // Always return success to prevent email enumeration
       return NextResponse.json({ success: true });
     }
 
-    const { data: authUserData, error: authUserError } =
-      await supabase.auth.admin.getUserById(profile.id);
-
-    if (authUserError || !authUserData.user) {
-      console.error("Forgot password: auth user lookup failed", authUserError);
-      return NextResponse.json({ success: true });
-    }
-
-    if (isGoogleOnlyAccount(authUserData.user.identities)) {
+    // Block Google-only accounts from password reset
+    const googleOnly = await isGoogleOnlyUser(profile.id).catch(() => false);
+    if (googleOnly) {
       return NextResponse.json({ success: true });
     }
 
@@ -71,28 +47,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     }
 
-    const { data: linkData, error: linkError } =
-      await supabase.auth.admin.generateLink({
-        type: "recovery",
-        email,
-        options: {
-          redirectTo: `${appUrl}${ROUTES.RESET_PASSWORD}`,
-        },
-      });
+    // Generate a secure random token
+    const token = crypto.randomBytes(32).toString("hex");
+    await createResetToken(profile.id, token);
 
-    if (linkError || !linkData.properties?.action_link) {
-      console.error("Forgot password: generateLink failed", linkError);
-      return NextResponse.json({ success: true });
-    }
+    const resetUrl = `${appUrl}${ROUTES.RESET_PASSWORD}?token=${token}`;
 
     try {
       await sendPasswordResetEmail({
         to: email,
         userName: profile.name,
-        resetUrl: linkData.properties.action_link,
+        resetUrl,
       });
     } catch (emailError) {
       console.error("Forgot password: email send failed", emailError);
+      // Still return success — don't leak token generation errors
     }
 
     return NextResponse.json({ success: true });

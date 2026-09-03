@@ -41,6 +41,7 @@ export interface Order {
   payment_status: OrderPaymentStatus;
   subtotal: number;
   shipping_cost: number;
+  shipping_method?: "normal" | "fast" | null;
   total: number;
   shipping_address: ShippingAddress;
   payment_id: string | null;

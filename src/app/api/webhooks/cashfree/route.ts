@@ -1,22 +1,21 @@
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import {
   getDatabaseOrderId,
   verifyCashfreeWebhook,
 } from "@/lib/payment/cashfree";
 import { completePaidOrder } from "@/lib/orders/complete-payment";
 import type { CashfreeWebhookPayload } from "@/types/payment";
+import {
+  findOrderIdByCashfreeRef,
+  cancelOrderWithPaymentFailed,
+} from "@/lib/db/orders";
 
 export async function POST(request: Request) {
   const rawBody = await request.text();
   const timestamp = request.headers.get("x-webhook-timestamp");
   const signature = request.headers.get("x-webhook-signature");
 
-  if (
-    !timestamp ||
-    !signature ||
-    !verifyCashfreeWebhook(rawBody, timestamp, signature)
-  ) {
+  if (!timestamp || !signature || !verifyCashfreeWebhook(rawBody, timestamp, signature)) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
@@ -30,15 +29,9 @@ export async function POST(request: Request) {
   }
 
   const { order, payment } = body.data;
-  const cfOrderId = order.order_id;
-  const supabase = createAdminClient();
-  const candidateId = getDatabaseOrderId(cfOrderId).toLowerCase();
-  const query = supabase.from("orders").select("id");
-  const { data: dbOrder } =
-    candidateId.length === 36
-      ? await query.eq("id", candidateId).single()
-      : await query.ilike("id", `${candidateId}%`).single();
+  const candidateId = getDatabaseOrderId(order.order_id).toLowerCase();
 
+  const dbOrder = await findOrderIdByCashfreeRef(candidateId);
   if (!dbOrder) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
@@ -46,10 +39,7 @@ export async function POST(request: Request) {
   if (payment.payment_status === "SUCCESS") {
     await completePaidOrder(dbOrder.id, payment.cf_payment_id);
   } else if (payment.payment_status === "FAILED") {
-    await supabase
-      .from("orders")
-      .update({ status: "cancelled", payment_status: "failed" })
-      .eq("id", dbOrder.id);
+    await cancelOrderWithPaymentFailed(dbOrder.id);
   }
 
   return NextResponse.json({ received: true });

@@ -9,7 +9,6 @@ export const API_ENDPOINTS = {
   ORDER: (id: string) => `/api/orders/${id}`,
   ORDER_CUSTOMIZATION: (id: string) => `/api/orders/${id}/customization`,
   ORDER_TRACK: (id: string) => `/api/orders/${id}/track`,
-  ORDER_SHIPROCKET: (id: string) => `/api/orders/${id}/shiprocket`,
   REVIEWS: "/api/reviews",
   REVIEW: (id: string) => `/api/reviews/${id}`,
   PAYMENT_CASHFREE: "/api/payment/cashfree",
@@ -24,6 +23,7 @@ export const API_ENDPOINTS = {
   PROFILE_ADDRESSES: "/api/profile/addresses",
   UPLOAD: "/api/upload",
   ADMIN_ANALYTICS: "/api/admin/analytics",
+  ORDER_SYNC_SHIPMENT: (id: string) => `/api/admin/orders/${id}/sync-shipment`,
   SHIPPING_DELIVERY_ESTIMATE: "/api/shipping/delivery-estimate",
   COUNTRY_CALLING_CODES:
     "https://countriesnow.space/api/v0.1/countries/codes",

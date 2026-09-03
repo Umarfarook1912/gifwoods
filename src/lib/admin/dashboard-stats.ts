@@ -1,10 +1,11 @@
-import { createAdminClient } from "@/lib/supabase/admin";
 import {
   bucketsToSeries,
   buildAnalyticsBuckets,
   resolveBucketKey,
 } from "@/lib/admin/analytics-buckets";
 import type { DashboardMetricKey, StatusBarPoint } from "@/types/admin-dashboard";
+import { getRecentOrders } from "@/lib/db/orders";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-amber-400",
@@ -56,9 +57,7 @@ export async function getAnalyticsSeries(days: number, metric: DashboardMetricKe
     if (!key) continue;
     const bucket = buckets.get(key)!;
     bucket.orders += 1;
-    if (order.payment_status === "paid") {
-      bucket.revenue += Number(order.total ?? 0);
-    }
+    if (order.payment_status === "paid") bucket.revenue += Number(order.total ?? 0);
   }
 
   for (const user of usersRes.data ?? []) {
@@ -99,13 +98,5 @@ export async function getAnalyticsSeries(days: number, metric: DashboardMetricKe
 }
 
 export async function getRecentDashboardOrders() {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("orders")
-    .select(
-      "id, status, payment_status, payment_id, total, created_at, user:profiles(name, email), order_items(id, product:products(name))"
-    )
-    .order("created_at", { ascending: false })
-    .limit(5);
-  return data ?? [];
+  return getRecentOrders();
 }

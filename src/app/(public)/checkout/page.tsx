@@ -22,13 +22,14 @@ import type { CheckoutStep, ShippingAddress } from "@/types/order";
 
 export default function CheckoutPage() {
   const { data: session } = useSession();
-  const { items, getSubtotal } = useCartStore();
+  const { items, getSubtotal, shippingMethod, setShippingMethod } = useCartStore();
   const [step, setStep] = useState<CheckoutStep>("address");
   const [address, setAddress] = useState<ShippingAddress | null>(null);
+  const [deliveryPincode, setDeliveryPincode] = useState("");
   const [loading, setLoading] = useState(false);
 
   const subtotal = getSubtotal();
-  const shipping = calculateShipping(subtotal);
+  const shipping = calculateShipping(subtotal, shippingMethod);
   const total = subtotal + shipping;
 
   if (items.length === 0) {
@@ -50,6 +51,7 @@ export default function CheckoutPage() {
 
   const handleAddressSubmit = (addr: ShippingAddress) => {
     setAddress(addr);
+    setDeliveryPincode(addr.pincode);
     setStep("review");
   };
 
@@ -75,6 +77,7 @@ export default function CheckoutPage() {
             customization: item.customization,
           })),
           shipping_address: address,
+          shipping_method: shippingMethod,
         }),
       });
 
@@ -119,7 +122,7 @@ export default function CheckoutPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8">
-          <section className="rounded-3xl border border-border bg-white p-4 shadow-sm sm:p-7">
+          <section className="order-last rounded-3xl border border-border bg-white p-4 shadow-sm sm:p-7 lg:order-first">
             <div className="mb-6 flex items-center justify-between gap-4">
               <h2 className="font-display text-xl font-bold text-dark sm:text-2xl">
                 {step === "address" && CHECKOUT_COPY.ADDRESS_TITLE}
@@ -136,6 +139,7 @@ export default function CheckoutPage() {
                 enabled={Boolean(session)}
                 value={address}
                 onSubmit={handleAddressSubmit}
+                onPincodeChange={setDeliveryPincode}
               />
             )}
             {step === "review" && address && (
@@ -151,12 +155,17 @@ export default function CheckoutPage() {
             )}
           </section>
 
+          <div className="order-first lg:order-last">
           <CheckoutSummary
             items={items}
             subtotal={subtotal}
             shipping={shipping}
             total={total}
+            shippingMethod={shippingMethod}
+            onShippingMethodChange={setShippingMethod}
+            pincode={deliveryPincode || address?.pincode || ""}
           />
+          </div>
         </div>
       </div>
     </main>

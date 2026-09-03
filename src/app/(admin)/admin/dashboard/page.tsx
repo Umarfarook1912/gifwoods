@@ -99,7 +99,7 @@ export default async function AdminDashboardPage() {
             recentOrders.map((order) => {
               const user = order.user as { name?: string; email?: string } | null;
               return (
-                <div key={order.id} className="p-4 md:px-5 flex items-center justify-between gap-4">
+                <div key={order.id as string} className="p-4 md:px-5 flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-dark truncate">
                       {getOrderProductSummary(order as unknown as Order)}

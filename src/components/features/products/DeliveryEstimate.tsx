@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Loader2, MapPin, Truck } from "lucide-react";
+import { Loader2, MapPin, Truck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DeliveryMethodOptions } from "@/components/features/products/DeliveryMethodOptions";
 import { DELIVERY_COPY } from "@/constants/shipping";
 import { useDeliveryEstimate } from "@/hooks/useDeliveryEstimate";
+import { useCartStore } from "@/hooks/useCartStore";
 import type { Product } from "@/types/product";
 
 interface Props {
@@ -14,6 +16,8 @@ interface Props {
 
 export function DeliveryEstimate({ product }: Props) {
   const [pincode, setPincode] = useState("");
+  const shippingMethod = useCartStore((s) => s.shippingMethod);
+  const setShippingMethod = useCartStore((s) => s.setShippingMethod);
   const { data, isFetching, error } = useDeliveryEstimate(pincode, product);
 
   const digitsOnly = pincode.replace(/\D/g, "").slice(0, 6);
@@ -33,9 +37,7 @@ export function DeliveryEstimate({ product }: Props) {
             <p className="text-xs font-semibold uppercase tracking-wide text-warm-gray">
               {DELIVERY_COPY.EXPECTED_DELIVERY_BY}
             </p>
-            <p className="mt-1 text-xs text-warm-gray">
-              {DELIVERY_COPY.ENTER_PINCODE}
-            </p>
+            <p className="mt-1 text-xs text-warm-gray">{DELIVERY_COPY.ENTER_PINCODE}</p>
           </div>
 
           <div>
@@ -75,14 +77,13 @@ export function DeliveryEstimate({ product }: Props) {
           )}
 
           {digitsOnly.length === 6 && data?.serviceable && (
-            <div>
-              <p className="flex items-center gap-1.5 text-sm font-semibold text-dark">
-                <Calendar className="h-3.5 w-3.5 text-gold" />
-                {data.formattedDate}
-              </p>
-              <p className="mt-1 text-xs text-warm-gray">
-                {DELIVERY_COPY.SHIPROCKET_SOURCE}
-              </p>
+            <div className="space-y-3">
+              <DeliveryMethodOptions
+                estimate={data}
+                selected={shippingMethod}
+                onSelect={setShippingMethod}
+              />
+              <p className="text-xs text-warm-gray">{DELIVERY_COPY.ESTIMATE_FOOTNOTE}</p>
             </div>
           )}
 

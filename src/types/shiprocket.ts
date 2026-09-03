@@ -99,3 +99,12 @@ export interface ShiprocketServiceabilityResponse {
   status?: number;
   message?: string;
 }
+
+export interface ShiprocketOrderDetail {
+  id?: number;
+  channel_order_id?: string;
+  awb_code?: string;
+  courier_name?: string;
+  status?: string;
+  current_status?: string;
+}

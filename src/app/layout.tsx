@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { GoogleAnalytics } from "@/components/shared/GoogleAnalytics";
+import { MetaPixel } from "@/components/shared/MetaPixel";
 import { DEFAULT_SEO } from "@/constants/seo";
 
 export const metadata: Metadata = {
@@ -51,6 +52,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <GoogleAnalytics />
+        <MetaPixel />
         <Providers>{children}</Providers>
       </body>
     </html>

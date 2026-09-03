@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
 import { toUserErrorMessage } from "@/lib/errors/user-message";
-import { createClient } from "@/lib/supabase/server";
+import { getUserProfileById, updateUserProfile } from "@/lib/db/users";
 
 export async function GET(
   _request: Request,
@@ -12,13 +12,11 @@ export async function GET(
   if (!session) return NextResponse.json({ data: null, error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("profiles").select("*").eq("id", id).single();
+  const data = await getUserProfileById(id);
 
-  if (error) {
-    console.error(APP_ERRORS.NOT_FOUND, error);
+  if (!data) {
     return NextResponse.json(
-      { data: null, error: toUserErrorMessage(error, APP_ERRORS.NOT_FOUND) },
+      { data: null, error: toUserErrorMessage(null, APP_ERRORS.NOT_FOUND) },
       { status: 404 }
     );
   }
@@ -34,21 +32,14 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json();
-  const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .update(body)
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) {
-    console.error(APP_ERRORS.PROFILE_SAVE_FAILED, error);
+  try {
+    const data = await updateUserProfile(id, body);
+    return NextResponse.json({ data, error: null });
+  } catch (error) {
     return NextResponse.json(
       { data: null, error: toUserErrorMessage(error, APP_ERRORS.PROFILE_SAVE_FAILED) },
       { status: 500 }
     );
   }
-  return NextResponse.json({ data, error: null });
 }

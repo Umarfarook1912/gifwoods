@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
 import { apiError } from "@/lib/errors/api-response";
-import { updateAddress, deleteAddress } from "@/lib/supabase/profile-db";
+import { updateAddress, deleteAddress } from "@/lib/db/addresses";
 
 export async function PUT(
   request: Request,

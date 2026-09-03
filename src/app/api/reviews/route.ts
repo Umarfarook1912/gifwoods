@@ -3,8 +3,12 @@ import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
 import { apiError } from "@/lib/errors/api-response";
 import { reviewSchema } from "@/lib/utils/validators";
-import { getProductReviews, getAllReviews, createReview } from "@/lib/supabase/reviews-db";
-import { createClient } from "@/lib/supabase/server";
+import {
+  getProductReviews,
+  getAllReviews,
+  createReview,
+  checkReviewEligibility,
+} from "@/lib/db/reviews";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -12,7 +16,9 @@ export async function GET(request: Request) {
   const isApproved = searchParams.get("isApproved");
 
   try {
-    const isApprovedVal = isApproved === "true" ? true : isApproved === "false" ? false : undefined;
+    const isApprovedVal =
+      isApproved === "true" ? true : isApproved === "false" ? false : undefined;
+
     if (productId) {
       const data = await getProductReviews(productId, isApprovedVal);
       return NextResponse.json({ data, error: null });
@@ -43,20 +49,12 @@ export async function POST(request: Request) {
   const userId = session.user.supabaseId ?? session.user.id;
 
   try {
-    const supabase = await createClient();
     if (parsed.data.order_id) {
-      // Verify user purchased the product and order is delivered
-      const { data: eligible } = await supabase
-        .from("order_items")
-        .select("id, order:orders!inner(id, user_id, status)")
-        .eq("product_id", parsed.data.product_id)
-        .eq("order_id", parsed.data.order_id);
-
-      const isEligible = eligible?.some((item) => {
-        const order = (item.order as unknown) as Record<string, unknown> | null;
-        return order?.user_id === userId && order?.status === "delivered";
-      });
-
+      const isEligible = await checkReviewEligibility(
+        userId,
+        parsed.data.product_id,
+        parsed.data.order_id
+      );
       if (!isEligible) {
         return NextResponse.json(
           { data: null, error: "You can only review products from delivered orders" },

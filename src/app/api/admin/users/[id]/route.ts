@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
 import { mapAuthErrorMessage, toUserErrorMessage } from "@/lib/errors/user-message";
-import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  updateAuthPassword,
+  updateAuthMeta,
+  deleteAuthUser,
+} from "@/lib/auth/user-service";
+import { adminUpdateUserProfile } from "@/lib/db/users";
 
 export async function PUT(
   request: Request,
@@ -24,63 +29,37 @@ export async function PUT(
       role?: "admin" | "user";
     };
 
-    const supabase = createAdminClient();
-
-    // 1. If password is provided, update it in Supabase Auth
-    if (password && password.trim()) {
+    // 1. Update password in Auth if provided
+    if (password?.trim()) {
       if (password.length < 6) {
         return NextResponse.json(
           { error: "Password must be at least 6 characters." },
           { status: 400 }
         );
       }
-      const { error: authError } = await supabase.auth.admin.updateUserById(id, {
-        password: password,
-      });
-      if (authError) {
+      try {
+        await updateAuthPassword(id, password);
+      } catch (authError: unknown) {
+        const msg = authError instanceof Error ? authError.message : String(authError);
         return NextResponse.json(
-          { error: mapAuthErrorMessage(authError.message, APP_ERRORS.ADMIN_UPDATE_FAILED) },
+          { error: mapAuthErrorMessage(msg, APP_ERRORS.ADMIN_UPDATE_FAILED) },
           { status: 400 }
         );
       }
     }
 
     // 2. Update profile table
-    const updatePayload: any = {};
-    if (name) updatePayload.name = name.trim();
-    if (status) updatePayload.status = status;
-    if (permissions) updatePayload.permissions = permissions;
-    if (role) updatePayload.role = role;
+    const data = await adminUpdateUserProfile(id, { name, status, permissions, role });
 
-    const { data, error: profileError } = await supabase
-      .from("profiles")
-      .update(updatePayload)
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (profileError) {
-      console.error(APP_ERRORS.ADMIN_UPDATE_FAILED, profileError);
-      return NextResponse.json(
-        { error: toUserErrorMessage(profileError, APP_ERRORS.ADMIN_UPDATE_FAILED) },
-        { status: 500 }
-      );
-    }
-
-    // 3. Update auth metadata (name) if changed
+    // 3. Sync name to Auth metadata if changed
     if (name) {
-      await supabase.auth.admin.updateUserById(id, {
-        user_metadata: { name: name.trim() },
-      });
+      await updateAuthMeta(id, { name: name.trim() }).catch(() => undefined);
     }
 
     return NextResponse.json({ success: true, user: data });
   } catch (err) {
     console.error("Admin user update API error:", err);
-    return NextResponse.json(
-      { error: APP_ERRORS.ADMIN_UPDATE_FAILED },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: APP_ERRORS.ADMIN_UPDATE_FAILED }, { status: 500 });
   }
 }
 
@@ -95,12 +74,9 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const supabase = createAdminClient();
-
-    // Delete user from auth (cascades to public.profiles)
-    const { error } = await supabase.auth.admin.deleteUser(id);
-
-    if (error) {
+    try {
+      await deleteAuthUser(id);
+    } catch (error) {
       console.error(APP_ERRORS.ADMIN_DELETE_FAILED, error);
       return NextResponse.json(
         { error: toUserErrorMessage(error, APP_ERRORS.ADMIN_DELETE_FAILED) },
@@ -111,9 +87,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Admin user delete API error:", err);
-    return NextResponse.json(
-      { error: APP_ERRORS.ADMIN_DELETE_FAILED },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: APP_ERRORS.ADMIN_DELETE_FAILED }, { status: 500 });
   }
 }

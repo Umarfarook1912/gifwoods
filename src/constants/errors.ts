@@ -42,6 +42,7 @@ export const APP_ERRORS = {
 
   ANALYTICS_LOAD_FAILED: "Failed to load analytics. Please try again.",
   TRACKING_LOAD_FAILED: "Could not load tracking information. Please try again.",
+  SHIPROCKET_SYNC_FAILED: "Failed to sync shipment from Shiprocket. Please try again.",
   UPLOAD_FAILED: "Upload failed. Please try again.",
   CONTACT_SEND_FAILED: "Failed to send message. Please try again.",
   DELIVERY_ESTIMATE_FAILED: "Unable to fetch delivery estimate. Please try again.",

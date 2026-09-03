@@ -1,14 +1,19 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { CART_STORAGE_KEY } from "@/constants/routes";
+import { DELIVERY_METHODS } from "@/constants/shipping";
 import type { CartState, CartItem } from "@/types/cart";
 import type { Product, Customization } from "@/types/product";
+import type { DeliveryMethod } from "@/types/shipping";
 
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
       isOpen: false,
+      shippingMethod: DELIVERY_METHODS.NORMAL,
+
+      setShippingMethod: (method: DeliveryMethod) => set({ shippingMethod: method }),
 
       addItem: (product: Product, quantity = 1, customization?: Customization) => {
         set((state) => {
@@ -70,7 +75,10 @@ export const useCartStore = create<CartState>()(
     {
       name: CART_STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ items: state.items }),
+      partialize: (state) => ({
+        items: state.items,
+        shippingMethod: state.shippingMethod,
+      }),
     }
   )
 );

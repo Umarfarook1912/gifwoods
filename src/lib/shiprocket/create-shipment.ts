@@ -125,12 +125,7 @@ export async function createShiprocketShipment(
     .eq("id", order.id);
 
   if (mode === "sync") {
-    if (isShiprocketMockEnabled()) {
-      await supabase
-        .from("orders")
-        .update(buildMockAwbFields(order.id))
-        .eq("id", order.id);
-    }
+    // Admin assigns AWB later via Shiprocket Ship Now; webhook saves awb_code.
     return;
   }
 

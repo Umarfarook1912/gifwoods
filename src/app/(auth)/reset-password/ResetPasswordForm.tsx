@@ -4,18 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { PasswordField } from "@/components/features/auth/PasswordField";
 import { PasswordStrengthIndicator } from "@/components/features/auth/PasswordStrengthIndicator";
 import { SITE_NAME, SITE_TAGLINE } from "@/constants/ui";
 import { AUTH_COPY, AUTH_QUERY } from "@/constants/auth";
 import { ROUTES } from "@/constants/routes";
 import { APP_ERRORS } from "@/constants/errors";
-import { createClient } from "@/lib/supabase/client";
 import { toastError } from "@/lib/errors/toast";
 import { usePasswordRecoveryLink } from "@/hooks/usePasswordRecoveryLink";
-import { Loader2, AlertCircle, Mail } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 
 interface FieldErrors {
   password?: string;
@@ -24,7 +21,7 @@ interface FieldErrors {
 
 export function ResetPasswordForm() {
   const router = useRouter();
-  const { linkState, email } = usePasswordRecoveryLink();
+  const { linkState, token } = usePasswordRecoveryLink();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -34,19 +31,16 @@ export function ResetPasswordForm() {
 
   const validate = (): FieldErrors => {
     const errors: FieldErrors = {};
-
     if (!password) {
       errors.password = "Password is required";
     } else if (password.length < 6) {
       errors.password = "Password must be at least 6 characters";
     }
-
     if (!confirm) {
       errors.confirm = "Please confirm your password";
     } else if (password !== confirm) {
       errors.confirm = "Passwords do not match";
     }
-
     return errors;
   };
 
@@ -62,16 +56,19 @@ export function ResetPasswordForm() {
     setLoading(true);
 
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.updateUser({ password });
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password }),
+      });
 
-      if (error) {
-        console.error("Reset password: updateUser failed", error);
-        toastError(error, APP_ERRORS.PASSWORD_UPDATE_FAILED);
+      const data = (await res.json()) as { success: boolean; error?: string };
+
+      if (!res.ok || !data.success) {
+        toastError(null, data.error ?? APP_ERRORS.PASSWORD_UPDATE_FAILED);
         return;
       }
 
-      await supabase.auth.signOut();
       router.push(
         `${ROUTES.LOGIN}?${AUTH_QUERY.RESET_SUCCESS}=${AUTH_QUERY.RESET_SUCCESS_VALUE}`
       );
@@ -126,28 +123,6 @@ export function ResetPasswordForm() {
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                {email && (
-                  <div className="space-y-1.5">
-                    <Label
-                      htmlFor="reset-email"
-                      className="text-sm font-medium text-dark"
-                    >
-                      {AUTH_COPY.RESET_PASSWORD_EMAIL_LABEL}
-                    </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                      <Input
-                        id="reset-email"
-                        type="email"
-                        value={email}
-                        readOnly
-                        tabIndex={-1}
-                        className="pl-9 bg-muted/50 text-warm-gray cursor-default"
-                      />
-                    </div>
-                  </div>
-                )}
-
                 <div className="space-y-1.5">
                   <PasswordField
                     id="reset-password"

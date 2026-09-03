@@ -8,17 +8,34 @@ import { cn } from "@/lib/utils/cn";
 import { useCartStore } from "@/hooks/useCartStore";
 import { FREE_SHIPPING_THRESHOLD } from "@/constants/ui";
 import { CHECKOUT_COPY } from "@/constants/checkout";
+import { DELIVERY_METHODS, FAST_DELIVERY_FEE } from "@/constants/shipping";
+import { ShippingMethodToggle } from "@/components/features/cart/ShippingMethodToggle";
+import { CheckoutDeliveryDate } from "@/components/features/checkout/CheckoutDeliveryDate";
+import { getFastDeliverySurcharge } from "@/lib/orders/pricing";
 import type { CartItem } from "@/types/cart";
+import type { DeliveryMethod } from "@/types/shipping";
 
 interface Props {
   items: CartItem[];
   subtotal: number;
   shipping: number;
   total: number;
+  shippingMethod: DeliveryMethod;
+  onShippingMethodChange: (method: DeliveryMethod) => void;
+  pincode?: string;
 }
 
-export function CheckoutSummary({ items, subtotal, shipping, total }: Props) {
+export function CheckoutSummary({
+  items,
+  subtotal,
+  shipping,
+  total,
+  shippingMethod,
+  onShippingMethodChange,
+  pincode = "",
+}: Props) {
   const { removeItem, updateQuantity } = useCartStore();
+  const fastFee = getFastDeliverySurcharge(shippingMethod);
 
   return (
     <aside className="h-fit rounded-3xl border border-border bg-white p-5 shadow-sm lg:sticky lg:top-24">
@@ -95,16 +112,34 @@ export function CheckoutSummary({ items, subtotal, shipping, total }: Props) {
 
       <Separator />
       <div className="space-y-3 py-4 text-sm">
+        <ShippingMethodToggle
+          selected={shippingMethod}
+          onSelect={onShippingMethodChange}
+        />
+        <CheckoutDeliveryDate
+          pincode={pincode}
+          items={items}
+          subtotal={subtotal}
+          shippingMethod={shippingMethod}
+        />
         <div className="flex justify-between">
           <span className="text-warm-gray">Subtotal</span>
           <span className="font-medium text-dark">{formatPrice(subtotal)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-warm-gray">Shipping</span>
+          <span className="text-warm-gray">
+            Shipping
+            {shippingMethod === DELIVERY_METHODS.FAST ? " (incl. Fast)" : ""}
+          </span>
           <span className={shipping === 0 ? "font-semibold text-emerald-600" : "font-medium text-dark"}>
             {shipping === 0 ? "Free" : formatPrice(shipping)}
           </span>
         </div>
+        {fastFee > 0 && (
+          <p className="text-xs text-warm-gray">
+            Includes Fast surcharge of {formatPrice(FAST_DELIVERY_FEE)}
+          </p>
+        )}
       </div>
       <Separator />
       <div className="flex items-end justify-between py-4">
@@ -117,7 +152,8 @@ export function CheckoutSummary({ items, subtotal, shipping, total }: Props) {
       <div className="flex gap-2 rounded-xl bg-cream p-3 text-xs text-warm-gray">
         <Truck className="h-4 w-4 shrink-0 text-gold" />
         <span>
-          Free shipping on orders above {formatPrice(FREE_SHIPPING_THRESHOLD)}. Otherwise ₹75 shipping applies.
+          Free base shipping above {formatPrice(FREE_SHIPPING_THRESHOLD)}. Fast adds{" "}
+          {formatPrice(FAST_DELIVERY_FEE)}.
         </span>
       </div>
     </aside>

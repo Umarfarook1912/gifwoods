@@ -6,8 +6,8 @@ import {
   getCashfreeOrderPayments,
 } from "@/lib/payment/cashfree";
 import { completePaidOrder } from "@/lib/orders/complete-payment";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { ROUTES } from "@/constants/routes";
+import { getOrderOwner } from "@/lib/db/orders";
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -19,12 +19,7 @@ export async function GET(request: Request) {
   }
 
   const userId = session.user.supabaseId ?? session.user.id;
-  const supabase = createAdminClient();
-  const { data: order } = await supabase
-    .from("orders")
-    .select("id, user_id")
-    .eq("id", orderId)
-    .single();
+  const order = await getOrderOwner(orderId);
 
   if (!order || (order.user_id !== userId && !hasApiPermission(session, "orders"))) {
     return NextResponse.redirect(new URL(ROUTES.ORDERS, url.origin));
@@ -36,13 +31,8 @@ export async function GET(request: Request) {
 
     if (cashfreeOrder.order_status === "PAID") {
       const payments = await getCashfreeOrderPayments(cashfreeOrderId);
-      const successfulPayment = payments.find(
-        (payment) => payment.payment_status === "SUCCESS"
-      );
-      await completePaidOrder(
-        orderId,
-        successfulPayment?.cf_payment_id ?? cashfreeOrderId
-      );
+      const successfulPayment = payments.find((p) => p.payment_status === "SUCCESS");
+      await completePaidOrder(orderId, successfulPayment?.cf_payment_id ?? cashfreeOrderId);
       return NextResponse.redirect(
         new URL(`${ROUTES.ORDER_DETAIL(orderId)}?payment=success`, url.origin)
       );

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { APP_ERRORS } from "@/constants/errors";
 import { mapAuthErrorMessage } from "@/lib/errors/user-message";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAuthUser, deleteAuthUser } from "@/lib/auth/user-service";
+import { upsertUserProfile } from "@/lib/db/users";
 
 export async function POST(request: Request) {
   try {
@@ -12,7 +13,6 @@ export async function POST(request: Request) {
       password?: string;
     };
 
-    // ── Basic validation ────────────────────────────────────────────────────
     if (!name || !email || !password) {
       return NextResponse.json(
         { error: "Name, email, and password are required." },
@@ -35,24 +35,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = createAdminClient();
-
-    // ── Create user in Supabase Auth ────────────────────────────────────────
-    // email_confirm: true  → skip email verification (confirm immediately)
-    const { data: authData, error: authError } =
-      await supabase.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: { name },
-      });
-
-    if (authError) {
-      // "User already registered" → Supabase returns a 422 with this message
+    let userId: string;
+    try {
+      userId = await createAuthUser(email, password, { name });
+    } catch (authError: unknown) {
+      const msg = authError instanceof Error ? authError.message : String(authError);
       if (
-        authError.message.toLowerCase().includes("already") ||
-        authError.message.toLowerCase().includes("duplicate") ||
-        authError.message.toLowerCase().includes("exists")
+        msg.toLowerCase().includes("already") ||
+        msg.toLowerCase().includes("duplicate") ||
+        msg.toLowerCase().includes("exists")
       ) {
         return NextResponse.json(
           { error: "An account with this email already exists. Please log in." },
@@ -60,49 +51,32 @@ export async function POST(request: Request) {
         );
       }
       return NextResponse.json(
-        { error: mapAuthErrorMessage(authError.message, APP_ERRORS.REGISTRATION_FAILED) },
+        { error: mapAuthErrorMessage(msg, APP_ERRORS.REGISTRATION_FAILED) },
         { status: 400 }
       );
     }
 
-    if (!authData.user) {
-      return NextResponse.json(
-        { error: "Failed to create account. Please try again." },
-        { status: 500 }
-      );
-    }
-
-    // ── Upsert the profiles row ─────────────────────────────────────────────
-    // The Supabase `handle_new_user` trigger may already create this row.
-    // We upsert (ignoreDuplicates: false) so name is always set correctly.
-    const { error: profileError } = await supabase.from("profiles").upsert(
-      {
-        id: authData.user.id,   // real Supabase auth.users UUID — satisfies FK
+    try {
+      await upsertUserProfile({
+        id: userId,
         name: name.trim(),
         email: email.toLowerCase().trim(),
         role: "user",
         avatar_url: null,
-      },
-      { onConflict: "id", ignoreDuplicates: false }
-    );
-
-    if (profileError) {
-      // Profile creation failed — clean up the auth user so we don't leave
-      // an orphan in auth.users
-      await supabase.auth.admin.deleteUser(authData.user.id);
-      console.error("Profile creation error:", profileError.message);
+      });
+    } catch (profileError) {
+      // Clean up orphaned auth user if profile creation fails
+      await deleteAuthUser(userId).catch(() => undefined);
+      console.error("Profile creation error:", profileError);
       return NextResponse.json(
         { error: APP_ERRORS.ACCOUNT_SETUP_FAILED },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ success: true, userId: authData.user.id });
+    return NextResponse.json({ success: true, userId });
   } catch (err) {
     console.error("Register route error:", err);
-    return NextResponse.json(
-      { error: APP_ERRORS.REGISTRATION_FAILED },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: APP_ERRORS.REGISTRATION_FAILED }, { status: 500 });
   }
 }

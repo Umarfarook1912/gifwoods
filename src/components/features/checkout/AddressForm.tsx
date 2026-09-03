@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,6 +15,7 @@ type AddressFormData = z.infer<typeof shippingAddressSchema>;
 interface Props {
   defaultValues?: Partial<ShippingAddress>;
   onSubmit: (address: ShippingAddress) => void;
+  onPincodeChange?: (pincode: string) => void;
 }
 
 const INDIAN_STATES = [
@@ -25,16 +27,23 @@ const INDIAN_STATES = [
   "Delhi", "Jammu & Kashmir", "Ladakh", "Puducherry",
 ];
 
-export function AddressForm({ defaultValues, onSubmit }: Props) {
+export function AddressForm({ defaultValues, onSubmit, onPincodeChange }: Props) {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(shippingAddressSchema) as any,
     defaultValues: { country: "India", ...defaultValues },
   });
+
+  const pincodeValue = watch("pincode");
+  useEffect(() => {
+    const digits = String(pincodeValue ?? "").replace(/\D/g, "").slice(0, 6);
+    onPincodeChange?.(digits);
+  }, [onPincodeChange, pincodeValue]);
 
   return (
     <form onSubmit={handleSubmit((data) => onSubmit(data as unknown as ShippingAddress))} className="space-y-4">

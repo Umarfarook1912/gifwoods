@@ -27,9 +27,15 @@ interface Props {
   enabled: boolean;
   value: ShippingAddress | null;
   onSubmit: (address: ShippingAddress) => void;
+  onPincodeChange?: (pincode: string) => void;
 }
 
-export function CheckoutAddressStep({ enabled, value, onSubmit }: Props) {
+export function CheckoutAddressStep({
+  enabled,
+  value,
+  onSubmit,
+  onPincodeChange,
+}: Props) {
   const { data: addresses = [], isLoading, isError } = useSavedAddresses(enabled);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -50,6 +56,20 @@ export function CheckoutAddressStep({ enabled, value, onSubmit }: Props) {
     setSelectedId(initial.id);
   }, [addresses, selectedId, value]);
 
+  useEffect(() => {
+    if (!selectedId || showForm) return;
+    const selected = addresses.find((address) => address.id === selectedId);
+    if (selected?.postal_code) {
+      onPincodeChange?.(selected.postal_code);
+    }
+  }, [addresses, onPincodeChange, selectedId, showForm]);
+
+  useEffect(() => {
+    if (value?.pincode) {
+      onPincodeChange?.(value.pincode);
+    }
+  }, [onPincodeChange, value?.pincode]);
+
   if (isLoading) {
     return (
       <div className="flex min-h-44 items-center justify-center">
@@ -66,7 +86,11 @@ export function CheckoutAddressStep({ enabled, value, onSubmit }: Props) {
             ← Use a saved address
           </Button>
         )}
-        <AddressForm defaultValues={value ?? undefined} onSubmit={onSubmit} />
+        <AddressForm
+          defaultValues={value ?? undefined}
+          onSubmit={onSubmit}
+          onPincodeChange={onPincodeChange}
+        />
       </div>
     );
   }

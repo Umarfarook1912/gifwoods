@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
 import { mapAuthErrorMessage, toUserErrorMessage } from "@/lib/errors/user-message";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAuthUser, deleteAuthUser } from "@/lib/auth/user-service";
+import { upsertUserProfile } from "@/lib/db/users";
 
 export async function POST(request: Request) {
   try {
@@ -42,22 +43,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = createAdminClient();
-
-    // 1. Create user in Supabase Auth
-    const { data: authData, error: authError } =
-      await supabase.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: { name },
-      });
-
-    if (authError) {
+    let userId: string;
+    try {
+      userId = await createAuthUser(email, password, { name });
+    } catch (authError: unknown) {
+      const msg = authError instanceof Error ? authError.message : String(authError);
       if (
-        authError.message.toLowerCase().includes("already") ||
-        authError.message.toLowerCase().includes("duplicate") ||
-        authError.message.toLowerCase().includes("exists")
+        msg.toLowerCase().includes("already") ||
+        msg.toLowerCase().includes("duplicate") ||
+        msg.toLowerCase().includes("exists")
       ) {
         return NextResponse.json(
           { error: "An account with this email already exists." },
@@ -65,34 +59,22 @@ export async function POST(request: Request) {
         );
       }
       return NextResponse.json(
-        { error: mapAuthErrorMessage(authError.message, APP_ERRORS.ADMIN_CREATE_FAILED) },
+        { error: mapAuthErrorMessage(msg, APP_ERRORS.ADMIN_CREATE_FAILED) },
         { status: 400 }
       );
     }
 
-    if (!authData.user) {
-      return NextResponse.json(
-        { error: "Failed to create Auth account." },
-        { status: 500 }
-      );
-    }
-
-    // 2. Create the profile row with admin role and selected permissions
-    const { error: profileError } = await supabase.from("profiles").upsert(
-      {
-        id: authData.user.id,
+    try {
+      await upsertUserProfile({
+        id: userId,
         name: name.trim(),
         email: email.toLowerCase().trim(),
         role: "admin",
-        permissions: permissions || [],
-        status: status || "active",
-      },
-      { onConflict: "id", ignoreDuplicates: false }
-    );
-
-    if (profileError) {
-      // Clean up the auth user if profile creation fails
-      await supabase.auth.admin.deleteUser(authData.user.id);
+        permissions: permissions ?? [],
+        status: status ?? "active",
+      });
+    } catch (profileError) {
+      await deleteAuthUser(userId).catch(() => undefined);
       console.error(APP_ERRORS.ADMIN_CREATE_FAILED, profileError);
       return NextResponse.json(
         { error: toUserErrorMessage(profileError, APP_ERRORS.ADMIN_CREATE_FAILED) },
@@ -100,12 +82,9 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ success: true, userId: authData.user.id });
+    return NextResponse.json({ success: true, userId });
   } catch (err) {
     console.error("Admin user create API error:", err);
-    return NextResponse.json(
-      { error: APP_ERRORS.ADMIN_CREATE_FAILED },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: APP_ERRORS.ADMIN_CREATE_FAILED }, { status: 500 });
   }
 }

@@ -1,17 +1,20 @@
 import { NextResponse } from "next/server";
 import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
-import {
-  createCashfreeOrder,
-  createCashfreeOrderId,
-} from "@/lib/payment/cashfree";
+import { createCashfreeOrder, createCashfreeOrderId } from "@/lib/payment/cashfree";
 import { apiError } from "@/lib/errors/api-response";
 import { toUserErrorMessage } from "@/lib/errors/user-message";
-import { createClient } from "@/lib/supabase/server";
 import { calculateShipping } from "@/lib/orders/pricing";
 import { API_ENDPOINTS } from "@/constants/api";
+import { DELIVERY_METHODS } from "@/constants/shipping";
 import { z } from "zod";
 import { shippingAddressSchema } from "@/lib/utils/validators";
+import {
+  getProductsForCheckout,
+  createOrder,
+  createOrderItems,
+  cancelOrder,
+} from "@/lib/db/orders";
 
 const orderPayloadSchema = z.object({
   items: z.array(
@@ -22,12 +25,18 @@ const orderPayloadSchema = z.object({
     })
   ),
   shipping_address: shippingAddressSchema,
+  shipping_method: z
+    .enum([DELIVERY_METHODS.NORMAL, DELIVERY_METHODS.FAST])
+    .default(DELIVERY_METHODS.NORMAL),
 });
 
 export async function POST(request: Request) {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ data: null, error: "Please sign in to checkout" }, { status: 401 });
+    return NextResponse.json(
+      { data: null, error: "Please sign in to checkout" },
+      { status: 401 }
+    );
   }
 
   const body = await request.json();
@@ -36,23 +45,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ data: null, error: APP_ERRORS.VALIDATION }, { status: 400 });
   }
 
-  const supabase = await createClient();
   const userId = session.user.supabaseId ?? session.user.id;
 
   const productIds = [...new Set(parsed.data.items.map((item) => item.product_id))];
-  const { data: products, error: productsError } = await supabase
-    .from("products")
-    .select("id, price, stock, status")
-    .in("id", productIds);
 
-  if (productsError || products?.length !== productIds.length) {
+  let products;
+  try {
+    products = await getProductsForCheckout(productIds);
+  } catch (error) {
+    return apiError(error, APP_ERRORS.PRODUCT_LOAD_FAILED);
+  }
+
+  if (products.length !== productIds.length) {
     return NextResponse.json(
       { data: null, error: "One or more products are unavailable" },
       { status: 400 }
     );
   }
 
-  const productMap = new Map(products.map((product) => [product.id, product]));
+  const productMap = new Map(products.map((p) => [p.id, p]));
   const pricedItems = parsed.data.items.map((item) => {
     const product = productMap.get(item.product_id)!;
     return { ...item, unit_price: Number(product.price), product };
@@ -68,47 +79,43 @@ export async function POST(request: Request) {
     );
   }
 
-  const subtotal = pricedItems.reduce(
-    (sum, item) => sum + item.unit_price * item.quantity,
-    0
-  );
-  const shippingCost = calculateShipping(subtotal);
+  const subtotal = pricedItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
+  const shippingMethod = parsed.data.shipping_method;
+  const shippingCost = calculateShipping(subtotal, shippingMethod);
   const total = subtotal + shippingCost;
 
-  const { data: order, error: orderError } = await supabase
-    .from("orders")
-    .insert({
+  let order;
+  try {
+    order = await createOrder({
       user_id: userId,
       status: "pending",
       payment_status: "pending",
       subtotal,
       shipping_cost: shippingCost,
+      shipping_method: shippingMethod,
       total,
-      shipping_address: parsed.data.shipping_address,
-    })
-    .select()
-    .single();
-
-  if (orderError || !order) {
-    console.error(APP_ERRORS.ORDER_CREATE_FAILED, orderError);
+      shipping_address: parsed.data.shipping_address as Record<string, unknown>,
+    });
+  } catch (error) {
     return NextResponse.json(
-      { data: null, error: toUserErrorMessage(orderError, APP_ERRORS.ORDER_CREATE_FAILED) },
+      { data: null, error: toUserErrorMessage(error, APP_ERRORS.ORDER_CREATE_FAILED) },
       { status: 500 }
     );
   }
 
-  const { error: itemsError } = await supabase.from("order_items").insert(
-    pricedItems.map((item) => ({
-      order_id: order.id,
-      product_id: item.product_id,
-      quantity: item.quantity,
-      unit_price: item.unit_price,
-      customization: item.customization ?? null,
-    }))
-  );
-  if (itemsError) {
-    await supabase.from("orders").delete().eq("id", order.id);
-    return apiError(itemsError, APP_ERRORS.ORDER_CREATE_FAILED);
+  try {
+    await createOrderItems(
+      pricedItems.map((item) => ({
+        order_id: order.id,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        customization: item.customization ?? null,
+      }))
+    );
+  } catch (error) {
+    await cancelOrder(order.id);
+    return apiError(error, APP_ERRORS.ORDER_CREATE_FAILED);
   }
 
   try {
@@ -121,7 +128,8 @@ export async function POST(request: Request) {
         customer_id: userId,
         customer_name: session.user.name ?? "Customer",
         customer_email: session.user.email ?? "",
-        customer_phone: parsed.data.shipping_address.phone,
+        // Cashfree requires exactly 10 digits — strip +91 if present
+        customer_phone: parsed.data.shipping_address.phone.replace(/^\+91/, ""),
       },
       order_meta: {
         return_url: `${process.env.NEXT_PUBLIC_APP_URL}${API_ENDPOINTS.PAYMENT_VERIFY}?orderId=${order.id}`,
@@ -140,7 +148,7 @@ export async function POST(request: Request) {
       error: null,
     });
   } catch (error) {
-    await supabase.from("orders").update({ status: "cancelled" }).eq("id", order.id);
+    await cancelOrder(order.id);
     return apiError(error, APP_ERRORS.PAYMENT_INIT_FAILED, 502);
   }
 }

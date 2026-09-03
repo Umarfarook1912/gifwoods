@@ -6,6 +6,7 @@ import type {
   ShiprocketPickupResponse,
   ShiprocketTrackingResponse,
   ShiprocketServiceabilityResponse,
+  ShiprocketOrderDetail,
 } from "@/types/shiprocket";
 import { SHIPROCKET_ERRORS } from "@/constants/shipping";
 
@@ -107,6 +108,20 @@ export async function getTracking(
   return shiprocketFetch<ShiprocketTrackingResponse>(
     `/courier/track/awb/${encodeURIComponent(awb)}`
   );
+}
+
+/** Fetch Shiprocket order details by their internal order ID to retrieve AWB after manual Ship Now. */
+export async function getShiprocketOrderDetails(
+  shiprocketOrderId: string | number
+): Promise<ShiprocketOrderDetail | null> {
+  try {
+    const result = await shiprocketFetch<{ data?: ShiprocketOrderDetail[] }>(
+      `/orders/show/${encodeURIComponent(String(shiprocketOrderId))}`
+    );
+    return result.data?.[0] ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function cancelShiprocketOrder(

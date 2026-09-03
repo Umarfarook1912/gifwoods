@@ -8,21 +8,31 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/hooks/useCartStore";
 import { formatPrice } from "@/lib/utils/formatters";
-import { calculateShipping } from "@/lib/orders/pricing";
+import { calculateShipping, getFastDeliverySurcharge } from "@/lib/orders/pricing";
 import { ROUTES } from "@/constants/routes";
 import { FREE_SHIPPING_THRESHOLD } from "@/constants/ui";
+import { FAST_DELIVERY_FEE, DELIVERY_METHODS } from "@/constants/shipping";
 import { CONFIRMATIONS } from "@/constants/confirmations";
 import { useConfirm } from "@/hooks/useConfirm";
+import { ShippingMethodToggle } from "@/components/features/cart/ShippingMethodToggle";
 
 export default function CartPage() {
   const confirm = useConfirm();
-  const { items, removeItem, updateQuantity, getSubtotal, clearCart } = useCartStore();
+  const {
+    items,
+    removeItem,
+    updateQuantity,
+    getSubtotal,
+    clearCart,
+    shippingMethod,
+    setShippingMethod,
+  } = useCartStore();
 
   const handleClearCart = async () => {
     if (await confirm(CONFIRMATIONS.CART_CLEAR)) clearCart();
   };
   const subtotal = getSubtotal();
-  const shipping = calculateShipping(subtotal);
+  const shipping = calculateShipping(subtotal, shippingMethod);
   const total = subtotal + shipping;
 
   if (items.length === 0) {
@@ -140,12 +150,19 @@ export default function CartPage() {
             <div className="bg-white rounded-2xl p-6 border border-border sticky top-24">
               <h2 className="font-display font-bold text-xl text-dark mb-4">Order Summary</h2>
               <div className="space-y-3 mb-4">
+                <ShippingMethodToggle
+                  selected={shippingMethod}
+                  onSelect={setShippingMethod}
+                />
                 <div className="flex justify-between text-sm">
                   <span className="text-warm-gray">Subtotal</span>
                   <span className="font-medium text-dark">{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-warm-gray">Shipping</span>
+                  <span className="text-warm-gray">
+                    Shipping
+                    {shippingMethod === DELIVERY_METHODS.FAST ? " (incl. Fast)" : ""}
+                  </span>
                   <span className="font-medium text-dark">
                     {shipping === 0 ? (
                       <span className="text-emerald-600">Free</span>
@@ -154,6 +171,11 @@ export default function CartPage() {
                     )}
                   </span>
                 </div>
+                {getFastDeliverySurcharge(shippingMethod) > 0 && (
+                  <p className="text-xs text-warm-gray">
+                    Includes Fast delivery surcharge of {formatPrice(FAST_DELIVERY_FEE)}
+                  </p>
+                )}
               </div>
               <Separator className="mb-4" />
               <div className="flex justify-between font-bold text-dark mb-6">

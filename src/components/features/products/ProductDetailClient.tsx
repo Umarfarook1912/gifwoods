@@ -17,6 +17,8 @@ import { formatPrice, formatDiscount } from "@/lib/utils/formatters";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils/cn";
 import { SOCIAL_LINKS, SITE_NAME } from "@/constants/ui";
+import { PRODUCT_DETAIL_COPY } from "@/constants/shipping";
+import { ROUTES } from "@/constants/routes";
 import { InstagramIcon, YoutubeIcon } from "@/components/ui/SocialIcons";
 import { productNotice, getCustomizationNeed } from "@/lib/customization";
 import type { Product } from "@/types/product";
@@ -39,12 +41,21 @@ export function ProductDetailClient({ product: initialProduct }: Props) {
     }
   }, [initialProduct]);
 
-  const handleAddToCart = () => {
+  const addProductToCart = () => {
     for (let i = 0; i < quantity; i++) {
       addItem(product, 1);
     }
+  };
+
+  const handleAddToCart = () => {
+    addProductToCart();
     openCart();
     toast.success(`${product.name} added to cart!`);
+  };
+
+  const handleBuyNow = () => {
+    addProductToCart();
+    router.push(ROUTES.CHECKOUT);
   };
 
   const discount =
@@ -161,13 +172,24 @@ export function ProductDetailClient({ product: initialProduct }: Props) {
 
         <div className="flex flex-wrap gap-3 mb-6">
           <Button
-            className="flex-1 min-w-[10rem] bg-gold text-dark hover:bg-gold-dark font-semibold h-12"
+            className="flex-1 min-w-[8rem] bg-gold text-dark hover:bg-gold-dark font-semibold h-12"
             onClick={handleAddToCart}
             disabled={product.stock === 0}
           >
             <ShoppingBag className="h-4 w-4 mr-2" />
-            {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+            {product.stock === 0
+              ? PRODUCT_DETAIL_COPY.OUT_OF_STOCK
+              : PRODUCT_DETAIL_COPY.ADD_TO_CART}
           </Button>
+          {product.stock > 0 && (
+            <Button
+              variant="outline"
+              className="flex-1 min-w-[8rem] border-dark text-dark hover:bg-dark hover:text-white font-semibold h-12"
+              onClick={handleBuyNow}
+            >
+              {PRODUCT_DETAIL_COPY.BUY_NOW}
+            </Button>
+          )}
           <ProductShareButton name={product.name} description={product.description} />
           <ProductAdminEdit product={product} onUpdated={setProduct} />
         </div>

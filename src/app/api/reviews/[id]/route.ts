@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { APP_ERRORS } from "@/constants/errors";
 import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { apiError } from "@/lib/errors/api-response";
-import { updateReview, deleteReview } from "@/lib/supabase/reviews-db";
+import { updateReview, deleteReview } from "@/lib/db/reviews";
 
 export async function PATCH(
   request: Request,

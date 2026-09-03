@@ -16,7 +16,7 @@ const CASHFREE_HEADERS = {
   "Content-Type": "application/json",
   "x-client-id": process.env.CASHFREE_APP_ID!,
   "x-client-secret": process.env.CASHFREE_SECRET_KEY!,
-  "x-api-version": "2023-08-01",
+  "x-api-version": "2026-01-01",
 };
 
 export function createCashfreeOrderId(databaseOrderId: string): string {

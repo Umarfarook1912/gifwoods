@@ -1,4 +1,5 @@
 import type { Product, Customization } from "./product";
+import type { DeliveryMethod } from "./shipping";
 
 export interface CartItem {
   id: string;
@@ -10,6 +11,8 @@ export interface CartItem {
 export interface CartState {
   items: CartItem[];
   isOpen: boolean;
+  shippingMethod: DeliveryMethod;
+  setShippingMethod: (method: DeliveryMethod) => void;
   addItem: (product: Product, quantity?: number, customization?: Customization) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
