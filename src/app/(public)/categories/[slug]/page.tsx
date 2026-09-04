@@ -32,6 +32,7 @@ async function getCategoryProducts(
     .from("products")
     .select("*, category:categories(id, name, slug)", { count: "exact" })
     .eq("status", "active")
+    .eq("is_test", false)
     .eq("category_id", categoryId)
     .order("created_at", { ascending: false });
 

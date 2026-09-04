@@ -29,7 +29,8 @@ async function getProducts(searchParams: Record<string, string>): Promise<{
   let query = supabase
     .from("products")
     .select("*, category:categories(id, name, slug)", { count: "exact" })
-    .eq("status", "active");
+    .eq("status", "active")
+    .eq("is_test", false);
 
   if (category) {
     const { data: catData } = await supabase
@@ -97,13 +98,15 @@ export default async function ShopPage({ searchParams }: PageProps) {
       </div>
 
       <div className="page-container py-8">
-        <div className="flex gap-8">
-          <div className="hidden lg:block w-56 flex-shrink-0">
-            <Suspense fallback={null}>
-              <ProductFilters categories={categories} />
-            </Suspense>
-          </div>
-          <div className="flex-1 min-w-0">
+        <div className="flex items-start gap-8">
+          <aside className="hidden lg:block w-56 shrink-0">
+            <div className="sticky top-20 max-h-[calc(100vh-5.5rem)] overflow-y-auto overscroll-contain scrollbar-hide pr-1">
+              <Suspense fallback={null}>
+                <ProductFilters categories={categories} />
+              </Suspense>
+            </div>
+          </aside>
+          <div className="min-w-0 flex-1">
             <Suspense fallback={null}>
               <div className="mb-4 lg:hidden">
                 <MobileProductFilters categories={categories} />

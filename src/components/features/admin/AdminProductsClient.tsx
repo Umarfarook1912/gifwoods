@@ -23,8 +23,10 @@ import { useConfirm } from "@/hooks/useConfirm";
 import { APP_ERRORS } from "@/constants/errors";
 import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Trash2, RefreshCw, ExternalLink } from "lucide-react";
 import type { Product, Category, ProductStatus } from "@/types/product";
+import { ROUTES } from "@/constants/routes";
+import Link from "next/link";
 
 interface Props {
   initialProducts: Product[];
@@ -224,6 +226,17 @@ export function AdminProductsClient({ initialProducts, categories }: Props) {
             label: "Actions",
             render: (p) => (
               <div className="flex justify-end gap-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                  <Link
+                    href={ROUTES.PRODUCT(p.slug)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={ADMIN_TABLE_COPY.VIEW_ON_STORE}
+                    title={ADMIN_TABLE_COPY.VIEW_ON_STORE}
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </Link>
+                </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)}>
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>

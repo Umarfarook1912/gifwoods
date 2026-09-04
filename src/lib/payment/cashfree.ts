@@ -7,17 +7,66 @@ import type {
 } from "@/types/payment";
 import { APP_ERRORS } from "@/constants/errors";
 
-const CASHFREE_BASE_URL =
-  process.env.CASHFREE_ENV === "PROD"
-    ? "https://api.cashfree.com/pg"
-    : "https://sandbox.cashfree.com/pg";
+/**
+ * - prod: live API + CASHFREE_*
+ * - sandbox: sandbox API + CASHFREE_* (whole app in TEST env)
+ * - test: sandbox API + CASHFREE_TEST_* (test-product order on a PROD site)
+ */
+export type CashfreeMode = "prod" | "sandbox" | "test";
 
-const CASHFREE_HEADERS = {
-  "Content-Type": "application/json",
-  "x-client-id": process.env.CASHFREE_APP_ID!,
-  "x-client-secret": process.env.CASHFREE_SECRET_KEY!,
-  "x-api-version": "2026-01-01",
-};
+const CASHFREE_API_VERSION = "2026-01-01";
+
+function getCashfreeConfig(mode: CashfreeMode) {
+  if (mode === "test") {
+    const appId = process.env.CASHFREE_TEST_APP_ID;
+    const secret = process.env.CASHFREE_TEST_SECRET_KEY;
+    if (!appId || !secret) {
+      throw new Error(APP_ERRORS.PAYMENT_INIT_FAILED);
+    }
+    return {
+      baseUrl: "https://sandbox.cashfree.com/pg",
+      headers: {
+        "Content-Type": "application/json",
+        "x-client-id": appId,
+        "x-client-secret": secret,
+        "x-api-version": CASHFREE_API_VERSION,
+      },
+    };
+  }
+
+  if (mode === "prod") {
+    return {
+      baseUrl: "https://api.cashfree.com/pg",
+      headers: {
+        "Content-Type": "application/json",
+        "x-client-id": process.env.CASHFREE_APP_ID!,
+        "x-client-secret": process.env.CASHFREE_SECRET_KEY!,
+        "x-api-version": CASHFREE_API_VERSION,
+      },
+    };
+  }
+
+  // Whole-app sandbox (CASHFREE_ENV !== PROD)
+  return {
+    baseUrl: "https://sandbox.cashfree.com/pg",
+    headers: {
+      "Content-Type": "application/json",
+      "x-client-id": process.env.CASHFREE_APP_ID!,
+      "x-client-secret": process.env.CASHFREE_SECRET_KEY!,
+      "x-api-version": CASHFREE_API_VERSION,
+    },
+  };
+}
+
+/** Resolve mode from order flag or global env. */
+export function resolveCashfreeMode(isTestOrder?: boolean): CashfreeMode {
+  if (isTestOrder) return "test";
+  return process.env.CASHFREE_ENV === "PROD" ? "prod" : "sandbox";
+}
+
+export function toCashfreeJsMode(mode: CashfreeMode): "production" | "sandbox" {
+  return mode === "prod" ? "production" : "sandbox";
+}
 
 export function createCashfreeOrderId(databaseOrderId: string): string {
   return `GW_${databaseOrderId}`;
@@ -28,11 +77,13 @@ export function getDatabaseOrderId(cashfreeOrderId: string): string {
 }
 
 export async function createCashfreeOrder(
-  payload: CashfreeOrderRequest
+  payload: CashfreeOrderRequest,
+  mode: CashfreeMode = resolveCashfreeMode()
 ): Promise<CashfreeOrderResponse> {
-  const response = await fetch(`${CASHFREE_BASE_URL}/orders`, {
+  const { baseUrl, headers } = getCashfreeConfig(mode);
+  const response = await fetch(`${baseUrl}/orders`, {
     method: "POST",
-    headers: CASHFREE_HEADERS,
+    headers,
     body: JSON.stringify(payload),
   });
 
@@ -46,10 +97,12 @@ export async function createCashfreeOrder(
 }
 
 export async function getCashfreeOrder(
-  orderId: string
+  orderId: string,
+  mode: CashfreeMode = resolveCashfreeMode()
 ): Promise<CashfreeOrderStatusResponse> {
-  const response = await fetch(`${CASHFREE_BASE_URL}/orders/${orderId}`, {
-    headers: CASHFREE_HEADERS,
+  const { baseUrl, headers } = getCashfreeConfig(mode);
+  const response = await fetch(`${baseUrl}/orders/${orderId}`, {
+    headers,
     cache: "no-store",
   });
   if (!response.ok) throw new Error(APP_ERRORS.PAYMENT_FAILED);
@@ -57,24 +110,42 @@ export async function getCashfreeOrder(
 }
 
 export async function getCashfreeOrderPayments(
-  orderId: string
+  orderId: string,
+  mode: CashfreeMode = resolveCashfreeMode()
 ): Promise<CashfreePaymentResponse[]> {
-  const response = await fetch(`${CASHFREE_BASE_URL}/orders/${orderId}/payments`, {
-    headers: CASHFREE_HEADERS,
+  const { baseUrl, headers } = getCashfreeConfig(mode);
+  const response = await fetch(`${baseUrl}/orders/${orderId}/payments`, {
+    headers,
     cache: "no-store",
   });
   if (!response.ok) return [];
   return response.json() as Promise<CashfreePaymentResponse[]>;
 }
 
+function verifyWithSecret(
+  rawBody: string,
+  timestamp: string,
+  signature: string,
+  secret: string
+): boolean {
+  if (!secret) return false;
+  const expected = createHmac("sha256", secret)
+    .update(`${timestamp}${rawBody}`)
+    .digest();
+  const received = Buffer.from(signature, "base64");
+  return expected.length === received.length && timingSafeEqual(expected, received);
+}
+
+/** Accept webhooks signed with either PROD or TEST Cashfree secrets. */
 export function verifyCashfreeWebhook(
   rawBody: string,
   timestamp: string,
   signature: string
 ): boolean {
-  const expected = createHmac("sha256", process.env.CASHFREE_SECRET_KEY!)
-    .update(`${timestamp}${rawBody}`)
-    .digest();
-  const received = Buffer.from(signature, "base64");
-  return expected.length === received.length && timingSafeEqual(expected, received);
+  const prodSecret = process.env.CASHFREE_SECRET_KEY ?? "";
+  const testSecret = process.env.CASHFREE_TEST_SECRET_KEY ?? "";
+  return (
+    verifyWithSecret(rawBody, timestamp, signature, prodSecret) ||
+    verifyWithSecret(rawBody, timestamp, signature, testSecret)
+  );
 }

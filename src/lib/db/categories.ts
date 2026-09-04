@@ -17,6 +17,7 @@ export async function getAvailableCategories(): Promise<Category[]> {
     .from("categories")
     .select("id, name, slug, image_url, description, created_at, products!inner(id)")
     .eq("products.status", "active")
+    .eq("products.is_test", false)
     .order("name");
 
   if (!data) return [];
@@ -38,6 +39,7 @@ export async function getCategories(withActiveProductsOnly = false): Promise<Cat
       .from("categories")
       .select("id, name, slug, image_url, description, created_at, products!inner(id)")
       .eq("products.status", "active")
+      .eq("products.is_test", false)
       .order("name", { ascending: true });
 
     return (data ?? []).map((row) => {

@@ -34,6 +34,7 @@ async function getRelated(categoryId: string, currentId: string): Promise<Produc
     .select("*, category:categories(id, name, slug)")
     .eq("category_id", categoryId)
     .eq("status", "active")
+    .eq("is_test", false)
     .neq("id", currentId)
     .limit(4);
   return (data ?? []) as Product[];

@@ -15,4 +15,5 @@ export const ADMIN_TABLE_COPY = {
   STOCK: "Stock",
   STATUS: "Status",
   HOME: "Home",
+  VIEW_ON_STORE: "View product page",
 } as const;

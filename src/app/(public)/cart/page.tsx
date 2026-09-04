@@ -15,6 +15,9 @@ import { FAST_DELIVERY_FEE, DELIVERY_METHODS } from "@/constants/shipping";
 import { CONFIRMATIONS } from "@/constants/confirmations";
 import { useConfirm } from "@/hooks/useConfirm";
 import { ShippingMethodToggle } from "@/components/features/cart/ShippingMethodToggle";
+import { isMixedTestCart, isTestCart } from "@/lib/cart/test-cart";
+import { APP_ERRORS } from "@/constants/errors";
+import { CHECKOUT_COPY } from "@/constants/checkout";
 
 export default function CartPage() {
   const confirm = useConfirm();
@@ -32,7 +35,9 @@ export default function CartPage() {
     if (await confirm(CONFIRMATIONS.CART_CLEAR)) clearCart();
   };
   const subtotal = getSubtotal();
-  const shipping = calculateShipping(subtotal, shippingMethod);
+  const testOrder = isTestCart(items);
+  const mixedCart = isMixedTestCart(items);
+  const shipping = calculateShipping(subtotal, shippingMethod, { isTestOrder: testOrder });
   const total = subtotal + shipping;
 
   if (items.length === 0) {
@@ -150,10 +155,22 @@ export default function CartPage() {
             <div className="bg-white rounded-2xl p-6 border border-border sticky top-24">
               <h2 className="font-display font-bold text-xl text-dark mb-4">Order Summary</h2>
               <div className="space-y-3 mb-4">
-                <ShippingMethodToggle
-                  selected={shippingMethod}
-                  onSelect={setShippingMethod}
-                />
+                {!testOrder && (
+                  <ShippingMethodToggle
+                    selected={shippingMethod}
+                    onSelect={setShippingMethod}
+                  />
+                )}
+                {testOrder && (
+                  <p className="rounded-lg bg-cream border border-gold/20 p-3 text-xs text-warm-gray">
+                    {CHECKOUT_COPY.TEST_ORDER_NOTE}
+                  </p>
+                )}
+                {mixedCart && (
+                  <p className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
+                    {APP_ERRORS.MIXED_TEST_CART}
+                  </p>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-warm-gray">Subtotal</span>
                   <span className="font-medium text-dark">{formatPrice(subtotal)}</span>
@@ -161,7 +178,7 @@ export default function CartPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-warm-gray">
                     Shipping
-                    {shippingMethod === DELIVERY_METHODS.FAST ? " (incl. Fast)" : ""}
+                    {!testOrder && shippingMethod === DELIVERY_METHODS.FAST ? " (incl. Fast)" : ""}
                   </span>
                   <span className="font-medium text-dark">
                     {shipping === 0 ? (
@@ -171,7 +188,7 @@ export default function CartPage() {
                     )}
                   </span>
                 </div>
-                {getFastDeliverySurcharge(shippingMethod) > 0 && (
+                {!testOrder && getFastDeliverySurcharge(shippingMethod) > 0 && (
                   <p className="text-xs text-warm-gray">
                     Includes Fast delivery surcharge of {formatPrice(FAST_DELIVERY_FEE)}
                   </p>
@@ -182,17 +199,26 @@ export default function CartPage() {
                 <span>Total</span>
                 <span className="text-xl">{formatPrice(total)}</span>
               </div>
-              {subtotal < FREE_SHIPPING_THRESHOLD && (
+              {!testOrder && subtotal < FREE_SHIPPING_THRESHOLD && (
                 <p className="text-xs text-warm-gray mb-4 p-3 rounded-lg bg-cream border border-gold/20">
                   Add {formatPrice(FREE_SHIPPING_THRESHOLD - subtotal)} more to get free shipping!
                 </p>
               )}
-              <Button
-                className="w-full bg-gold text-dark hover:bg-gold-dark font-semibold h-12"
-                asChild
-              >
-                <Link href={ROUTES.CHECKOUT}>Proceed to Checkout</Link>
-              </Button>
+              {mixedCart ? (
+                <Button
+                  className="w-full bg-gold text-dark hover:bg-gold-dark font-semibold h-12"
+                  disabled
+                >
+                  Proceed to Checkout
+                </Button>
+              ) : (
+                <Button
+                  className="w-full bg-gold text-dark hover:bg-gold-dark font-semibold h-12"
+                  asChild
+                >
+                  <Link href={ROUTES.CHECKOUT}>Proceed to Checkout</Link>
+                </Button>
+              )}
             </div>
           </div>
         </div>

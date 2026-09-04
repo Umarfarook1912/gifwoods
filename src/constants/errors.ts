@@ -22,6 +22,8 @@ export const APP_ERRORS = {
   ORDER_CREATE_FAILED: "Could not create your order. Please try again.",
   ORDER_DELETE_FAILED: "Failed to delete order. Please try again.",
   ORDER_UPDATE_FAILED: "Failed to update order status. Please try again.",
+  MIXED_TEST_CART:
+    "Test products cannot be checked out with regular products. Remove one type and try again.",
   CUSTOMIZATION_SUBMIT_FAILED: "Failed to submit customization. Please try again.",
 
   PRODUCT_SAVE_FAILED: "Failed to save product. Please try again.",

@@ -4,6 +4,7 @@ import {
   createCashfreeOrderId,
   getCashfreeOrder,
   getCashfreeOrderPayments,
+  resolveCashfreeMode,
 } from "@/lib/payment/cashfree";
 import { completePaidOrder } from "@/lib/orders/complete-payment";
 import { ROUTES } from "@/constants/routes";
@@ -25,12 +26,14 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL(ROUTES.ORDERS, url.origin));
   }
 
+  const cashfreeMode = resolveCashfreeMode(Boolean(order.is_test_order));
+
   try {
     const cashfreeOrderId = createCashfreeOrderId(orderId);
-    const cashfreeOrder = await getCashfreeOrder(cashfreeOrderId);
+    const cashfreeOrder = await getCashfreeOrder(cashfreeOrderId, cashfreeMode);
 
     if (cashfreeOrder.order_status === "PAID") {
-      const payments = await getCashfreeOrderPayments(cashfreeOrderId);
+      const payments = await getCashfreeOrderPayments(cashfreeOrderId, cashfreeMode);
       const successfulPayment = payments.find((p) => p.payment_status === "SUCCESS");
       await completePaidOrder(orderId, successfulPayment?.cf_payment_id ?? cashfreeOrderId);
       return NextResponse.redirect(

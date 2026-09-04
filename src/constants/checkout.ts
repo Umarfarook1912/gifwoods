@@ -16,6 +16,7 @@ export const CHECKOUT_COPY = {
   REVIEW_TITLE: "Review your order",
   PAYMENT_TITLE: "Complete payment",
   PAY_SECURELY: "Pay securely",
+  TEST_ORDER_NOTE: "Test product — Cashfree sandbox (no real charge) · Free shipping",
   REMOVE_ITEM: "Remove item",
   DECREASE_QTY: "Decrease quantity",
   INCREASE_QTY: "Increase quantity",

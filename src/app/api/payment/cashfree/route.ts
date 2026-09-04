@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { APP_ERRORS } from "@/constants/errors";
 import { auth } from "@/lib/auth/auth";
-import { createCashfreeOrder, createCashfreeOrderId } from "@/lib/payment/cashfree";
+import {
+  createCashfreeOrder,
+  createCashfreeOrderId,
+  resolveCashfreeMode,
+  toCashfreeJsMode,
+} from "@/lib/payment/cashfree";
 import { apiError } from "@/lib/errors/api-response";
 import { toUserErrorMessage } from "@/lib/errors/user-message";
 import { calculateShipping } from "@/lib/orders/pricing";
@@ -79,10 +84,21 @@ export async function POST(request: Request) {
     );
   }
 
+  const hasTest = pricedItems.some((item) => Boolean(item.product.is_test));
+  const hasNormal = pricedItems.some((item) => !item.product.is_test);
+  if (hasTest && hasNormal) {
+    return NextResponse.json(
+      { data: null, error: APP_ERRORS.MIXED_TEST_CART },
+      { status: 400 }
+    );
+  }
+
+  const isTestOrder = hasTest && !hasNormal;
   const subtotal = pricedItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
   const shippingMethod = parsed.data.shipping_method;
-  const shippingCost = calculateShipping(subtotal, shippingMethod);
+  const shippingCost = calculateShipping(subtotal, shippingMethod, { isTestOrder });
   const total = subtotal + shippingCost;
+  const cashfreeMode = resolveCashfreeMode(isTestOrder);
 
   let order;
   try {
@@ -93,6 +109,7 @@ export async function POST(request: Request) {
       subtotal,
       shipping_cost: shippingCost,
       shipping_method: shippingMethod,
+      is_test_order: isTestOrder,
       total,
       shipping_address: parsed.data.shipping_address as Record<string, unknown>,
     });
@@ -120,27 +137,30 @@ export async function POST(request: Request) {
 
   try {
     const cashfreeOrderId = createCashfreeOrderId(order.id);
-    const cashfreeOrder = await createCashfreeOrder({
-      order_id: cashfreeOrderId,
-      order_amount: total,
-      order_currency: "INR",
-      customer_details: {
-        customer_id: userId,
-        customer_name: session.user.name ?? "Customer",
-        customer_email: session.user.email ?? "",
-        // Cashfree requires exactly 10 digits — strip +91 if present
-        customer_phone: parsed.data.shipping_address.phone.replace(/^\+91/, ""),
+    const cashfreeOrder = await createCashfreeOrder(
+      {
+        order_id: cashfreeOrderId,
+        order_amount: total,
+        order_currency: "INR",
+        customer_details: {
+          customer_id: userId,
+          customer_name: session.user.name ?? "Customer",
+          customer_email: session.user.email ?? "",
+          customer_phone: parsed.data.shipping_address.phone.replace(/^\+91/, ""),
+        },
+        order_meta: {
+          return_url: `${process.env.NEXT_PUBLIC_APP_URL}${API_ENDPOINTS.PAYMENT_VERIFY}?orderId=${order.id}`,
+          notify_url: `${process.env.NEXT_PUBLIC_APP_URL}${API_ENDPOINTS.WEBHOOK_CASHFREE}`,
+        },
       },
-      order_meta: {
-        return_url: `${process.env.NEXT_PUBLIC_APP_URL}${API_ENDPOINTS.PAYMENT_VERIFY}?orderId=${order.id}`,
-        notify_url: `${process.env.NEXT_PUBLIC_APP_URL}${API_ENDPOINTS.WEBHOOK_CASHFREE}`,
-      },
-    });
+      cashfreeMode
+    );
 
     return NextResponse.json({
       data: {
         order_id: order.id,
         payment_session_id: cashfreeOrder.payment_session_id,
+        paymentEnv: toCashfreeJsMode(cashfreeMode),
         subtotal,
         shipping_cost: shippingCost,
         total,

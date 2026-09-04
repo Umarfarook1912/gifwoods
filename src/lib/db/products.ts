@@ -53,7 +53,9 @@ export async function getProducts(
     .from("products")
     .select(`*, category:categories(id, name, slug), reviews(rating)`, { count: "exact" });
 
-  if (!allStatuses) query = query.eq("status", "active");
+  if (!allStatuses) {
+    query = query.eq("status", "active").eq("is_test", false);
+  }
 
   // Category filter by slug
   if (category) {

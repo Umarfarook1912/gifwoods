@@ -22,6 +22,7 @@ async function getBestsellers(): Promise<Product[]> {
     .from("products")
     .select("*, category:categories(id, name, slug)")
     .eq("status", "active")
+    .eq("is_test", false)
     .eq("is_bestseller", true)
     .order("created_at", { ascending: false })
     .limit(8);
@@ -35,6 +36,7 @@ async function getNewArrivals(): Promise<Product[]> {
     .from("products")
     .select("*, category:categories(id, name, slug)")
     .eq("status", "active")
+    .eq("is_test", false)
     .eq("is_new_arrival", true)
     .order("created_at", { ascending: false })
     .limit(8);
@@ -48,6 +50,7 @@ async function getAllActiveProducts(): Promise<Product[]> {
     .from("products")
     .select("*, category:categories(id, name, slug)")
     .eq("status", "active")
+    .eq("is_test", false)
     .order("created_at", { ascending: false });
 
   return (data ?? []) as Product[];

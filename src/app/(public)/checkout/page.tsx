@@ -11,6 +11,7 @@ import { CheckoutReview } from "@/components/features/checkout/CheckoutReview";
 import { CheckoutPayment } from "@/components/features/checkout/CheckoutPayment";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/hooks/useCartStore";
+import { isMixedTestCart, isTestCart } from "@/lib/cart/test-cart";
 import { calculateShipping } from "@/lib/orders/pricing";
 import { ROUTES } from "@/constants/routes";
 import { API_ENDPOINTS } from "@/constants/api";
@@ -29,7 +30,9 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
 
   const subtotal = getSubtotal();
-  const shipping = calculateShipping(subtotal, shippingMethod);
+  const mixedCart = isMixedTestCart(items);
+  const testOrder = isTestCart(items);
+  const shipping = calculateShipping(subtotal, shippingMethod, { isTestOrder: testOrder });
   const total = subtotal + shipping;
 
   if (items.length === 0) {
@@ -60,6 +63,10 @@ export default function CheckoutPage() {
       toast.error("Please sign in to complete checkout");
       return;
     }
+    if (mixedCart) {
+      toast.error(APP_ERRORS.MIXED_TEST_CART);
+      return;
+    }
     if (!address) {
       setStep("address");
       toast.error("Please add a delivery address");
@@ -84,12 +91,17 @@ export default function CheckoutPage() {
       const json = await res.json();
       if (!res.ok || json.error) throw new Error(json.error ?? "Payment initiation failed");
 
-      const { payment_session_id } = json.data;
+      const { payment_session_id, paymentEnv } = json.data as {
+        payment_session_id: string;
+        paymentEnv?: "sandbox" | "production";
+      };
 
-      // Load Cashfree SDK and open checkout
       const { load } = await import("@cashfreepayments/cashfree-js");
-      const cashfree = await load({ mode: process.env.NEXT_PUBLIC_CASHFREE_ENV === "PROD" ? "production" : "sandbox" });
-      
+      const mode =
+        paymentEnv ??
+        (process.env.NEXT_PUBLIC_CASHFREE_ENV === "PROD" ? "production" : "sandbox");
+      const cashfree = await load({ mode });
+
       cashfree.checkout({
         paymentSessionId: payment_session_id,
         redirectTarget: "_self",
@@ -116,6 +128,15 @@ export default function CheckoutPage() {
             {CHECKOUT_COPY.SUBTITLE}
           </p>
         </div>
+
+        {mixedCart && (
+          <div
+            role="alert"
+            className="mb-6 rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+          >
+            {APP_ERRORS.MIXED_TEST_CART}
+          </div>
+        )}
 
         <div className="mb-6 max-w-2xl sm:mb-8">
           <CheckoutStepper currentStep={step} onStepChange={handleStepChange} />
@@ -151,20 +172,26 @@ export default function CheckoutPage() {
               />
             )}
             {step === "payment" && (
-              <CheckoutPayment total={total} loading={loading} onPay={handlePayment} />
+              <CheckoutPayment
+                total={total}
+                loading={loading}
+                onPay={handlePayment}
+                disabled={mixedCart}
+              />
             )}
           </section>
 
           <div className="order-first lg:order-last">
-          <CheckoutSummary
-            items={items}
-            subtotal={subtotal}
-            shipping={shipping}
-            total={total}
-            shippingMethod={shippingMethod}
-            onShippingMethodChange={setShippingMethod}
-            pincode={deliveryPincode || address?.pincode || ""}
-          />
+            <CheckoutSummary
+              items={items}
+              subtotal={subtotal}
+              shipping={shipping}
+              total={total}
+              shippingMethod={shippingMethod}
+              onShippingMethodChange={setShippingMethod}
+              pincode={deliveryPincode || address?.pincode || ""}
+              isTestOrder={testOrder}
+            />
           </div>
         </div>
       </div>

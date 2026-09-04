@@ -117,14 +117,14 @@ export async function getOrderById(id: string): Promise<Order | null> {
 /** Order with only id and user_id (ownership check). */
 export async function getOrderOwner(
   orderId: string
-): Promise<{ id: string; user_id: string } | null> {
+): Promise<{ id: string; user_id: string; is_test_order: boolean } | null> {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("orders")
-    .select("id, user_id")
+    .select("id, user_id, is_test_order")
     .eq("id", orderId)
     .single();
-  return (data as { id: string; user_id: string }) ?? null;
+  return (data as { id: string; user_id: string; is_test_order: boolean }) ?? null;
 }
 
 /** Minimal order for invoice rendering. */
@@ -264,13 +264,14 @@ export interface CheckoutProduct {
   price: number;
   stock: number;
   status: string;
+  is_test: boolean;
 }
 
 export async function getProductsForCheckout(productIds: string[]): Promise<CheckoutProduct[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("id, price, stock, status")
+    .select("id, price, stock, status, is_test")
     .in("id", productIds);
   if (error) throw error;
   return (data ?? []) as CheckoutProduct[];
@@ -285,6 +286,7 @@ export interface CreateOrderPayload {
   subtotal: number;
   shipping_cost: number;
   shipping_method?: string;
+  is_test_order?: boolean;
   total: number;
   shipping_address: Record<string, unknown>;
 }

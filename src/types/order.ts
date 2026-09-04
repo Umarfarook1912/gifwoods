@@ -42,6 +42,7 @@ export interface Order {
   subtotal: number;
   shipping_cost: number;
   shipping_method?: "normal" | "fast" | null;
+  is_test_order?: boolean;
   total: number;
   shipping_address: ShippingAddress;
   payment_id: string | null;

@@ -23,6 +23,7 @@ interface Props {
   shippingMethod: DeliveryMethod;
   onShippingMethodChange: (method: DeliveryMethod) => void;
   pincode?: string;
+  isTestOrder?: boolean;
 }
 
 export function CheckoutSummary({
@@ -33,9 +34,10 @@ export function CheckoutSummary({
   shippingMethod,
   onShippingMethodChange,
   pincode = "",
+  isTestOrder = false,
 }: Props) {
   const { removeItem, updateQuantity } = useCartStore();
-  const fastFee = getFastDeliverySurcharge(shippingMethod);
+  const fastFee = isTestOrder ? 0 : getFastDeliverySurcharge(shippingMethod);
 
   return (
     <aside className="h-fit rounded-3xl border border-border bg-white p-5 shadow-sm lg:sticky lg:top-24">
@@ -112,16 +114,25 @@ export function CheckoutSummary({
 
       <Separator />
       <div className="space-y-3 py-4 text-sm">
-        <ShippingMethodToggle
-          selected={shippingMethod}
-          onSelect={onShippingMethodChange}
-        />
-        <CheckoutDeliveryDate
-          pincode={pincode}
-          items={items}
-          subtotal={subtotal}
-          shippingMethod={shippingMethod}
-        />
+        {!isTestOrder && (
+          <>
+            <ShippingMethodToggle
+              selected={shippingMethod}
+              onSelect={onShippingMethodChange}
+            />
+            <CheckoutDeliveryDate
+              pincode={pincode}
+              items={items}
+              subtotal={subtotal}
+              shippingMethod={shippingMethod}
+            />
+          </>
+        )}
+        {isTestOrder && (
+          <p className="rounded-xl bg-cream p-3 text-xs text-warm-gray">
+            {CHECKOUT_COPY.TEST_ORDER_NOTE}
+          </p>
+        )}
         <div className="flex justify-between">
           <span className="text-warm-gray">Subtotal</span>
           <span className="font-medium text-dark">{formatPrice(subtotal)}</span>
@@ -129,7 +140,7 @@ export function CheckoutSummary({
         <div className="flex justify-between">
           <span className="text-warm-gray">
             Shipping
-            {shippingMethod === DELIVERY_METHODS.FAST ? " (incl. Fast)" : ""}
+            {!isTestOrder && shippingMethod === DELIVERY_METHODS.FAST ? " (incl. Fast)" : ""}
           </span>
           <span className={shipping === 0 ? "font-semibold text-emerald-600" : "font-medium text-dark"}>
             {shipping === 0 ? "Free" : formatPrice(shipping)}
@@ -149,13 +160,15 @@ export function CheckoutSummary({
         </span>
       </div>
 
-      <div className="flex gap-2 rounded-xl bg-cream p-3 text-xs text-warm-gray">
-        <Truck className="h-4 w-4 shrink-0 text-gold" />
-        <span>
-          Free base shipping above {formatPrice(FREE_SHIPPING_THRESHOLD)}. Fast adds{" "}
-          {formatPrice(FAST_DELIVERY_FEE)}.
-        </span>
-      </div>
+      {!isTestOrder && (
+        <div className="flex gap-2 rounded-xl bg-cream p-3 text-xs text-warm-gray">
+          <Truck className="h-4 w-4 shrink-0 text-gold" />
+          <span>
+            Free base shipping above {formatPrice(FREE_SHIPPING_THRESHOLD)}. Fast adds{" "}
+            {formatPrice(FAST_DELIVERY_FEE)}.
+          </span>
+        </div>
+      )}
     </aside>
   );
 }

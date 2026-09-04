@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -34,6 +35,7 @@ const EMPTY_FORM: ProductFormState = {
   stock: 0,
   is_bestseller: false,
   is_new_arrival: false,
+  is_test: false,
   customization_text: false,
   customization_image: false,
   badge: "",
@@ -50,6 +52,8 @@ interface Props {
 }
 
 export function AdminProductForm({ open, onOpenChange, editing, categories, onSaved }: Props) {
+  const { data: session } = useSession();
+  const isSuperAdmin = session?.user?.role === "super_admin";
   const [form, setForm] = useState<ProductFormState>(EMPTY_FORM);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [saving, setSaving] = useState(false);
@@ -74,6 +78,7 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
             stock: editing.stock,
             is_bestseller: editing.is_bestseller ?? false,
             is_new_arrival: editing.is_new_arrival ?? false,
+            is_test: editing.is_test ?? false,
             customization_text: editing.customization_text ?? false,
             customization_image: editing.customization_image ?? false,
             badge: editing.badge ?? "",
@@ -100,6 +105,7 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
         badge: form.badge || undefined,
         images: form.images.filter(Boolean),
         specifications: form.specifications.filter((s) => s.key.trim() && s.value.trim()),
+        ...(isSuperAdmin ? { is_test: form.is_test } : { is_test: undefined }),
       };
       const url = editing ? API_ENDPOINTS.PRODUCT(editing.id) : API_ENDPOINTS.PRODUCTS;
       const res = await fetch(url, {
@@ -177,6 +183,15 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
                 />
                 <Label>{CUSTOMIZATION_COPY.IMAGE_TOGGLE}</Label>
               </div>
+              {isSuperAdmin && (
+                <div className="flex items-center gap-3">
+                  <Switch
+                    checked={form.is_test}
+                    onCheckedChange={(v) => setForm({ ...form, is_test: v })}
+                  />
+                  <Label>{PRODUCT_HOME_TOGGLE_LABELS.TEST_PRODUCT}</Label>
+                </div>
+              )}
             </div>
           </div>
         </div>

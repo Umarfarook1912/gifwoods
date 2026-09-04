@@ -26,6 +26,7 @@ export interface Product {
   is_featured?: boolean;
   is_bestseller: boolean;
   is_new_arrival: boolean;
+  is_test?: boolean;
   badge: ProductBadge | null;
   customization_text?: boolean;
   customization_image?: boolean;
@@ -61,6 +62,7 @@ export interface ProductFormData {
   stock: number;
   is_bestseller: boolean;
   is_new_arrival: boolean;
+  is_test?: boolean;
   customization_text?: boolean;
   customization_image?: boolean;
   badge?: ProductBadge;
@@ -86,6 +88,7 @@ export interface ProductFormState {
   stock: number;
   is_bestseller: boolean;
   is_new_arrival: boolean;
+  is_test: boolean;
   customization_text: boolean;
   customization_image: boolean;
   badge: string;

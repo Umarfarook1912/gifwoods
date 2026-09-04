@@ -149,6 +149,7 @@ export const FULFILLMENT_STATUSES = [
 export const PRODUCT_HOME_TOGGLE_LABELS = {
   BESTSELLER: "Bestseller",
   NEW_ARRIVAL: "New Arrival",
+  TEST_PRODUCT: "Test product (Cashfree sandbox)",
 } as const;
 
 export const PRODUCT_SHARE_MESSAGES = {

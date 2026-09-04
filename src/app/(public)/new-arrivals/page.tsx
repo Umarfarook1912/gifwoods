@@ -17,6 +17,7 @@ async function getNewArrivals(): Promise<Product[]> {
     .from("products")
     .select("*, category:categories(id, name, slug)")
     .eq("status", "active")
+    .eq("is_test", false)
     .eq("is_new_arrival", true)
     .order("created_at", { ascending: false });
 

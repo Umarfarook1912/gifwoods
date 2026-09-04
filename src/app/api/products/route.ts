@@ -50,6 +50,12 @@ export async function POST(request: Request) {
   }
 
   const { new_category_name, ...productData } = parsed.data;
+
+  // Only superadmin may set is_test; strip for others so they cannot escalate.
+  if (session?.user?.role !== "super_admin") {
+    delete (productData as { is_test?: boolean }).is_test;
+  }
+
   let finalCategoryId = productData.category_id;
   let newCategoryObj = null;
 

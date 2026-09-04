@@ -43,6 +43,7 @@ export const productSchema = z.object({
   stock: z.number().int().min(0),
   is_bestseller: z.boolean(),
   is_new_arrival: z.boolean(),
+  is_test: z.boolean().optional(),
   customization_text: z.boolean().optional(),
   customization_image: z.boolean().optional(),
   badge: z.enum(["Personalize", "Bestseller", "New", "Limited"]).optional(),

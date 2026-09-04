@@ -44,6 +44,11 @@ export async function PATCH(
   }
 
   const { new_category_name, ...productData } = parsed.data;
+
+  if (session?.user?.role !== "super_admin") {
+    delete (productData as { is_test?: boolean }).is_test;
+  }
+
   let finalCategoryId = productData.category_id;
   let newCategoryObj = null;
 
