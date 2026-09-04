@@ -5,6 +5,7 @@ import { DataTable } from "./DataTable";
 import { OrderStatusDialog } from "./OrderStatusDialog";
 import { OrderStatusBadges } from "@/components/shared/OrderStatusBadges";
 import { ShipmentTrackDialog } from "./ShipmentTrackDialog";
+import { ManualAwbDialog } from "./ManualAwbDialog";
 import { AdminPageHeader, AdminSearchInput } from "./AdminListSection";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,9 +14,10 @@ import { AdminCustomizationDialog } from "./AdminCustomizationDialog";
 import { formatPrice, formatDate } from "@/lib/utils/formatters";
 import { getOrderProductSummary } from "@/lib/orders/display";
 import { ADMIN_PAGE, ADMIN_TABLE } from "@/constants/admin-ui";
-import { Eye, ListRestart, Truck, Trash2, RefreshCw } from "lucide-react";
+import { Eye, ListRestart, Truck, Trash2, PenLine } from "lucide-react";
 import { ORDER_STATUSES } from "@/constants/ui";
 import { CUSTOMIZATION_COPY } from "@/constants/customization";
+import { MANUAL_AWB_COPY } from "@/constants/shipping";
 import { useConfirm } from "@/hooks/useConfirm";
 import { CONFIRMATIONS } from "@/constants/confirmations";
 import { API_ENDPOINTS } from "@/constants/api";
@@ -37,7 +39,7 @@ export function AdminOrdersClient({ initialOrders }: Props) {
   const [statusOrder, setStatusOrder] = useState<Order | null>(null);
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
   const [trackOrder, setTrackOrder] = useState<Order | null>(null);
-  const [syncingIds, setSyncingIds] = useState<Set<string>>(new Set());
+  const [manualAwbOrder, setManualAwbOrder] = useState<Order | null>(null);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -74,25 +76,28 @@ export function AdminOrdersClient({ initialOrders }: Props) {
     );
   };
 
-  const handleSyncShipment = async (order: Order) => {
-    setSyncingIds((prev) => new Set(prev).add(order.id));
-    try {
-      const res = await fetch(API_ENDPOINTS.ORDER_SYNC_SHIPMENT(order.id), { method: "POST" });
-      const json = await res.json();
-      if (!res.ok || json.error) { toastError(json.error, APP_ERRORS.SHIPROCKET_SYNC_FAILED); return; }
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === order.id
-            ? { ...o, awb_code: json.data.awb_code, courier_name: json.data.courier_name, tracking_url: json.data.tracking_url, status: json.data.status }
-            : o
-        )
-      );
-      toast.success("Shipment synced — AWB saved");
-    } catch (err) {
-      toastError(err, APP_ERRORS.SHIPROCKET_SYNC_FAILED);
-    } finally {
-      setSyncingIds((prev) => { const n = new Set(prev); n.delete(order.id); return n; });
+  const applyShipmentToOrder = (
+    orderId: string,
+    shipment: {
+      awb_code: string;
+      courier_name: string | null;
+      tracking_url: string;
+      status: OrderStatus | string;
     }
+  ) => {
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === orderId
+          ? {
+              ...o,
+              awb_code: shipment.awb_code,
+              courier_name: shipment.courier_name,
+              tracking_url: shipment.tracking_url,
+              status: shipment.status as OrderStatus,
+            }
+          : o
+      )
+    );
   };
 
   const handleDeleteOrder = async (id: string) => {
@@ -175,7 +180,7 @@ export function AdminOrdersClient({ initialOrders }: Props) {
                   {o.courier_name && <p className="text-warm-gray">{o.courier_name}</p>}
                 </div>
               ) : (
-                <span className="text-xs text-warm-gray">Awaiting Ship Now</span>
+                <span className="text-xs text-warm-gray">Add AWB to track</span>
               ),
           },
           {
@@ -229,16 +234,15 @@ export function AdminOrdersClient({ initialOrders }: Props) {
                     <Truck className="h-3.5 w-3.5" />
                   </Button>
                 )}
-                {o.shiprocket_order_id && !o.awb_code && (
+                {!o.awb_code && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-emerald-600 hover:text-emerald-800"
-                    title="Sync AWB from Shiprocket"
-                    onClick={() => handleSyncShipment(o)}
-                    disabled={syncingIds.has(o.id)}
+                    className="h-8 w-8 text-amber-600 hover:text-amber-800"
+                    title={MANUAL_AWB_COPY.OPEN_DIALOG}
+                    onClick={() => setManualAwbOrder(o)}
                   >
-                    <RefreshCw className={`h-3.5 w-3.5 ${syncingIds.has(o.id) ? "animate-spin" : ""}`} />
+                    <PenLine className="h-3.5 w-3.5" />
                   </Button>
                 )}
                 <Button
@@ -273,6 +277,11 @@ export function AdminOrdersClient({ initialOrders }: Props) {
         orderId={trackOrder?.id ?? null}
         awbCode={trackOrder?.awb_code ?? null}
         onClose={() => setTrackOrder(null)}
+      />
+      <ManualAwbDialog
+        order={manualAwbOrder}
+        onClose={() => setManualAwbOrder(null)}
+        onSaved={applyShipmentToOrder}
       />
     </div>
   );

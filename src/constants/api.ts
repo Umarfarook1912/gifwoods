@@ -23,7 +23,7 @@ export const API_ENDPOINTS = {
   PROFILE_ADDRESSES: "/api/profile/addresses",
   UPLOAD: "/api/upload",
   ADMIN_ANALYTICS: "/api/admin/analytics",
-  ORDER_SYNC_SHIPMENT: (id: string) => `/api/admin/orders/${id}/sync-shipment`,
+  ORDER_MANUAL_SHIPMENT: (id: string) => `/api/admin/orders/${id}/shipment`,
   SHIPPING_DELIVERY_ESTIMATE: "/api/shipping/delivery-estimate",
   COUNTRY_CALLING_CODES:
     "https://countriesnow.space/api/v0.1/countries/codes",

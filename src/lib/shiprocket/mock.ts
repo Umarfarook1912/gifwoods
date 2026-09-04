@@ -20,7 +20,7 @@ export function buildMockAwbFields(orderId: string) {
   return {
     awb_code: awbCode,
     courier_name: SHIPROCKET_MOCK.COURIER_NAME,
-    tracking_url: `${SHIPROCKET_MOCK.TRACKING_BASE_URL}${awbCode}`,
+    tracking_url: `${SHIPROCKET_MOCK.TRACKING_BASE_URL}${encodeURIComponent(awbCode)}`,
   };
 }
 

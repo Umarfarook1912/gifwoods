@@ -57,7 +57,8 @@ export const SHIPROCKET_MOCK = {
   AWB_PREFIX: "MOCK-AWB-",
   LEGACY_TEST_PREFIX: "TEST",
   COURIER_NAME: "Mock Courier (Dev)",
-  TRACKING_BASE_URL: "https://www.shiprocket.in/shipment-tracking/?id=",
+  /** Public page that pre-fills AWB — not shipment-tracking/?id= */
+  TRACKING_BASE_URL: "https://shiprocket.co/tracking/",
 } as const;
 
 export const TRACKING_COPY = {
@@ -67,6 +68,23 @@ export const TRACKING_COPY = {
   LOADING: "Loading tracking events…",
   UNAVAILABLE: "Live tracking unavailable right now.",
   SHIPMENT_TRACKING: "Shipment Tracking",
+  AWB_LABEL: "AWB",
+} as const;
+
+/** Shiprocket often returns this when location is unknown — hide from UI. */
+export const TRACKING_EMPTY_LOCATIONS = new Set(["na", "n/a", "null", "-", "none"]);
+
+export const MANUAL_AWB_COPY = {
+  TITLE: "Enter AWB manually",
+  DESCRIPTION: "Paste the AWB from Shiprocket after Ship Now. Tracking will show for the customer immediately.",
+  AWB_LABEL: "AWB / tracking number",
+  AWB_PLACEHOLDER: "e.g. 123456789012",
+  COURIER_LABEL: "Courier name (optional)",
+  COURIER_PLACEHOLDER: "e.g. Delhivery",
+  SAVE: "Save AWB",
+  SAVING: "Saving…",
+  SUCCESS: "AWB saved — customer can track this order",
+  OPEN_DIALOG: "Enter AWB manually",
 } as const;
 
 export const SHIPROCKET_ERRORS = {

@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, MapPin, PackageCheck, Truck } from "lucide-react";
 import { API_ENDPOINTS } from "@/constants/api";
 import { APP_ERRORS } from "@/constants/errors";
+import { TRACKING_EMPTY_LOCATIONS } from "@/constants/shipping";
 import { toUserErrorMessage } from "@/lib/errors/user-message";
 import type { ShiprocketTrackingResponse, ShiprocketTrackingActivity } from "@/types/shiprocket";
 
@@ -19,6 +20,12 @@ interface Props {
   orderId: string | null;
   awbCode: string | null;
   onClose: () => void;
+}
+
+function displayLocation(location: string | undefined): string | null {
+  if (!location?.trim()) return null;
+  if (TRACKING_EMPTY_LOCATIONS.has(location.trim().toLowerCase())) return null;
+  return location.trim();
 }
 
 export function ShipmentTrackDialog({ orderId, awbCode, onClose }: Props) {
@@ -100,7 +107,9 @@ export function ShipmentTrackDialog({ orderId, awbCode, onClose }: Props) {
             {activities.length === 0 && (
               <p className="text-sm text-warm-gray text-center py-4">No activity yet</p>
             )}
-            {activities.map((act, i) => (
+            {activities.map((act, i) => {
+              const location = displayLocation(act.location);
+              return (
               <div key={i} className="flex gap-3 text-sm">
                 <div className="flex flex-col items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-gold mt-1 shrink-0" />
@@ -110,13 +119,14 @@ export function ShipmentTrackDialog({ orderId, awbCode, onClose }: Props) {
                 </div>
                 <div className="pb-3">
                   <p className="font-medium text-dark">{act.activity}</p>
-                  {act.location && (
-                    <p className="text-xs text-warm-gray">{act.location}</p>
+                  {location && (
+                    <p className="text-xs text-warm-gray">{location}</p>
                   )}
                   <p className="text-xs text-warm-gray mt-0.5">{act.date}</p>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

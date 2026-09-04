@@ -8,6 +8,7 @@ import {
   updateOrderDeliveryStatus,
   updateOrderShipmentFields,
 } from "@/lib/db/orders";
+import { buildShiprocketTrackingUrl } from "@/lib/orders/apply-shipment";
 
 const SR_STATUS_MAP: Record<string, OrderStatus> = {
   "PICKUP SCHEDULED": "shipped",
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
 
   // Save AWB after Shiprocket Ship Now (order may not have awb_code yet)
   if (!order.awb_code) {
-    trackingUrl = `https://www.shiprocket.in/shipment-tracking/?id=${awbCode}`;
+    trackingUrl = buildShiprocketTrackingUrl(awbCode);
     try {
       await updateOrderShipmentFields(orderId, {
         awb_code: awbCode,

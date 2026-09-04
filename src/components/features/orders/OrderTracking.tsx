@@ -10,7 +10,11 @@ import {
   Truck,
 } from "lucide-react";
 import { API_ENDPOINTS } from "@/constants/api";
-import { SHIPROCKET_MOCK, TRACKING_COPY } from "@/constants/shipping";
+import {
+  SHIPROCKET_MOCK,
+  TRACKING_COPY,
+  TRACKING_EMPTY_LOCATIONS,
+} from "@/constants/shipping";
 import type { OrderStatus } from "@/types/order";
 import type { ShiprocketTrackingActivity, ShiprocketTrackingResponse } from "@/types/shiprocket";
 
@@ -38,19 +42,24 @@ function isMockAwbClient(awb: string): boolean {
   );
 }
 
+function displayLocation(location: string | undefined): string | null {
+  if (!location?.trim()) return null;
+  if (TRACKING_EMPTY_LOCATIONS.has(location.trim().toLowerCase())) return null;
+  return location.trim();
+}
+
 export function OrderTracking({
   orderId,
   awbCode,
   courierName,
-  trackingUrl,
+  trackingUrl: _trackingUrl,
   status,
 }: Props) {
   const [activities, setActivities] = useState<ShiprocketTrackingActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const isMock = isMockAwbClient(awbCode);
-  const href =
-    trackingUrl ?? `${SHIPROCKET_MOCK.TRACKING_BASE_URL}${encodeURIComponent(awbCode)}`;
+  const href = `${SHIPROCKET_MOCK.TRACKING_BASE_URL}${encodeURIComponent(awbCode)}`;
 
   useEffect(() => {
     async function load() {
@@ -72,6 +81,10 @@ export function OrderTracking({
     void load();
   }, [orderId]);
 
+  const metaLine = [courierName?.trim(), `${TRACKING_COPY.AWB_LABEL}: ${awbCode}`]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <div className="mb-6 bg-white rounded-2xl border border-border p-6">
       <div className="flex flex-wrap items-start gap-2 mb-4">
@@ -79,11 +92,7 @@ export function OrderTracking({
           <Truck className="h-4 w-4 text-gold" />
           <h2 className="font-semibold text-dark">{TRACKING_COPY.SHIPMENT_TRACKING}</h2>
         </div>
-        {courierName && (
-          <span className="sm:ml-auto text-xs text-warm-gray">
-            {courierName} · AWB: {awbCode}
-          </span>
-        )}
+        <span className="sm:ml-auto text-xs text-warm-gray">{metaLine}</span>
       </div>
 
       {!isMock && (
@@ -162,23 +171,26 @@ export function OrderTracking({
 
       {!loading && activities.length > 0 && (
         <div className="space-y-0 max-h-64 overflow-y-auto pr-1">
-          {activities.map((act, i) => (
-            <div key={i} className="flex gap-3 text-sm">
-              <div className="flex flex-col items-center gap-0 pt-1">
-                <div className="w-2 h-2 rounded-full bg-gold shrink-0" />
-                {i < activities.length - 1 && (
-                  <div className="w-px flex-1 bg-border min-h-[1.5rem]" />
-                )}
+          {activities.map((act, i) => {
+            const location = displayLocation(act.location);
+            return (
+              <div key={i} className="flex gap-3 text-sm">
+                <div className="flex flex-col items-center gap-0 pt-1">
+                  <div className="w-2 h-2 rounded-full bg-gold shrink-0" />
+                  {i < activities.length - 1 && (
+                    <div className="w-px flex-1 bg-border min-h-[1.5rem]" />
+                  )}
+                </div>
+                <div className="pb-3">
+                  <p className="font-medium text-dark leading-snug">{act.activity}</p>
+                  {location && (
+                    <p className="text-xs text-warm-gray mt-0.5">{location}</p>
+                  )}
+                  <p className="text-xs text-warm-gray mt-0.5">{act.date}</p>
+                </div>
               </div>
-              <div className="pb-3">
-                <p className="font-medium text-dark leading-snug">{act.activity}</p>
-                {act.location && (
-                  <p className="text-xs text-warm-gray mt-0.5">{act.location}</p>
-                )}
-                <p className="text-xs text-warm-gray mt-0.5">{act.date}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

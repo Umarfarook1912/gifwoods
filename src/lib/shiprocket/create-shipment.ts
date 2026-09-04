@@ -12,6 +12,7 @@ import {
   buildMockAwbFields,
 } from "@/lib/shiprocket/mock";
 import { formatShiprocketAwbError } from "@/lib/shiprocket/awb-errors";
+import { buildShiprocketTrackingUrl } from "@/lib/orders/apply-shipment";
 import type { ShiprocketOrderPayload } from "@/types/shiprocket";
 import type { ShippingAddress } from "@/types/order";
 import { splitCustomerName } from "@/lib/shiprocket/split-customer-name";
@@ -158,7 +159,7 @@ export async function createShiprocketShipment(
     .update({
       awb_code: awbCode,
       courier_name: courierName,
-      tracking_url: `https://www.shiprocket.in/shipment-tracking/?id=${awbCode}`,
+      tracking_url: buildShiprocketTrackingUrl(awbCode),
     })
     .eq("id", order.id);
 }
