@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { formatPrice } from "@/lib/utils/formatters";
 import { cn } from "@/lib/utils/cn";
 import { useCartStore } from "@/hooks/useCartStore";
-import { FREE_SHIPPING_THRESHOLD } from "@/constants/ui";
+import { FREE_SHIPPING_THRESHOLD, GST_LINE_LABEL } from "@/constants/ui";
 import { CHECKOUT_COPY } from "@/constants/checkout";
 import { DELIVERY_METHODS, FAST_DELIVERY_FEE } from "@/constants/shipping";
 import { ShippingMethodToggle } from "@/components/features/cart/ShippingMethodToggle";
@@ -18,6 +18,7 @@ import type { DeliveryMethod } from "@/types/shipping";
 interface Props {
   items: CartItem[];
   subtotal: number;
+  gst: number;
   shipping: number;
   total: number;
   shippingMethod: DeliveryMethod;
@@ -29,6 +30,7 @@ interface Props {
 export function CheckoutSummary({
   items,
   subtotal,
+  gst,
   shipping,
   total,
   shippingMethod,
@@ -136,6 +138,10 @@ export function CheckoutSummary({
         <div className="flex justify-between">
           <span className="text-warm-gray">Subtotal</span>
           <span className="font-medium text-dark">{formatPrice(subtotal)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-warm-gray">{GST_LINE_LABEL}</span>
+          <span className="font-medium text-dark">{formatPrice(gst)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-warm-gray">

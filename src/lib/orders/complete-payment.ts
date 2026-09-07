@@ -26,6 +26,7 @@ interface PaidOrder {
   status: string;
   subtotal: number;
   shipping_cost: number;
+  gst_amount?: number;
   total: number;
   confirmation_email_sent_at: string | null;
   shipping_address: ShippingAddress;
@@ -101,6 +102,7 @@ export async function completePaidOrder(orderId: string, paymentId: string): Pro
     items,
     subtotal: Number(order.subtotal),
     shippingCost: Number(order.shipping_cost),
+    gstAmount: Number(order.gst_amount ?? 0),
     total: Number(order.total),
     paymentId,
   };

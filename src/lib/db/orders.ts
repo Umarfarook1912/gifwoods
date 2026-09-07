@@ -170,7 +170,7 @@ export async function getOrderForPaymentCompletion(orderId: string): Promise<Rec
   const { data } = await supabase
     .from("orders")
     .select(
-      "id, status, subtotal, shipping_cost, total, confirmation_email_sent_at, shipping_address, user:profiles(name, email), order_items(quantity, unit_price, product:products(name, customization_text, customization_image))"
+      "id, status, subtotal, shipping_cost, gst_amount, total, confirmation_email_sent_at, shipping_address, user:profiles(name, email), order_items(quantity, unit_price, product:products(name, customization_text, customization_image))"
     )
     .eq("id", orderId)
     .single();
@@ -287,6 +287,7 @@ export interface CreateOrderPayload {
   shipping_cost: number;
   shipping_method?: string;
   is_test_order?: boolean;
+  gst_amount?: number;
   total: number;
   shipping_address: Record<string, unknown>;
 }

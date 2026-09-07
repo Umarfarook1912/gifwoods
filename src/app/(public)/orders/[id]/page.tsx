@@ -16,6 +16,7 @@ import { getPaymentStatus } from "@/lib/orders/status";
 import { getShiprocketDeliveryEstimate } from "@/lib/shipping/delivery-estimate";
 import { ROUTES } from "@/constants/routes";
 import { DELIVERY_COPY } from "@/constants/shipping";
+import { GST_LINE_LABEL } from "@/constants/ui";
 import { buildLoginHref } from "@/lib/auth/callback-url";
 import type { Order, OrderItem } from "@/types/order";
 import type { Product } from "@/types/product";
@@ -165,6 +166,10 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
             <div className="flex justify-between">
               <span className="text-warm-gray">Subtotal</span>
               <span>{formatPrice(typedOrder.subtotal)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-warm-gray">{GST_LINE_LABEL}</span>
+              <span>{formatPrice(typedOrder.gst_amount ?? 0)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-warm-gray">Shipping</span>

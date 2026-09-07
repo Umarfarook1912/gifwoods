@@ -41,6 +41,7 @@ export interface Order {
   payment_status: OrderPaymentStatus;
   subtotal: number;
   shipping_cost: number;
+  gst_amount?: number;
   shipping_method?: "normal" | "fast" | null;
   is_test_order?: boolean;
   total: number;
@@ -78,5 +79,6 @@ export interface CreateOrderPayload {
   shipping_address: ShippingAddress;
   subtotal: number;
   shipping_cost: number;
+  gst_amount?: number;
   total: number;
 }

@@ -10,6 +10,7 @@ interface AdminOrderEmailProps {
   total: number;
   subtotal: number;
   shippingCost: number;
+  gstAmount: number;
   paymentId: string;
   items: OrderEmailLineItem[];
 }
@@ -21,6 +22,7 @@ export async function sendAdminOrderEmail({
   total,
   subtotal,
   shippingCost,
+  gstAmount,
   paymentId,
   items,
 }: AdminOrderEmailProps): Promise<void> {
@@ -34,6 +36,7 @@ export async function sendAdminOrderEmail({
       items,
       subtotal,
       shippingCost,
+      gstAmount,
       total,
       paymentId,
     }),

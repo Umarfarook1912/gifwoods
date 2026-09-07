@@ -12,7 +12,7 @@ import { CheckoutPayment } from "@/components/features/checkout/CheckoutPayment"
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/hooks/useCartStore";
 import { isMixedTestCart, isTestCart } from "@/lib/cart/test-cart";
-import { calculateShipping } from "@/lib/orders/pricing";
+import { calculateShipping, calculateGst, calculateOrderTotal } from "@/lib/orders/pricing";
 import { ROUTES } from "@/constants/routes";
 import { API_ENDPOINTS } from "@/constants/api";
 import { CHECKOUT_COPY } from "@/constants/checkout";
@@ -33,7 +33,8 @@ export default function CheckoutPage() {
   const mixedCart = isMixedTestCart(items);
   const testOrder = isTestCart(items);
   const shipping = calculateShipping(subtotal, shippingMethod, { isTestOrder: testOrder });
-  const total = subtotal + shipping;
+  const gst = calculateGst(subtotal);
+  const total = calculateOrderTotal(subtotal, shipping, gst);
 
   if (items.length === 0) {
     return (
@@ -185,6 +186,7 @@ export default function CheckoutPage() {
             <CheckoutSummary
               items={items}
               subtotal={subtotal}
+              gst={gst}
               shipping={shipping}
               total={total}
               shippingMethod={shippingMethod}

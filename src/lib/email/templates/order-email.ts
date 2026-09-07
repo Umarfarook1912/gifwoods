@@ -1,4 +1,4 @@
-import { SITE_NAME, SITE_TAGLINE } from "@/constants/ui";
+import { GST_LINE_LABEL, SITE_NAME, SITE_TAGLINE } from "@/constants/ui";
 import { formatOrderId, formatPrice } from "@/lib/utils/formatters";
 import type { OrderEmailLineItem, OrderEmailPayload } from "@/types/email";
 
@@ -70,6 +70,10 @@ export function buildTotalsTable(payload: OrderEmailPayload): string {
       <tr>
         <td style="padding:6px 0;color:${COLORS.muted};font-size:14px;">Subtotal</td>
         <td style="padding:6px 0;color:${COLORS.dark};font-size:14px;text-align:right;">${formatPrice(payload.subtotal)}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0;color:${COLORS.muted};font-size:14px;">${GST_LINE_LABEL}</td>
+        <td style="padding:6px 0;color:${COLORS.dark};font-size:14px;text-align:right;">${formatPrice(payload.gstAmount)}</td>
       </tr>
       <tr>
         <td style="padding:6px 0;color:${COLORS.muted};font-size:14px;">Shipping</td>

@@ -8,9 +8,9 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/hooks/useCartStore";
 import { formatPrice } from "@/lib/utils/formatters";
-import { calculateShipping, getFastDeliverySurcharge } from "@/lib/orders/pricing";
+import { calculateShipping, calculateGst, calculateOrderTotal, getFastDeliverySurcharge } from "@/lib/orders/pricing";
 import { ROUTES } from "@/constants/routes";
-import { FREE_SHIPPING_THRESHOLD } from "@/constants/ui";
+import { FREE_SHIPPING_THRESHOLD, GST_LINE_LABEL } from "@/constants/ui";
 import { FAST_DELIVERY_FEE, DELIVERY_METHODS } from "@/constants/shipping";
 import { CONFIRMATIONS } from "@/constants/confirmations";
 import { useConfirm } from "@/hooks/useConfirm";
@@ -38,7 +38,8 @@ export default function CartPage() {
   const testOrder = isTestCart(items);
   const mixedCart = isMixedTestCart(items);
   const shipping = calculateShipping(subtotal, shippingMethod, { isTestOrder: testOrder });
-  const total = subtotal + shipping;
+  const gst = calculateGst(subtotal);
+  const total = calculateOrderTotal(subtotal, shipping, gst);
 
   if (items.length === 0) {
     return (
@@ -174,6 +175,10 @@ export default function CartPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-warm-gray">Subtotal</span>
                   <span className="font-medium text-dark">{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-warm-gray">{GST_LINE_LABEL}</span>
+                  <span className="font-medium text-dark">{formatPrice(gst)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-warm-gray">

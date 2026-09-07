@@ -1,6 +1,7 @@
 import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { formatPrice, formatDate, formatOrderId } from "@/lib/utils/formatters";
 import { getPaymentStatus, canDownloadInvoice } from "@/lib/orders/status";
+import { GST_LINE_LABEL } from "@/constants/ui";
 import type { Order } from "@/types/order";
 import { NextResponse } from "next/server";
 import { getOrderForInvoice } from "@/lib/db/orders";
@@ -117,6 +118,7 @@ export async function GET(
         <div class="flex justify-end">
           <div class="w-64 space-y-3 text-sm text-gray-600">
             <div class="flex justify-between"><span>Subtotal</span><span class="font-medium text-gray-800">${formatPrice(typedOrder.subtotal)}</span></div>
+            <div class="flex justify-between"><span>${GST_LINE_LABEL}</span><span class="font-medium text-gray-800">${formatPrice(typedOrder.gst_amount ?? 0)}</span></div>
             <div class="flex justify-between"><span>Shipping</span><span class="font-medium text-gray-800">${typedOrder.shipping_cost === 0 ? "Free" : formatPrice(typedOrder.shipping_cost)}</span></div>
             <div class="flex justify-between pt-3 border-t border-gray-200 text-base font-bold text-gray-900"><span>Total</span><span>${formatPrice(typedOrder.total)}</span></div>
           </div>

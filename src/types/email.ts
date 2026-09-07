@@ -12,6 +12,7 @@ export interface OrderEmailPayload {
   items: OrderEmailLineItem[];
   subtotal: number;
   shippingCost: number;
+  gstAmount: number;
   total: number;
   paymentId?: string;
   estimatedDeliveryDate?: string | null;

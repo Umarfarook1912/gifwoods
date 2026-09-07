@@ -9,7 +9,7 @@ import {
 } from "@/lib/payment/cashfree";
 import { apiError } from "@/lib/errors/api-response";
 import { toUserErrorMessage } from "@/lib/errors/user-message";
-import { calculateShipping } from "@/lib/orders/pricing";
+import { calculateShipping, calculateGst, calculateOrderTotal } from "@/lib/orders/pricing";
 import { API_ENDPOINTS } from "@/constants/api";
 import { DELIVERY_METHODS } from "@/constants/shipping";
 import { z } from "zod";
@@ -97,7 +97,8 @@ export async function POST(request: Request) {
   const subtotal = pricedItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
   const shippingMethod = parsed.data.shipping_method;
   const shippingCost = calculateShipping(subtotal, shippingMethod, { isTestOrder });
-  const total = subtotal + shippingCost;
+  const gstAmount = calculateGst(subtotal);
+  const total = calculateOrderTotal(subtotal, shippingCost, gstAmount);
   const cashfreeMode = resolveCashfreeMode(isTestOrder);
 
   let order;
@@ -110,6 +111,7 @@ export async function POST(request: Request) {
       shipping_cost: shippingCost,
       shipping_method: shippingMethod,
       is_test_order: isTestOrder,
+      gst_amount: gstAmount,
       total,
       shipping_address: parsed.data.shipping_address as Record<string, unknown>,
     });
@@ -163,6 +165,7 @@ export async function POST(request: Request) {
         paymentEnv: toCashfreeJsMode(cashfreeMode),
         subtotal,
         shipping_cost: shippingCost,
+        gst_amount: gstAmount,
         total,
       },
       error: null,

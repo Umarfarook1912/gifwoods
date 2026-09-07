@@ -17,6 +17,7 @@ interface OrderConfirmationProps {
   total: number;
   subtotal: number;
   shippingCost: number;
+  gstAmount: number;
   items: OrderEmailLineItem[];
   estimatedDeliveryDate?: string | null;
 }
@@ -28,6 +29,7 @@ export async function sendOrderConfirmationEmail({
   total,
   subtotal,
   shippingCost,
+  gstAmount,
   items,
   estimatedDeliveryDate,
 }: OrderConfirmationProps) {
@@ -44,6 +46,7 @@ export async function sendOrderConfirmationEmail({
       items,
       subtotal,
       shippingCost,
+      gstAmount,
       total,
       estimatedDeliveryDate,
     }),

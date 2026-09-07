@@ -240,4 +240,8 @@ export const LOADER_SIZE = "medium" as const;
 
 export const FREE_SHIPPING_THRESHOLD = 1500;
 export const STANDARD_SHIPPING_FEE = 75;
+/** Exclusive GST rate applied to product subtotal (shipping excluded). */
+export const GST_RATE = 0.18;
+export const GST_PERCENT_LABEL = "18%";
+export const GST_LINE_LABEL = "GST (18%)";
 export const MIN_CORPORATE_ORDER = 25;
