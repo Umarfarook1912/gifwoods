@@ -30,6 +30,25 @@ export async function getProductReviews(
   return (data ?? []) as Review[];
 }
 
+/** Current user's review for a product (pending or approved). */
+export async function getMyProductReview(
+  userId: string,
+  productId: string
+): Promise<Review | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("reviews")
+    .select("*, user:profiles(id, name, avatar_url)")
+    .eq("product_id", productId)
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  return (data as Review) ?? null;
+}
+
 export async function getAllReviews(): Promise<Review[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase

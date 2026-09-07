@@ -27,7 +27,7 @@ export function ReviewsSection({ reviews: initialReviews, productId }: Props) {
       ? reviewsList.reduce((s, r) => s + r.rating, 0) / reviewsList.length
       : 0;
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (_review?: Review) => {
     try {
       const res = await fetch(`/api/reviews?productId=${productId}&isApproved=true`);
       const json = await res.json();
@@ -78,21 +78,25 @@ export function ReviewsSection({ reviews: initialReviews, productId }: Props) {
         {/* Write a Review Block */}
         <div className="md:col-span-1">
           <div className="bg-cream/40 p-6 rounded-2xl border border-border/60 sticky top-24">
-            <h3 className="font-display font-bold text-lg text-dark mb-4">Write a Review</h3>
             {status === "loading" && (
               <div className="h-20 bg-muted animate-pulse rounded-xl" />
             )}
             {status === "unauthenticated" && (
-              <div className="space-y-3">
-                <p className="text-sm text-warm-gray leading-relaxed">
-                  Only logged-in customers can leave reviews. Sign in to write a review for this gift.
-                </p>
-                <Button asChild className="w-full bg-gold hover:bg-gold-dark text-dark font-semibold">
-                  <Link href={buildLoginHref(pathname)}>
-                    Sign In to Review
-                  </Link>
-                </Button>
-              </div>
+              <>
+                <h3 className="font-display font-bold text-lg text-dark mb-4">
+                  Write a Review
+                </h3>
+                <div className="space-y-3">
+                  <p className="text-sm text-warm-gray leading-relaxed">
+                    Only logged-in customers can leave reviews. Sign in to write a review for this gift.
+                  </p>
+                  <Button asChild className="w-full bg-gold hover:bg-gold-dark text-dark font-semibold">
+                    <Link href={buildLoginHref(pathname)}>
+                      Sign In to Review
+                    </Link>
+                  </Button>
+                </div>
+              </>
             )}
             {status === "authenticated" && (
               <ReviewForm
