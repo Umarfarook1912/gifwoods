@@ -88,6 +88,17 @@ export const SOCIAL_LINKS = {
   whatsapp: `https://wa.me/${internationalPhone}`,
 } as const;
 
+export const WHATSAPP_FLOAT = {
+  ARIA_LABEL: "Chat with us on WhatsApp",
+  MESSAGE:
+    "Hi Gifwoods! I'd like to know more about your personalized gifts.",
+} as const;
+
+/** WhatsApp chat URL with optional prefilled message (defaults to float CTA). */
+export function getWhatsAppChatUrl(message = WHATSAPP_FLOAT.MESSAGE): string {
+  return `${SOCIAL_LINKS.whatsapp}?text=${encodeURIComponent(message)}`;
+}
+
 export const MEDIA_LOGOS = [
   "Vogue India",
   "Elle Decor",

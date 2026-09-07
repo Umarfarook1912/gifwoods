@@ -14,6 +14,8 @@
   --color-secondary-dark: #2e271f;
   --color-cream: #faf7f2;
   --color-warm-gray: #8b7d6b;
+  --color-whatsapp: #25d366;
+  --color-whatsapp-dark: #1ebe57;
 
   /* shadcn tokens mapped to Gifwoods palette */
   --color-background: var(--background);
