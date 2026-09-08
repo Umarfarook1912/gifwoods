@@ -5,6 +5,8 @@ export const API_ENDPOINTS = {
   PRODUCT: (id: string) => `/api/products/${id}`,
   CATEGORIES: "/api/categories",
   CATEGORY: (id: string) => `/api/categories/${id}`,
+  HOMEPAGE_CAROUSEL: "/api/homepage-carousel",
+  HOMEPAGE_CAROUSEL_SLIDE: (id: string) => `/api/homepage-carousel/${id}`,
   ORDERS: "/api/orders",
   ORDER: (id: string) => `/api/orders/${id}`,
   ORDER_CUSTOMIZATION: (id: string) => `/api/orders/${id}/customization`,

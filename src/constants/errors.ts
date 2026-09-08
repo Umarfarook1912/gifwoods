@@ -33,6 +33,10 @@ export const APP_ERRORS = {
   CATEGORY_DELETE_FAILED: "Failed to delete category. Please try again.",
   CATEGORY_LOAD_FAILED: "Failed to load categories. Please try again.",
 
+  CAROUSEL_SAVE_FAILED: "Failed to save carousel slide. Please try again.",
+  CAROUSEL_DELETE_FAILED: "Failed to delete carousel slide. Please try again.",
+  CAROUSEL_LOAD_FAILED: "Failed to load carousel slides. Please try again.",
+
   REVIEW_SUBMIT_FAILED: "Failed to submit review. Please try again.",
   REVIEW_UPDATE_FAILED: "Failed to update review. Please try again.",
 

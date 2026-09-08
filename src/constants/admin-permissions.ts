@@ -6,6 +6,7 @@ export const ADMIN_PERMISSION_IDS = {
   ADMINS: "admins",
   CUSTOMERS: "customers",
   REVIEWS: "reviews",
+  CAROUSEL: "carousel",
 } as const;
 
 export type AdminPermissionId =
@@ -48,6 +49,11 @@ export const ADMIN_PERMISSIONS = [
     id: ADMIN_PERMISSION_IDS.REVIEWS,
     label: "Reviews",
     description: "Moderate, approve or delete client product testimonials.",
+  },
+  {
+    id: ADMIN_PERMISSION_IDS.CAROUSEL,
+    label: "Homepage Carousel",
+    description: "Manage left and right homepage banner carousels and their links.",
   },
 ] as const;
 

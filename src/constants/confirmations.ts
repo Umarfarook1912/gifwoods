@@ -49,6 +49,15 @@ export function categoryDeleteConfirmation(name: string): ConfirmOptions {
   };
 }
 
+export function carouselSlideDeleteConfirmation(label: string): ConfirmOptions {
+  return {
+    title: `Delete ${label}?`,
+    description: "This slide will be removed from the homepage carousel permanently.",
+    confirmLabel: "Delete Slide",
+    variant: "destructive",
+  };
+}
+
 export function userRoleChangeConfirmation(
   userName: string,
   newRole: string

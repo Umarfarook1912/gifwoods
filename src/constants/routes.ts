@@ -31,6 +31,7 @@ export const ROUTES = {
     ADMINS: "/admin/admins",
     CUSTOMERS: "/admin/customers",
     REVIEWS: "/admin/reviews",
+    CAROUSEL: "/admin/carousel",
     /** @deprecated Use ADMIN.CUSTOMERS */
     USERS: "/admin/customers",
   },

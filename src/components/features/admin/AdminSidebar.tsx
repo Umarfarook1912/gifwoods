@@ -12,6 +12,7 @@ import {
   Tags,
   ChevronRight,
   Shield,
+  Images,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { ROUTES } from "@/constants/routes";
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { href: ROUTES.ADMIN.DASHBOARD, label: "Dashboard", icon: LayoutDashboard, key: "dashboard" },
   { href: ROUTES.ADMIN.PRODUCTS, label: "Products", icon: Package, key: "products" },
   { href: ROUTES.ADMIN.CATEGORIES, label: "Categories", icon: Tags, key: "categories" },
+  { href: ROUTES.ADMIN.CAROUSEL, label: "Carousel", icon: Images, key: ADMIN_PERMISSION_IDS.CAROUSEL },
   { href: ROUTES.ADMIN.ORDERS, label: "Orders", icon: ShoppingBag, key: "orders" },
   { href: ROUTES.ADMIN.ADMINS, label: "Admins", icon: Shield, key: ADMIN_PERMISSION_IDS.ADMINS, matchPrefix: "/admin/admins" },
   { href: ROUTES.ADMIN.CUSTOMERS, label: "Users", icon: Users, key: ADMIN_PERMISSION_IDS.CUSTOMERS, matchPrefix: "/admin/customers" },

@@ -60,3 +60,24 @@ export const contactFormSchema = z.object({
   phone: phoneSchema.optional().or(z.literal("")),
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
+
+const carouselLinkSchema = z
+  .string()
+  .trim()
+  .min(1, "Navigation link is required")
+  .refine(
+    (value) => value.startsWith("/") || /^https?:\/\//i.test(value),
+    "Use a site path like /shop or a full http(s) URL"
+  );
+
+export const homepageCarouselSlideSchema = z.object({
+  slot: z.enum(["left", "right"]),
+  image_url: z.string().trim().url("Enter a valid image URL"),
+  link_url: carouselLinkSchema,
+  alt_text: z.string().trim().max(200).optional().nullable(),
+  headline: z.string().trim().max(80).optional().nullable(),
+  subheadline: z.string().trim().max(140).optional().nullable(),
+  cta_label: z.string().trim().max(40).optional().nullable(),
+  sort_order: z.number().int().min(0).max(999).optional(),
+  is_active: z.boolean().optional(),
+});

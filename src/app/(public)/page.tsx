@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { HeroSection } from "@/components/features/products/HeroSection";
+import { HomeDualCarousel } from "@/components/features/home/HomeDualCarousel";
 import { ProductSectionCarousel } from "@/components/features/products/ProductSectionCarousel";
 import { CategoryProductsSection } from "@/components/features/products/CategoryProductsSection";
 import { WhyUsSection } from "@/components/features/products/WhyUsSection";
@@ -8,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ROUTES } from "@/constants/routes";
 import { getAvailableCategories } from "@/lib/supabase/categories-db";
 import { getApprovedReviews } from "@/lib/supabase/reviews-db";
+import { getActiveHomepageCarouselSlides } from "@/lib/db/homepage-carousel";
 import type { Category, Product } from "@/types/product";
 
 export const metadata: Metadata = {
@@ -57,17 +59,21 @@ async function getAllActiveProducts(): Promise<Product[]> {
 }
 
 export default async function HomePage() {
-  const [bestsellers, newArrivals, categories, allProducts, reviews] = await Promise.all([
-    getBestsellers(),
-    getNewArrivals(),
-    getAvailableCategories(),
-    getAllActiveProducts(),
-    getApprovedReviews(),
-  ]);
+  const [bestsellers, newArrivals, categories, allProducts, reviews, carouselSlides] =
+    await Promise.all([
+      getBestsellers(),
+      getNewArrivals(),
+      getAvailableCategories(),
+      getAllActiveProducts(),
+      getApprovedReviews(),
+      getActiveHomepageCarouselSlides(),
+    ]);
+
+  const hasCarousel = carouselSlides.length > 0;
 
   return (
     <>
-      <HeroSection />
+      {hasCarousel ? <HomeDualCarousel slides={carouselSlides} /> : <HeroSection />}
       
       {/* Section 1: Best Sellers */}
       <ProductSectionCarousel
