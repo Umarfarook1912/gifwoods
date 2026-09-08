@@ -132,7 +132,9 @@ export async function getOrderForInvoice(orderId: string): Promise<Order | null>
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("orders")
-    .select("*, order_items(*, product:products(id, name, images, slug, price))")
+    .select(
+      "*, order_items(*, product:products(id, name, images, slug, price)), user:profiles(name, email)"
+    )
     .eq("id", orderId)
     .single();
   return (data as Order) ?? null;

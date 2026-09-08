@@ -3,19 +3,22 @@ import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { redirect, notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, CreditCard } from "lucide-react";
+import { CalendarDays, CreditCard, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { ReviewForm } from "@/components/features/reviews/ReviewForm";
 import { PaymentReturnNotice } from "@/components/features/orders/PaymentReturnNotice";
 import { OrderStatusBadges } from "@/components/shared/OrderStatusBadges";
 import { OrderItemCustomization } from "@/components/features/orders/OrderItemCustomization";
 import { OrderTracking } from "@/components/features/orders/OrderTracking";
 import { formatPrice, formatDate, formatOrderId } from "@/lib/utils/formatters";
-import { getPaymentStatus } from "@/lib/orders/status";
+import { canDownloadInvoice, getPaymentStatus } from "@/lib/orders/status";
 import { getShiprocketDeliveryEstimate } from "@/lib/shipping/delivery-estimate";
 import { ROUTES } from "@/constants/routes";
+import { API_ENDPOINTS } from "@/constants/api";
 import { DELIVERY_COPY } from "@/constants/shipping";
+import { INVOICE_COPY } from "@/constants/invoice";
 import { GST_LINE_LABEL } from "@/constants/ui";
 import { buildLoginHref } from "@/lib/auth/callback-url";
 import type { Order, OrderItem } from "@/types/order";
@@ -85,7 +88,26 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
             </h1>
             <p className="text-warm-gray text-sm mt-1">{formatDate(typedOrder.created_at)}</p>
           </div>
-          <OrderStatusBadges order={typedOrder} />
+          <div className="flex flex-wrap items-center gap-2">
+            <OrderStatusBadges order={typedOrder} />
+            {canDownloadInvoice(typedOrder) && (
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="gap-2 border-gold/40 bg-white font-semibold text-dark hover:bg-gold/10"
+              >
+                <a
+                  href={API_ENDPOINTS.ORDER_INVOICE(typedOrder.id)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Download className="h-4 w-4" />
+                  {INVOICE_COPY.DOWNLOAD_BUTTON}
+                </a>
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Expected delivery date */}

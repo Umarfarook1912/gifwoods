@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
   HOMEPAGE_CAROUSEL_SLIDE: (id: string) => `/api/homepage-carousel/${id}`,
   ORDERS: "/api/orders",
   ORDER: (id: string) => `/api/orders/${id}`,
+  ORDER_INVOICE: (id: string) => `/api/orders/${id}/invoice`,
   ORDER_CUSTOMIZATION: (id: string) => `/api/orders/${id}/customization`,
   ORDER_TRACK: (id: string) => `/api/orders/${id}/track`,
   REVIEWS: "/api/reviews",
