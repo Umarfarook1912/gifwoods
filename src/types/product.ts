@@ -9,6 +9,7 @@ export interface Category {
 
 export type ProductBadge = "Personalize" | "Bestseller" | "New" | "Limited";
 export type ProductStatus = "active" | "draft" | "archived";
+export type ProductOfferType = "percent" | "amount";
 
 export interface Product {
   id: string;
@@ -31,6 +32,10 @@ export interface Product {
   customization_text?: boolean;
   customization_image?: boolean;
   status: ProductStatus;
+  offer_type?: ProductOfferType | null;
+  offer_value?: number | null;
+  offer_starts_at?: string | null;
+  offer_ends_at?: string | null;
   specifications?: Array<{ key: string; value: string }>;
   avg_rating?: number;
   review_count?: number;
@@ -67,6 +72,10 @@ export interface ProductFormData {
   customization_image?: boolean;
   badge?: ProductBadge;
   status: ProductStatus;
+  offer_type?: ProductOfferType | null;
+  offer_value?: number | null;
+  offer_starts_at?: string | null;
+  offer_ends_at?: string | null;
   specifications?: Array<{ key: string; value: string }>;
 }
 
@@ -93,6 +102,10 @@ export interface ProductFormState {
   customization_image: boolean;
   badge: string;
   status: ProductStatus;
+  offer_type: "" | ProductOfferType;
+  offer_value: number;
+  offer_starts_at: string;
+  offer_ends_at: string;
   specifications: ProductSpecification[];
 }
 

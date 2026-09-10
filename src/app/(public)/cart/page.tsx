@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/hooks/useCartStore";
 import { formatPrice } from "@/lib/utils/formatters";
+import { getEffectiveProductPrice } from "@/lib/products/offer-price";
 import { calculateShipping, calculateGst, calculateOrderTotal, getFastDeliverySurcharge } from "@/lib/orders/pricing";
 import { ROUTES } from "@/constants/routes";
 import { FREE_SHIPPING_THRESHOLD, GST_LINE_LABEL } from "@/constants/ui";
@@ -128,7 +129,7 @@ export default function CartPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-dark">
-                        {formatPrice(item.product.price * item.quantity)}
+                        {formatPrice(getEffectiveProductPrice(item.product) * item.quantity)}
                       </span>
                       <button
                         onClick={() => removeItem(item.id)}

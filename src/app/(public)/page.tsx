@@ -7,10 +7,12 @@ import { WhyUsSection } from "@/components/features/products/WhyUsSection";
 import { TestimonialsSection } from "@/components/features/products/TestimonialsSection";
 import { createClient } from "@/lib/supabase/server";
 import { ROUTES } from "@/constants/routes";
+import { PRODUCT_OFFER_COPY } from "@/constants/offers";
 import { getAvailableCategories } from "@/lib/supabase/categories-db";
 import { getApprovedReviews } from "@/lib/supabase/reviews-db";
 import { getActiveHomepageCarouselSlides } from "@/lib/db/homepage-carousel";
-import type { Category, Product } from "@/types/product";
+import { getActiveOfferProducts } from "@/lib/db/products";
+import type { Product } from "@/types/product";
 
 export const metadata: Metadata = {
   title: "Gifwoods — Premium Personalized Gifts for Every Occasion",
@@ -59,8 +61,9 @@ async function getAllActiveProducts(): Promise<Product[]> {
 }
 
 export default async function HomePage() {
-  const [bestsellers, newArrivals, categories, allProducts, reviews, carouselSlides] =
+  const [offers, bestsellers, newArrivals, categories, allProducts, reviews, carouselSlides] =
     await Promise.all([
+      getActiveOfferProducts(8),
       getBestsellers(),
       getNewArrivals(),
       getAvailableCategories(),
@@ -74,7 +77,18 @@ export default async function HomePage() {
   return (
     <>
       {hasCarousel ? <HomeDualCarousel slides={carouselSlides} /> : <HeroSection />}
-      
+
+      {offers.length > 0 && (
+        <ProductSectionCarousel
+          title={PRODUCT_OFFER_COPY.SECTION_TITLE}
+          subtitle={PRODUCT_OFFER_COPY.SECTION_SUBTITLE}
+          products={offers}
+          viewAllHref={ROUTES.OFFERS}
+          bgClass="bg-cream/40"
+          badgeLabel={PRODUCT_OFFER_COPY.SECTION_BADGE}
+        />
+      )}
+
       {/* Section 1: Best Sellers */}
       <ProductSectionCarousel
         title="Bestsellers"

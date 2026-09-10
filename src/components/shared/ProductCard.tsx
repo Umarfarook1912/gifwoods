@@ -4,9 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, Star } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { formatPrice } from "@/lib/utils/formatters";
 import { ROUTES } from "@/constants/routes";
 import { useCartStore } from "@/hooks/useCartStore";
+import { ProductOfferPrice } from "@/components/shared/ProductOfferPrice";
+import { OfferCountdown } from "@/components/shared/OfferCountdown";
+import { getProductOfferPricing } from "@/lib/products/offer-price";
 import { toast } from "sonner";
 import type { Product } from "@/types/product";
 
@@ -24,6 +26,7 @@ interface Props {
 
 export function ProductCard({ product, className }: Props) {
   const { addItem, openCart } = useCartStore();
+  const pricing = getProductOfferPricing(product);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -46,6 +49,18 @@ export function ProductCard({ product, className }: Props) {
       )}
 
       <div className="relative aspect-square overflow-hidden rounded-[1.25rem] bg-white">
+        {pricing.isOfferActive && pricing.offerBadge && (
+          <span className="absolute left-2 top-2 z-[2] rounded-full border border-gold/40 bg-cream/95 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-dark sm:text-[10px]">
+            {pricing.offerBadge}
+          </span>
+        )}
+        {pricing.isOfferActive && product.offer_ends_at && (
+          <OfferCountdown
+            endsAt={product.offer_ends_at}
+            variant="overlay"
+            className="absolute right-2 top-2 z-[2]"
+          />
+        )}
         <Link href={ROUTES.PRODUCT(product.slug)} className="absolute inset-0 block">
           {product.images[0] ? (
             <Image
@@ -88,14 +103,12 @@ export function ProductCard({ product, className }: Props) {
           {product.name}
         </h3>
 
-        <div className="flex items-baseline gap-2">
-          <span className="font-bold text-dark text-sm sm:text-base">{formatPrice(product.price)}</span>
-          {product.original_price && product.original_price > product.price && (
-            <span className="text-xs sm:text-sm text-warm-gray line-through">
-              {formatPrice(product.original_price)}
-            </span>
-          )}
-        </div>
+        <ProductOfferPrice
+          product={product}
+          priceClassName="text-sm sm:text-base"
+          compareClassName="text-xs sm:text-sm"
+          showBadge={false}
+        />
       </Link>
     </div>
   );

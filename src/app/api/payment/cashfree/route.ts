@@ -10,6 +10,7 @@ import {
 import { apiError } from "@/lib/errors/api-response";
 import { toUserErrorMessage } from "@/lib/errors/user-message";
 import { calculateShipping, calculateGst, calculateOrderTotal } from "@/lib/orders/pricing";
+import { getEffectiveProductPrice } from "@/lib/products/offer-price";
 import { API_ENDPOINTS } from "@/constants/api";
 import { DELIVERY_METHODS } from "@/constants/shipping";
 import { z } from "zod";
@@ -71,7 +72,11 @@ export async function POST(request: Request) {
   const productMap = new Map(products.map((p) => [p.id, p]));
   const pricedItems = parsed.data.items.map((item) => {
     const product = productMap.get(item.product_id)!;
-    return { ...item, unit_price: Number(product.price), product };
+    return {
+      ...item,
+      unit_price: getEffectiveProductPrice(product),
+      product,
+    };
   });
 
   const unavailable = pricedItems.find(

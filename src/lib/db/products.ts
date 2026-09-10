@@ -214,3 +214,26 @@ export async function deleteProduct(id: string): Promise<void> {
   const { error } = await supabase.from("products").delete().eq("id", id);
   if (error) throw error;
 }
+
+/** Active products with a live timed offer window. */
+export async function getActiveOfferProducts(limit = 12): Promise<Product[]> {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("products")
+    .select("*, category:categories(id, name, slug)")
+    .eq("status", "active")
+    .eq("is_test", false)
+    .not("offer_type", "is", null)
+    .gt("offer_value", 0)
+    .lte("offer_starts_at", now)
+    .gte("offer_ends_at", now)
+    .order("offer_ends_at", { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    console.error("getActiveOfferProducts:", error.message);
+    return [];
+  }
+  return (data ?? []) as Product[];
+}

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ReviewsSection } from "@/components/features/reviews/ReviewsSection";
 import { cn } from "@/lib/utils/cn";
 import { formatPrice } from "@/lib/utils/formatters";
+import { getEffectiveProductPrice } from "@/lib/products/offer-price";
 import { ROUTES } from "@/constants/routes";
 import type { Product } from "@/types/product";
 import type { Review } from "@/types/review";
@@ -171,7 +172,7 @@ export function ProductTabs({ product, reviews, related }: Props) {
                     {item.name}
                   </p>
                   <p className="text-sm font-bold text-dark mt-1">
-                    {formatPrice(item.price)}
+                    {formatPrice(getEffectiveProductPrice(item))}
                   </p>
                 </div>
               </Link>

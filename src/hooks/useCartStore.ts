@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { CART_STORAGE_KEY } from "@/constants/routes";
 import { DELIVERY_METHODS } from "@/constants/shipping";
+import { getEffectiveProductPrice } from "@/lib/products/offer-price";
 import type { CartState, CartItem } from "@/types/cart";
 import type { Product, Customization } from "@/types/product";
 import type { DeliveryMethod } from "@/types/shipping";
@@ -63,7 +64,7 @@ export const useCartStore = create<CartState>()(
 
       getSubtotal: () => {
         return get().items.reduce(
-          (sum, item) => sum + item.product.price * item.quantity,
+          (sum, item) => sum + getEffectiveProductPrice(item.product) * item.quantity,
           0
         );
       },

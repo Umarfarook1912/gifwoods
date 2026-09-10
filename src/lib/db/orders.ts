@@ -267,13 +267,19 @@ export interface CheckoutProduct {
   stock: number;
   status: string;
   is_test: boolean;
+  offer_type: "percent" | "amount" | null;
+  offer_value: number | null;
+  offer_starts_at: string | null;
+  offer_ends_at: string | null;
 }
 
 export async function getProductsForCheckout(productIds: string[]): Promise<CheckoutProduct[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("id, price, stock, status, is_test")
+    .select(
+      "id, price, stock, status, is_test, offer_type, offer_value, offer_starts_at, offer_ends_at"
+    )
     .in("id", productIds);
   if (error) throw error;
   return (data ?? []) as CheckoutProduct[];

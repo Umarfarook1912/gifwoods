@@ -3,7 +3,7 @@ import { APP_ERRORS } from "@/constants/errors";
 import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { apiError } from "@/lib/errors/api-response";
 import { toUserErrorMessage } from "@/lib/errors/user-message";
-import { productSchema } from "@/lib/utils/validators";
+import { productUpdateSchema } from "@/lib/utils/validators";
 import {
   getProductByIdOrSlug,
   updateProduct,
@@ -38,7 +38,7 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json();
-  const parsed = productSchema.partial().safeParse(body);
+  const parsed = productUpdateSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ data: null, error: APP_ERRORS.VALIDATION }, { status: 400 });
   }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PRODUCT_OFFER_VALIDATION } from "@/constants/offers";
 
 export const phoneSchema = z
   .string()
@@ -29,7 +30,7 @@ export const reviewSchema = z.object({
   order_id: z.string().uuid().optional().nullable(),
 });
 
-export const productSchema = z.object({
+export const productFieldsSchema = z.object({
   name: z.string().min(2).max(200),
   slug: z.string().min(2).max(200),
   code: z.string().max(50).optional().nullable(),
@@ -48,11 +49,76 @@ export const productSchema = z.object({
   customization_image: z.boolean().optional(),
   badge: z.enum(["Personalize", "Bestseller", "New", "Limited"]).optional(),
   status: z.enum(["active", "draft", "archived"]),
-  specifications: z.array(z.object({
-    key: z.string(),
-    value: z.string()
-  })).optional(),
+  offer_type: z.enum(["percent", "amount"]).nullable().optional(),
+  offer_value: z.number().positive().nullable().optional(),
+  offer_starts_at: z.string().nullable().optional(),
+  offer_ends_at: z.string().nullable().optional(),
+  specifications: z
+    .array(
+      z.object({
+        key: z.string(),
+        value: z.string(),
+      })
+    )
+    .optional(),
 });
+
+type ProductOfferRefineInput = {
+  price?: number;
+  offer_type?: "percent" | "amount" | null;
+  offer_value?: number | null;
+  offer_starts_at?: string | null;
+  offer_ends_at?: string | null;
+};
+
+function refineProductOffer(data: ProductOfferRefineInput, ctx: z.RefinementCtx) {
+  if (!data.offer_type) return;
+  if (data.offer_value == null) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["offer_value"],
+      message: PRODUCT_OFFER_VALIDATION.VALUE_REQUIRED,
+    });
+  } else if (data.offer_type === "percent" && data.offer_value > 100) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["offer_value"],
+      message: PRODUCT_OFFER_VALIDATION.PERCENT_MAX,
+    });
+  } else if (
+    data.offer_type === "amount" &&
+    data.price != null &&
+    data.offer_value >= data.price
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["offer_value"],
+      message: PRODUCT_OFFER_VALIDATION.AMOUNT_LT_PRICE,
+    });
+  }
+  if (!data.offer_starts_at || !data.offer_ends_at) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["offer_starts_at"],
+      message: PRODUCT_OFFER_VALIDATION.WINDOW_REQUIRED,
+    });
+    return;
+  }
+  if (new Date(data.offer_ends_at) <= new Date(data.offer_starts_at)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["offer_ends_at"],
+      message: PRODUCT_OFFER_VALIDATION.END_AFTER_START,
+    });
+  }
+}
+
+export const productSchema = productFieldsSchema.superRefine(refineProductOffer);
+
+/** Partial schema for PATCH — refinements only run when an offer type is set. */
+export const productUpdateSchema = productFieldsSchema
+  .partial()
+  .superRefine(refineProductOffer);
 
 export const contactFormSchema = z.object({
   name: z.string().min(2, "Name is required"),

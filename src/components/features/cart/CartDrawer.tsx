@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/hooks/useCartStore";
 import { formatPrice } from "@/lib/utils/formatters";
+import { getEffectiveProductPrice } from "@/lib/products/offer-price";
 import { ROUTES } from "@/constants/routes";
 import { FREE_SHIPPING_THRESHOLD } from "@/constants/ui";
 import { CONFIRMATIONS } from "@/constants/confirmations";
@@ -152,7 +153,7 @@ export function CartDrawer() {
                         </button>
                       </div>
                       <span className="text-sm font-semibold text-dark">
-                        {formatPrice(item.product.price * item.quantity)}
+                        {formatPrice(getEffectiveProductPrice(item.product) * item.quantity)}
                       </span>
                     </div>
                   </div>

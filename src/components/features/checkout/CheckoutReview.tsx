@@ -4,6 +4,7 @@ import Image from "next/image";
 import { MapPin, Minus, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils/formatters";
+import { getEffectiveProductPrice } from "@/lib/products/offer-price";
 import { cn } from "@/lib/utils/cn";
 import { useCartStore } from "@/hooks/useCartStore";
 import { CHECKOUT_COPY } from "@/constants/checkout";
@@ -123,10 +124,10 @@ export function CheckoutReview({
 
                   <div className="text-right">
                     <p className="text-sm font-semibold text-dark">
-                      {formatPrice(item.product.price * item.quantity)}
+                      {formatPrice(getEffectiveProductPrice(item.product) * item.quantity)}
                     </p>
                     <p className="text-xs text-warm-gray">
-                      {formatPrice(item.product.price)} each
+                      {formatPrice(getEffectiveProductPrice(item.product))} each
                     </p>
                   </div>
                 </div>

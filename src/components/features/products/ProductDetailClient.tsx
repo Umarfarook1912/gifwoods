@@ -14,6 +14,8 @@ import { DeliveryEstimate } from "./DeliveryEstimate";
 import { StarRating } from "@/components/shared/StarRating";
 import { useCartStore } from "@/hooks/useCartStore";
 import { formatPrice, formatDiscount } from "@/lib/utils/formatters";
+import { getProductOfferPricing } from "@/lib/products/offer-price";
+import { OfferCountdown } from "@/components/shared/OfferCountdown";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils/cn";
 import { SOCIAL_LINKS, SITE_NAME } from "@/constants/ui";
@@ -58,10 +60,12 @@ export function ProductDetailClient({ product: initialProduct }: Props) {
     router.push(ROUTES.CHECKOUT);
   };
 
-  const discount =
-    product.original_price && product.original_price > product.price
-      ? formatDiscount(product.original_price, product.price)
-      : null;
+  const pricing = getProductOfferPricing(product);
+  const discountBadge =
+    pricing.offerBadge ??
+    (pricing.compareAtPrice != null && pricing.compareAtPrice > pricing.unitPrice
+      ? formatDiscount(pricing.compareAtPrice, pricing.unitPrice)
+      : null);
 
   return (
     <div className="space-y-6">
@@ -111,19 +115,26 @@ export function ProductDetailClient({ product: initialProduct }: Props) {
           </div>
         )}
 
-        <div className="flex items-baseline gap-3 mb-6">
-          <span className="font-display font-bold text-3xl text-dark">
-            {formatPrice(product.price)}
-          </span>
-          {product.original_price && product.original_price > product.price && (
-            <>
-              <span className="text-warm-gray line-through text-lg">
-                {formatPrice(product.original_price)}
-              </span>
-              <Badge className="bg-red-100 text-red-700 border-0 text-xs font-semibold">
-                {discount}
-              </Badge>
-            </>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-baseline gap-3">
+            <span className="font-display font-bold text-3xl text-dark">
+              {formatPrice(pricing.unitPrice)}
+            </span>
+            {pricing.compareAtPrice != null && (
+              <>
+                <span className="text-warm-gray line-through text-lg">
+                  {formatPrice(pricing.compareAtPrice)}
+                </span>
+                {discountBadge && (
+                  <Badge className="bg-gold/20 text-dark border-0 text-xs font-semibold">
+                    {discountBadge}
+                  </Badge>
+                )}
+              </>
+            )}
+          </div>
+          {pricing.isOfferActive && product.offer_ends_at && (
+            <OfferCountdown endsAt={product.offer_ends_at} variant="detail" />
           )}
         </div>
 

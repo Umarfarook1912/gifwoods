@@ -20,6 +20,7 @@ export const NAV_LINKS = [
   { label: "Shop", href: "/shop" },
   { label: "New Arrivals", href: "/new-arrivals" },
   { label: "Best Sellers", href: "/bestsellers" },
+  { label: "Offers", href: "/offers" },
   { label: "Categories", href: "#", dropdown: true },
   { label: "Corporate Gifting", href: "/categories/corporate" },
   { label: "About", href: "/about" },
@@ -32,6 +33,7 @@ export const FOOTER_SHOP_LINKS = [
   { label: "Corporate", href: "/categories/corporate" },
   { label: "Hampers", href: "/categories/hampers" },
   { label: "New Arrivals", href: "/new-arrivals" },
+  { label: "Offers", href: "/offers" },
 ] as const;
 
 export const FOOTER_COMPANY_LINKS = [

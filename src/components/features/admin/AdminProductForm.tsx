@@ -12,36 +12,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ProductFormFields } from "./ProductFormFields";
+import { ProductOfferFields } from "./ProductOfferFields";
 import { ImageListField, SpecificationListField } from "./ProductFormLists";
+import { EMPTY_PRODUCT_FORM, productToFormState } from "./product-form-state";
 import { API_ENDPOINTS } from "@/constants/api";
 import { NEW_CATEGORY_OPTION, PRODUCT_HOME_TOGGLE_LABELS } from "@/constants/ui";
 import { CUSTOMIZATION_COPY } from "@/constants/customization";
 import { APP_ERRORS } from "@/constants/errors";
 import { toastError } from "@/lib/errors/toast";
 import { toast } from "sonner";
+import { fromDatetimeLocalValue } from "@/lib/utils/datetime-local";
 import { RefreshCw } from "lucide-react";
 import type { Category, Product, ProductFormState } from "@/types/product";
-
-const EMPTY_FORM: ProductFormState = {
-  name: "",
-  slug: "",
-  code: "",
-  description: "",
-  price: 0,
-  original_price: 0,
-  category_id: "",
-  images: [""],
-  tags: [],
-  stock: 0,
-  is_bestseller: false,
-  is_new_arrival: false,
-  is_test: false,
-  customization_text: false,
-  customization_image: false,
-  badge: "",
-  status: "active",
-  specifications: [],
-};
 
 interface Props {
   open: boolean;
@@ -54,7 +36,7 @@ interface Props {
 export function AdminProductForm({ open, onOpenChange, editing, categories, onSaved }: Props) {
   const { data: session } = useSession();
   const isSuperAdmin = session?.user?.role === "super_admin";
-  const [form, setForm] = useState<ProductFormState>(EMPTY_FORM);
+  const [form, setForm] = useState<ProductFormState>(EMPTY_PRODUCT_FORM);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -63,30 +45,7 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
   useEffect(() => {
     if (!open) return;
     setNewCategoryName("");
-    setForm(
-      editing
-        ? {
-            name: editing.name,
-            slug: editing.slug,
-            code: editing.code ?? "",
-            description: editing.description,
-            price: editing.price,
-            original_price: editing.original_price ?? 0,
-            category_id: editing.category_id ?? "",
-            images: editing.images.length > 0 ? editing.images : [""],
-            tags: editing.tags,
-            stock: editing.stock,
-            is_bestseller: editing.is_bestseller ?? false,
-            is_new_arrival: editing.is_new_arrival ?? false,
-            is_test: editing.is_test ?? false,
-            customization_text: editing.customization_text ?? false,
-            customization_image: editing.customization_image ?? false,
-            badge: editing.badge ?? "",
-            status: editing.status,
-            specifications: editing.specifications ?? [],
-          }
-        : EMPTY_FORM
-    );
+    setForm(editing ? productToFormState(editing) : EMPTY_PRODUCT_FORM);
   }, [open, editing]);
 
   const handleSave = async () => {
@@ -96,6 +55,7 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
     }
     setSaving(true);
     try {
+      const hasOffer = Boolean(form.offer_type);
       const payload = {
         ...form,
         category_id: isNewCategory ? undefined : form.category_id || undefined,
@@ -105,6 +65,10 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
         badge: form.badge || undefined,
         images: form.images.filter(Boolean),
         specifications: form.specifications.filter((s) => s.key.trim() && s.value.trim()),
+        offer_type: hasOffer ? form.offer_type : null,
+        offer_value: hasOffer ? form.offer_value : null,
+        offer_starts_at: hasOffer ? fromDatetimeLocalValue(form.offer_starts_at) : null,
+        offer_ends_at: hasOffer ? fromDatetimeLocalValue(form.offer_ends_at) : null,
         ...(isSuperAdmin ? { is_test: form.is_test } : { is_test: undefined }),
       };
       const url = editing ? API_ENDPOINTS.PRODUCT(editing.id) : API_ENDPOINTS.PRODUCTS;
@@ -144,6 +108,8 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
               newCategoryName={newCategoryName}
               setNewCategoryName={setNewCategoryName}
             />
+
+            <ProductOfferFields form={form} setForm={setForm} />
 
             <ImageListField
               images={form.images}

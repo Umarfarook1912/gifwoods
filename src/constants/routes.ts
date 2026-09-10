@@ -2,6 +2,7 @@ export const ROUTES = {
   HOME: "/",
   SHOP: "/shop",
   BESTSELLERS: "/bestsellers",
+  OFFERS: "/offers",
   NEW_ARRIVALS: "/new-arrivals",
   CATEGORY: (slug: string) => `/categories/${slug}`,
   PRODUCT: (slug: string) => `/products/${slug}`,

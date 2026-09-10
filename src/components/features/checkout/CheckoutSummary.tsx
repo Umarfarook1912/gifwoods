@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Minus, PackageCheck, Plus, Trash2, Truck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { formatPrice } from "@/lib/utils/formatters";
+import { getEffectiveProductPrice } from "@/lib/products/offer-price";
 import { cn } from "@/lib/utils/cn";
 import { useCartStore } from "@/hooks/useCartStore";
 import { FREE_SHIPPING_THRESHOLD, GST_LINE_LABEL } from "@/constants/ui";
@@ -77,7 +78,7 @@ export function CheckoutSummary({
                 </button>
               </div>
               <p className="mt-0.5 text-xs text-warm-gray">
-                {formatPrice(item.product.price)} each
+                {formatPrice(getEffectiveProductPrice(item.product))} each
               </p>
               <div className="mt-2 flex items-center justify-between gap-2">
                 <div className="flex items-center overflow-hidden rounded-full border border-border bg-white">
@@ -106,7 +107,7 @@ export function CheckoutSummary({
                   </button>
                 </div>
                 <span className="text-sm font-semibold text-dark">
-                  {formatPrice(item.product.price * item.quantity)}
+                  {formatPrice(getEffectiveProductPrice(item.product) * item.quantity)}
                 </span>
               </div>
             </div>

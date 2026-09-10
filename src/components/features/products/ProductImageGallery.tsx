@@ -14,8 +14,7 @@ export function ProductImageGallery({ images, name }: Props) {
 
   return (
     <div className="space-y-3">
-      {/* Main image */}
-      <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted">
+      <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted">
         {images[selected] ? (
           <Image
             src={images[selected]}
@@ -26,13 +25,12 @@ export function ProductImageGallery({ images, name }: Props) {
             sizes="(max-width: 768px) 100vw, 50vw"
           />
         ) : (
-          <div className="w-full h-full bg-cream flex items-center justify-center text-muted-foreground/30">
+          <div className="flex h-full w-full items-center justify-center bg-cream text-muted-foreground/30">
             No image
           </div>
         )}
       </div>
 
-      {/* Thumbnails */}
       {images.length > 1 && (
         <div className="flex gap-2 overflow-x-auto scrollbar-hide">
           {images.map((img, i) => (
@@ -40,18 +38,11 @@ export function ProductImageGallery({ images, name }: Props) {
               key={i}
               onClick={() => setSelected(i)}
               className={cn(
-                "relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-colors",
-                selected === i ? "border-gold" : "border-border hover:border-gold/50"
+                "relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-colors",
+                selected === i ? "border-gold" : "border-transparent opacity-70 hover:opacity-100"
               )}
-              aria-label={`View image ${i + 1}`}
             >
-              <Image
-                src={img}
-                alt={`${name} - ${i + 1}`}
-                fill
-                className="object-cover"
-                sizes="64px"
-              />
+              <Image src={img} alt="" fill className="object-cover" sizes="64px" />
             </button>
           ))}
         </div>
