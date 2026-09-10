@@ -115,24 +115,20 @@ export function ProductDetailClient({ product: initialProduct }: Props) {
           </div>
         )}
 
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-baseline gap-3">
-            <span className="font-display font-bold text-3xl text-dark">
-              {formatPrice(pricing.unitPrice)}
+        <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span className="font-display font-bold text-3xl text-dark">
+            {formatPrice(pricing.unitPrice)}
+          </span>
+          {pricing.compareAtPrice != null && (
+            <span className="text-warm-gray line-through text-lg">
+              {formatPrice(pricing.compareAtPrice)}
             </span>
-            {pricing.compareAtPrice != null && (
-              <>
-                <span className="text-warm-gray line-through text-lg">
-                  {formatPrice(pricing.compareAtPrice)}
-                </span>
-                {discountBadge && (
-                  <Badge className="bg-gold/20 text-dark border-0 text-xs font-semibold">
-                    {discountBadge}
-                  </Badge>
-                )}
-              </>
-            )}
-          </div>
+          )}
+          {discountBadge && (
+            <Badge className="bg-gold/20 text-dark border-0 text-xs font-semibold">
+              {discountBadge}
+            </Badge>
+          )}
           {pricing.isOfferActive && product.offer_ends_at && (
             <OfferCountdown endsAt={product.offer_ends_at} variant="detail" />
           )}
