@@ -14,14 +14,14 @@ export const HOMEPAGE_CAROUSEL_SLOT_LABELS: Record<HomepageCarouselSlot, string>
 export const HOMEPAGE_CAROUSEL_SIZES = {
   left: {
     width: 1200,
-    height: 480,
-    ratioLabel: "2.5:1",
+    height: 600,
+    ratioLabel: "2:1",
     description: "Wide rectangle for the main left carousel",
   },
   right: {
-    width: 400,
-    height: 480,
-    ratioLabel: "5:6",
+    width: 480,
+    height: 600,
+    ratioLabel: "4:5",
     description: "Short banner for the right carousel (same height as left)",
   },
 } as const;

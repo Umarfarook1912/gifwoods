@@ -74,7 +74,7 @@ export function ProductTabs({ product, reviews, related }: Props) {
                 prose-ul:my-1 prose-li:my-0.5
                 prose-ol:my-1
                 prose-strong:text-dark
-                prose-img:rounded-xl prose-img:my-3 prose-img:w-full prose-img:max-w-sm
+                prose-img:rounded-xl prose-img:my-3 prose-img:h-auto prose-img:w-full prose-img:max-w-full
                 [&_iframe]:w-full [&_iframe]:max-w-lg [&_iframe]:rounded-xl [&_iframe]:my-3
                 [&_iframe]:h-[185px] [&_iframe]:sm:h-[260px] [&_iframe]:md:h-[340px]
                 text-xs sm:text-sm"

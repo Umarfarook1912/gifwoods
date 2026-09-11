@@ -21,14 +21,14 @@ export function HomeDualCarousel({ slides }: Props) {
         className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top,_rgba(229,169,60,0.16),_transparent_60%)]"
         aria-hidden
       />
-      <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto w-full px-4 sm:px-6 lg:px-10">
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-dark">
           {HOMEPAGE_CAROUSEL_COPY.SECTION_EYEBROW}
         </p>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch lg:gap-4">
           <div className="w-full lg:w-3/4">
             {left.length > 0 ? (
-              <div className="aspect-[2.5/1] min-h-[180px] w-full sm:min-h-[220px]">
+              <div className="aspect-[2/1] min-h-[240px] w-full sm:min-h-[320px] lg:min-h-[420px]">
                 <BannerCarousel
                   slides={left}
                   slot={HOMEPAGE_CAROUSEL_SLOTS.LEFT}
@@ -39,7 +39,7 @@ export function HomeDualCarousel({ slides }: Props) {
           </div>
           <div className="w-full lg:w-1/4">
             {right.length > 0 ? (
-              <div className="aspect-[2.5/1] min-h-[180px] w-full sm:min-h-[220px] lg:aspect-auto lg:h-full lg:min-h-0">
+              <div className="aspect-[2/1] min-h-[240px] w-full sm:min-h-[320px] lg:aspect-auto lg:h-full lg:min-h-[420px]">
                 <BannerCarousel
                   slides={right}
                   slot={HOMEPAGE_CAROUSEL_SLOTS.RIGHT}

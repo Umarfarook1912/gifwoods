@@ -17,6 +17,7 @@ import {
   RemoveFormatting,
   Palette,
   PlayCircle,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { RICH_TEXT_COLORS, RICH_TEXT_COPY } from "@/constants/rich-text-editor";
@@ -27,6 +28,8 @@ interface Props {
   showYoutubeInput: boolean;
   showLinkInput: boolean;
   showColorMenu: boolean;
+  imageSelected: boolean;
+  onRemoveImage: () => void;
   onToggleImage: () => void;
   onToggleYoutube: () => void;
   onToggleLink: () => void;
@@ -72,6 +75,8 @@ export function RichTextToolbar({
   showYoutubeInput,
   showLinkInput,
   showColorMenu,
+  imageSelected,
+  onRemoveImage,
   onToggleImage,
   onToggleYoutube,
   onToggleLink,
@@ -140,6 +145,11 @@ export function RichTextToolbar({
       <ToolbarButton title="Image" active={showImageInput} onClick={onToggleImage}>
         <ImageIcon className="h-3.5 w-3.5" />
       </ToolbarButton>
+      {imageSelected && (
+        <ToolbarButton title={RICH_TEXT_COPY.REMOVE_IMAGE} onClick={onRemoveImage}>
+          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+        </ToolbarButton>
+      )}
       <ToolbarButton title="YouTube" active={showYoutubeInput} onClick={onToggleYoutube}>
         <PlayCircle className="h-3.5 w-3.5" />
       </ToolbarButton>
