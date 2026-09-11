@@ -10,6 +10,7 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import { useEffect, useCallback, useState } from "react";
 import { RichTextToolbar } from "./RichTextToolbar";
+import { RichTextUrlBar } from "./RichTextUrlBar";
 import { RICH_TEXT_COPY } from "@/constants/rich-text-editor";
 
 interface Props {
@@ -27,6 +28,7 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [showColorMenu, setShowColorMenu] = useState(false);
   const [charCount, setCharCount] = useState(0);
+  const [imageSelected, setImageSelected] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -54,7 +56,7 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
     editorProps: {
       attributes: {
         class:
-          "min-h-[220px] px-4 py-3 text-sm text-dark leading-relaxed focus:outline-none prose prose-sm max-w-none",
+          "min-h-[220px] px-4 py-3 text-sm text-dark leading-relaxed focus:outline-none prose prose-sm max-w-none prose-img:rounded-xl prose-img:my-3 prose-img:h-auto prose-img:w-full prose-img:max-w-full",
       },
     },
     immediatelyRender: false,
@@ -67,12 +69,32 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
     setCharCount(editor.getText().length);
   }, [editor, value]);
 
+  useEffect(() => {
+    if (!editor) return;
+    const sync = () => {
+      setImageSelected(editor.isActive("image"));
+      setCharCount(editor.getText().length);
+    };
+    editor.on("selectionUpdate", sync);
+    editor.on("transaction", sync);
+    sync();
+    return () => {
+      editor.off("selectionUpdate", sync);
+      editor.off("transaction", sync);
+    };
+  }, [editor]);
+
   const insertImage = useCallback(() => {
     if (!editor || !imageUrl.trim()) return;
     editor.chain().focus().setImage({ src: imageUrl.trim() }).run();
     setImageUrl("");
     setShowImageInput(false);
   }, [editor, imageUrl]);
+
+  const removeImage = useCallback(() => {
+    if (!editor || !editor.isActive("image")) return;
+    editor.chain().focus().deleteSelection().run();
+  }, [editor]);
 
   const insertYoutube = useCallback(() => {
     if (!editor || !youtubeUrl.trim()) return;
@@ -103,6 +125,8 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
         showYoutubeInput={showYoutubeInput}
         showLinkInput={showLinkInput}
         showColorMenu={showColorMenu}
+        imageSelected={imageSelected}
+        onRemoveImage={removeImage}
         onToggleImage={() => {
           setShowImageInput((v) => !v);
           setShowYoutubeInput(false);
@@ -133,63 +157,33 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
       />
 
       {showLinkInput && (
-        <div className="flex items-center gap-2 border-b border-border bg-cream/30 px-3 py-2">
-          <input
-            type="url"
-            className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gold/50"
-            placeholder={RICH_TEXT_COPY.LINK_PROMPT}
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && applyLink()}
-          />
-          <button
-            type="button"
-            onClick={applyLink}
-            className="rounded-lg bg-gold px-3 py-1.5 text-xs font-semibold text-dark transition-colors hover:bg-gold-dark"
-          >
-            {RICH_TEXT_COPY.INSERT}
-          </button>
-        </div>
+        <RichTextUrlBar
+          value={linkUrl}
+          onChange={setLinkUrl}
+          onSubmit={applyLink}
+          placeholder={RICH_TEXT_COPY.LINK_PROMPT}
+          submitLabel={RICH_TEXT_COPY.INSERT}
+        />
       )}
 
       {showImageInput && (
-        <div className="flex items-center gap-2 border-b border-border bg-cream/30 px-3 py-2">
-          <input
-            type="url"
-            className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gold/50"
-            placeholder={RICH_TEXT_COPY.IMAGE_PLACEHOLDER}
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && insertImage()}
-          />
-          <button
-            type="button"
-            onClick={insertImage}
-            className="rounded-lg bg-gold px-3 py-1.5 text-xs font-semibold text-dark transition-colors hover:bg-gold-dark"
-          >
-            {RICH_TEXT_COPY.INSERT}
-          </button>
-        </div>
+        <RichTextUrlBar
+          value={imageUrl}
+          onChange={setImageUrl}
+          onSubmit={insertImage}
+          placeholder={RICH_TEXT_COPY.IMAGE_PLACEHOLDER}
+          submitLabel={RICH_TEXT_COPY.INSERT}
+        />
       )}
 
       {showYoutubeInput && (
-        <div className="flex items-center gap-2 border-b border-border bg-cream/30 px-3 py-2">
-          <input
-            type="url"
-            className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gold/50"
-            placeholder={RICH_TEXT_COPY.YOUTUBE_PLACEHOLDER}
-            value={youtubeUrl}
-            onChange={(e) => setYoutubeUrl(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && insertYoutube()}
-          />
-          <button
-            type="button"
-            onClick={insertYoutube}
-            className="rounded-lg bg-gold px-3 py-1.5 text-xs font-semibold text-dark transition-colors hover:bg-gold-dark"
-          >
-            {RICH_TEXT_COPY.EMBED}
-          </button>
-        </div>
+        <RichTextUrlBar
+          value={youtubeUrl}
+          onChange={setYoutubeUrl}
+          onSubmit={insertYoutube}
+          placeholder={RICH_TEXT_COPY.YOUTUBE_PLACEHOLDER}
+          submitLabel={RICH_TEXT_COPY.EMBED}
+        />
       )}
 
       <EditorContent editor={editor} />

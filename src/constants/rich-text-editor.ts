@@ -1,7 +1,7 @@
 export const RICH_TEXT_COPY = {
   PLACEHOLDER: "Write a detailed description…",
   FOOTER_HELP:
-    "Supports headings, bold, italic, underline • bullets, numbers, alignment, colors, links, images",
+    "Click an image to select it, then use Remove image • headings, lists, links, YouTube",
   CHARACTERS: "characters",
   STYLE_NORMAL: "Normal",
   STYLE_H2: "Heading 2",
@@ -11,6 +11,7 @@ export const RICH_TEXT_COPY = {
   YOUTUBE_PLACEHOLDER: "Paste YouTube URL (e.g. https://youtube.com/watch?v=…)",
   INSERT: "Insert",
   EMBED: "Embed",
+  REMOVE_IMAGE: "Remove image",
 } as const;
 
 export const RICH_TEXT_COLORS = [
