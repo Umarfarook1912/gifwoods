@@ -234,6 +234,16 @@ export const HOME_EXPLORE_PRODUCTS_DESKTOP = 8;
 export const HOME_EXPLORE_PRODUCTS_MOBILE = 6;
 export const HOME_VIEW_ALL_PRODUCTS_LABEL = "View All Products";
 
+/** Shared product listing grid — 2 cols mobile, 3 cols desktop. */
+export const PRODUCT_GRID_CLASS = "grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5";
+
+/** Homepage “Explore Our Products” grid — 2 cols mobile, 4 cols desktop. */
+export const HOME_EXPLORE_GRID_CLASS = "grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5";
+
+/** Embla slide widths for bestsellers / new arrivals carousels. */
+export const PRODUCT_CAROUSEL_SLIDE_CLASS =
+  "flex-[0_0_47%] sm:flex-[0_0_40%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%] pl-4 md:pl-5 min-w-0";
+
 export const SHOP_FILTERS_LABEL = "Filters";
 
 /** Primary brand gold — matches CSS `--color-gold` */

@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { Reveal } from "@/components/shared/Reveal";
 import { ROUTES } from "@/constants/routes";
+import { PRODUCT_GRID_CLASS } from "@/constants/ui";
 import type { Product } from "@/types/product";
 
 interface Props {
@@ -32,9 +33,9 @@ export function BestsellersSection({ products }: Props) {
           </Link>
         </Reveal>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
+        <div className={PRODUCT_GRID_CLASS}>
           {products.map((product, index) => (
-            <Reveal key={product.id} delay={(index % 4) as 0 | 1 | 2 | 3}>
+            <Reveal key={product.id} delay={(index % 3) as 0 | 1 | 2 | 3}>
               <ProductCard product={product} />
             </Reveal>
           ))}

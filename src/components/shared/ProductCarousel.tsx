@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { PRODUCT_CAROUSEL_SLIDE_CLASS } from "@/constants/ui";
 
 interface Props {
   children: React.ReactNode;
@@ -75,7 +76,7 @@ export function ProductCarousel({ children, className }: Props) {
       <div className="overflow-hidden w-full px-1" ref={emblaRef}>
         <div className="flex -ml-4 md:-ml-5">
           {React.Children.map(children, (child) => (
-            <div className="flex-[0_0_80%] sm:flex-[0_0_45%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%] pl-4 md:pl-5 min-w-0">
+            <div className={PRODUCT_CAROUSEL_SLIDE_CLASS}>
               {child}
             </div>
           ))}

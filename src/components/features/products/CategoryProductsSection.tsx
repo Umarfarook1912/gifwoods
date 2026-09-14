@@ -13,6 +13,7 @@ import {
   HOME_EXPLORE_PRODUCTS_DESKTOP,
   HOME_EXPLORE_PRODUCTS_MOBILE,
   HOME_VIEW_ALL_PRODUCTS_LABEL,
+  HOME_EXPLORE_GRID_CLASS,
 } from "@/constants/ui";
 import type { Category, Product } from "@/types/product";
 
@@ -118,7 +119,7 @@ export function CategoryProductsSection({
 
         {filteredProducts.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
+            <div className={HOME_EXPLORE_GRID_CLASS}>
               {displayedProducts.map((product, index) => (
                 <Reveal
                   key={product.id}

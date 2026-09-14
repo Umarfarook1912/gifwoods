@@ -1,6 +1,7 @@
 import { ProductCard } from "@/components/shared/ProductCard";
 import { Reveal } from "@/components/shared/Reveal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PRODUCT_GRID_CLASS } from "@/constants/ui";
 import type { Product } from "@/types/product";
 
 interface Props {
@@ -11,8 +12,8 @@ interface Props {
 export function ProductGrid({ products, loading }: Props) {
   if (loading) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
-        {Array.from({ length: 8 }, (_, i) => (
+      <div className={PRODUCT_GRID_CLASS}>
+        {Array.from({ length: 6 }, (_, i) => (
           <div key={i} className="rounded-2xl overflow-hidden border border-border">
             <Skeleton className="aspect-square w-full" />
             <div className="p-4 space-y-2">
@@ -37,9 +38,9 @@ export function ProductGrid({ products, loading }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
+    <div className={PRODUCT_GRID_CLASS}>
       {products.map((product, index) => (
-        <Reveal key={product.id} delay={(index % 4) as 0 | 1 | 2 | 3}>
+        <Reveal key={product.id} delay={(index % 3) as 0 | 1 | 2 | 3}>
           <ProductCard product={product} />
         </Reveal>
       ))}
