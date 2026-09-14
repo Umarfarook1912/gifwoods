@@ -237,3 +237,25 @@ export async function getActiveOfferProducts(limit = 12): Promise<Product[]> {
   }
   return (data ?? []) as Product[];
 }
+
+/** True when at least one product has a live timed offer. */
+export async function hasActiveOffers(): Promise<boolean> {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("products")
+    .select("id")
+    .eq("status", "active")
+    .eq("is_test", false)
+    .not("offer_type", "is", null)
+    .gt("offer_value", 0)
+    .lte("offer_starts_at", now)
+    .gte("offer_ends_at", now)
+    .limit(1);
+
+  if (error) {
+    console.error("hasActiveOffers:", error.message);
+    return false;
+  }
+  return (data?.length ?? 0) > 0;
+}

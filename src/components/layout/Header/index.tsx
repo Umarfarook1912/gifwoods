@@ -4,13 +4,17 @@ import { Search, User } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { getAvailableCategories } from "@/lib/supabase/categories-db";
+import { hasActiveOffers } from "@/lib/db/products";
 import { NavLinks } from "./NavLinks";
 import { CartButton } from "./CartButton";
 import { AuthMenu } from "./AuthMenu";
 import { MobileMenu } from "./MobileMenu";
 
 export async function Header() {
-  const categories = await getAvailableCategories();
+  const [categories, showOffers] = await Promise.all([
+    getAvailableCategories(),
+    hasActiveOffers(),
+  ]);
 
   return (
     <header className="sticky top-0 z-50 w-full">
@@ -18,7 +22,7 @@ export async function Header() {
         <div className="page-container h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Suspense fallback={null}>
-              <MobileMenu categories={categories} />
+              <MobileMenu categories={categories} showOffers={showOffers} />
             </Suspense>
             <Link href={ROUTES.HOME} className="flex items-center" aria-label="Home">
               <BrandLogo priority />
@@ -26,7 +30,7 @@ export async function Header() {
           </div>
 
           <Suspense fallback={<nav className="hidden md:block h-5 w-96" aria-hidden />}>
-            <NavLinks categories={categories} />
+            <NavLinks categories={categories} showOffers={showOffers} />
           </Suspense>
 
           <div className="flex items-center gap-1">

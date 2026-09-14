@@ -10,6 +10,8 @@ import {
   SOCIAL_LINKS,
   CONTACT_INFO,
 } from "@/constants/ui";
+import { isOffersLinkAvailable } from "@/components/layout/Header/nav-utils";
+import { hasActiveOffers } from "@/lib/db/products";
 
 function BrandSocialIcon({
   href,
@@ -64,7 +66,12 @@ function FooterColumn({
   );
 }
 
-export function Footer() {
+export async function Footer() {
+  const showOffers = await hasActiveOffers();
+  const shopLinks = FOOTER_SHOP_LINKS.filter((link) =>
+    isOffersLinkAvailable(link.href, showOffers)
+  );
+
   return (
     <footer className="bg-dark text-white">
       <div className="page-container py-10 md:py-14">
@@ -116,7 +123,7 @@ export function Footer() {
 
           {/* Links Columns: 3 columns responsive across mobile, tablet, and desktop */}
           <div className="lg:col-span-3 grid grid-cols-3 gap-4 sm:gap-6 md:gap-8 pt-2 lg:pt-0">
-            <FooterColumn title="Shop" links={FOOTER_SHOP_LINKS} />
+            <FooterColumn title="Shop" links={shopLinks} />
             <FooterColumn title="Company" links={FOOTER_COMPANY_LINKS} />
             <FooterColumn title="Support" links={FOOTER_SUPPORT_LINKS} />
           </div>

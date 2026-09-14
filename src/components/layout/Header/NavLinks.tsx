@@ -10,14 +10,16 @@ import { CategoriesMegaMenu } from "./CategoriesMegaMenu";
 import {
   isCategoryLinkAvailable,
   isNavLinkActive,
+  isOffersLinkAvailable,
 } from "./nav-utils";
 import type { Category } from "@/types/product";
 
 interface Props {
   categories: Category[];
+  showOffers?: boolean;
 }
 
-export function NavLinks({ categories }: Props) {
+export function NavLinks({ categories, showOffers = true }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const search = searchParams.toString() ? `?${searchParams.toString()}` : "";
@@ -65,6 +67,7 @@ export function NavLinks({ categories }: Props) {
         }
 
         if (!isCategoryLinkAvailable(link.href, categories)) return null;
+        if (!isOffersLinkAvailable(link.href, showOffers)) return null;
 
         const active = isNavLinkActive(link.href, pathname, search);
 

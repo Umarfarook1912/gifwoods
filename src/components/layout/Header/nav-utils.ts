@@ -23,6 +23,12 @@ export function isCategoryLinkAvailable(href: string, categories: Category[]): b
   return true;
 }
 
+/** Hide Offers nav/footer link when nothing is on offer. */
+export function isOffersLinkAvailable(href: string, showOffers: boolean): boolean {
+  if (href === ROUTES.OFFERS) return showOffers;
+  return true;
+}
+
 export function isNavLinkActive(
   href: string,
   pathname: string,

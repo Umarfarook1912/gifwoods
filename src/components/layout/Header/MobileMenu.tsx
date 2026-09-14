@@ -9,7 +9,7 @@ import { BrandLogo } from "@/components/shared/BrandLogo";
 import { NAV_LINKS, CATEGORIES_MENU } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils/cn";
-import { getCategoryHref, isCategoryLinkAvailable } from "./nav-utils";
+import { getCategoryHref, isCategoryLinkAvailable, isOffersLinkAvailable } from "./nav-utils";
 import { MobileMenuAuth } from "./MobileMenuAuth";
 import {
   mobileNavItemClass,
@@ -19,9 +19,10 @@ import type { Category } from "@/types/product";
 
 interface Props {
   categories: Category[];
+  showOffers?: boolean;
 }
 
-export function MobileMenu({ categories }: Props) {
+export function MobileMenu({ categories, showOffers = true }: Props) {
   const [open, setOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
 
@@ -104,6 +105,7 @@ export function MobileMenu({ categories }: Props) {
                 }
 
                 if (!isCategoryLinkAvailable(link.href, categories)) return null;
+                if (!isOffersLinkAvailable(link.href, showOffers)) return null;
 
                 return (
                   <Link
