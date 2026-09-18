@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
   Circle,
@@ -55,11 +56,17 @@ export function OrderTracking({
   trackingUrl: _trackingUrl,
   status,
 }: Props) {
+  const router = useRouter();
   const [activities, setActivities] = useState<ShiprocketTrackingActivity[]>([]);
+  const [displayStatus, setDisplayStatus] = useState<OrderStatus>(status);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const isMock = isMockAwbClient(awbCode);
   const href = `${SHIPROCKET_MOCK.TRACKING_BASE_URL}${encodeURIComponent(awbCode)}`;
+
+  useEffect(() => {
+    setDisplayStatus(status);
+  }, [status]);
 
   useEffect(() => {
     async function load() {
@@ -68,10 +75,17 @@ export function OrderTracking({
         if (!res.ok) throw new Error("fetch failed");
         const json = (await res.json()) as {
           data: ShiprocketTrackingResponse | null;
+          orderStatus?: OrderStatus;
           error: string | null;
         };
         const acts = json.data?.tracking_data?.shipment_track_activities ?? [];
         setActivities(acts);
+        if (json.orderStatus) {
+          setDisplayStatus(json.orderStatus);
+          if (json.orderStatus !== status) {
+            router.refresh();
+          }
+        }
       } catch {
         setFailed(true);
       } finally {
@@ -79,7 +93,7 @@ export function OrderTracking({
       }
     }
     void load();
-  }, [orderId]);
+  }, [orderId, status, router]);
 
   const metaLine = [courierName?.trim(), `${TRACKING_COPY.AWB_LABEL}: ${awbCode}`]
     .filter(Boolean)
@@ -113,7 +127,7 @@ export function OrderTracking({
 
       <div className="flex items-start gap-0 mb-6 overflow-x-auto pb-1">
         {STATUS_STEPS.map((step, i) => {
-          const done = step.match.includes(status);
+          const done = step.match.includes(displayStatus);
           return (
             <div key={step.key} className="flex-1 flex flex-col items-center gap-1 min-w-[3.5rem]">
               <div className="flex items-center w-full">
@@ -134,7 +148,7 @@ export function OrderTracking({
                 {i < STATUS_STEPS.length - 1 && (
                   <div
                     className={`flex-1 h-0.5 ${
-                      STATUS_STEPS[i + 1]?.match.includes(status) ? "bg-gold" : "bg-border"
+                      STATUS_STEPS[i + 1]?.match.includes(displayStatus) ? "bg-gold" : "bg-border"
                     }`}
                   />
                 )}

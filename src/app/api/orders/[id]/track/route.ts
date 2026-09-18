@@ -3,7 +3,12 @@ import { APP_ERRORS } from "@/constants/errors";
 import { auth, hasApiPermission } from "@/lib/auth/auth";
 import { getTracking } from "@/lib/shiprocket/client";
 import { isMockAwb, buildMockTrackingResponse } from "@/lib/shiprocket/mock";
-import { getOrderTracking } from "@/lib/db/orders";
+import { getOrderTracking, updateOrderDeliveryStatus } from "@/lib/db/orders";
+import {
+  inferOrderStatusFromTracking,
+  shouldAdvanceOrderStatus,
+} from "@/lib/orders/shiprocket-status";
+import type { OrderStatus } from "@/types/order";
 
 export async function GET(
   _request: Request,
@@ -33,12 +38,28 @@ export async function GET(
   }
 
   if (isMockAwb(order.awb_code)) {
-    return NextResponse.json({ data: buildMockTrackingResponse(), error: null });
+    return NextResponse.json({
+      data: buildMockTrackingResponse(),
+      orderStatus: order.status as OrderStatus,
+      error: null,
+    });
   }
 
   try {
     const tracking = await getTracking(order.awb_code);
-    return NextResponse.json({ data: tracking, error: null });
+    let orderStatus = order.status as OrderStatus;
+
+    const inferred = inferOrderStatusFromTracking(tracking);
+    if (inferred && shouldAdvanceOrderStatus(orderStatus, inferred)) {
+      try {
+        await updateOrderDeliveryStatus(id, inferred);
+        orderStatus = inferred;
+      } catch (syncErr) {
+        console.error("Track sync: status update failed", syncErr);
+      }
+    }
+
+    return NextResponse.json({ data: tracking, orderStatus, error: null });
   } catch (trackingError) {
     console.error("Shiprocket tracking failed:", trackingError);
     return NextResponse.json(

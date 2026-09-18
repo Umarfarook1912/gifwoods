@@ -156,14 +156,14 @@ export async function getOrderForCustomization(orderId: string): Promise<Record<
 /** Order + AWB for tracking. */
 export async function getOrderTracking(
   orderId: string
-): Promise<{ user_id: string; awb_code: string | null } | null> {
+): Promise<{ user_id: string; awb_code: string | null; status: OrderStatus } | null> {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("orders")
-    .select("user_id, awb_code")
+    .select("user_id, awb_code, status")
     .eq("id", orderId)
     .single();
-  return (data as { user_id: string; awb_code: string | null }) ?? null;
+  return (data as { user_id: string; awb_code: string | null; status: OrderStatus }) ?? null;
 }
 
 /** Full order for complete-payment helper. */

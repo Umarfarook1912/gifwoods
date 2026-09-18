@@ -9,24 +9,10 @@ import {
   updateOrderShipmentFields,
 } from "@/lib/db/orders";
 import { buildShiprocketTrackingUrl } from "@/lib/orders/apply-shipment";
-
-const SR_STATUS_MAP: Record<string, OrderStatus> = {
-  "PICKUP SCHEDULED": "shipped",
-  "PICKED UP": "shipped",
-  "IN TRANSIT": "shipped",
-  "OUT FOR DELIVERY": "shipped",
-  DELIVERED: "delivered",
-  RTO: "cancelled",
-  "RTO DELIVERED": "cancelled",
-};
-
-const STATUS_RANK: Record<OrderStatus, number> = {
-  pending: 0,
-  processing: 1,
-  shipped: 2,
-  delivered: 3,
-  cancelled: 4,
-};
+import {
+  mapShiprocketStatusToOrderStatus,
+  shouldAdvanceOrderStatus,
+} from "@/lib/orders/shiprocket-status";
 
 interface ShiprocketWebhookPayload {
   awb?: string;
@@ -34,9 +20,7 @@ interface ShiprocketWebhookPayload {
   current_status?: string;
   current_status_id?: number;
   shipment_status?: string;
-  /** Channel order id — Gifwoods orders.id when created via adhoc API */
   order_id?: string | number;
-  /** Shiprocket internal order id */
   sr_order_id?: string | number;
   etd?: string;
 }
@@ -88,7 +72,6 @@ export async function POST(request: Request) {
   const orderId = order.id as string;
   let trackingUrl = (order.tracking_url as string | null) ?? null;
 
-  // Save AWB after Shiprocket Ship Now (order may not have awb_code yet)
   if (!order.awb_code) {
     trackingUrl = buildShiprocketTrackingUrl(awbCode);
     try {
@@ -105,15 +88,14 @@ export async function POST(request: Request) {
     }
   }
 
-  const srStatus = (body.current_status ?? body.shipment_status ?? "").toUpperCase();
-  const newStatus = SR_STATUS_MAP[srStatus];
+  const srStatus = body.current_status ?? body.shipment_status ?? "";
+  const newStatus = mapShiprocketStatusToOrderStatus(srStatus);
   if (!newStatus) {
     return NextResponse.json({ received: true });
   }
 
-  const currentRank = STATUS_RANK[order.status as OrderStatus] ?? 0;
-  const newRank = STATUS_RANK[newStatus] ?? 0;
-  if (newRank <= currentRank && newStatus !== "cancelled") {
+  const currentStatus = order.status as OrderStatus;
+  if (!shouldAdvanceOrderStatus(currentStatus, newStatus)) {
     return NextResponse.json({ received: true });
   }
 
