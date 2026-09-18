@@ -28,6 +28,7 @@ export const DELIVERY_METHODS = {
 
 export const DELIVERY_COPY = {
   EXPECTED_DELIVERY_BY: "Expected delivery by",
+  DELIVERED_ON: "Delivered on",
   PINCODE_LABEL: "Delivery pincode",
   PINCODE_PLACEHOLDER: "Enter 6-digit pincode",
   CHECK_DELIVERY: "Check delivery date",

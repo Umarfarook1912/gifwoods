@@ -49,7 +49,7 @@ export function ShipmentTrackDialog({ orderId, awbCode, onClose }: Props) {
         return;
       }
       const td = json.data.tracking_data;
-      setShipmentStatus(td.shipment_status ?? "");
+      setShipmentStatus(String(td.shipment_status ?? ""));
       setActivities(
         td.shipment_track_activities ?? td.shipment_track ?? []
       );

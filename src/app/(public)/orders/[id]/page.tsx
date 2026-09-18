@@ -57,23 +57,43 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
   const isPaid = getPaymentStatus(typedOrder) === "paid";
   const isOwner = typedOrder.user_id === userId;
   const showTracking = ["processing", "shipped", "delivered"].includes(typedOrder.status);
+  const isDelivered = typedOrder.status === "delivered";
 
-  // Server-side delivery estimate using saved delivery pincode
-  let formattedDeliveryDate: string | null = null;
-  if (showTracking && addr?.pincode) {
-    try {
-      const firstProduct = typedOrder.order_items?.[0]?.product as Product | undefined;
-      const estimate = await getShiprocketDeliveryEstimate({
-        pincode: addr.pincode,
-        product: firstProduct ?? { customization_text: false, customization_image: false },
-        pickupPostcode: process.env.SHIPROCKET_PICKUP_PINCODE ?? "",
-        declaredValue: Number(typedOrder.total),
-      });
-      if (estimate.serviceable && estimate.formattedDate) {
-        formattedDeliveryDate = estimate.formattedDate;
+  let deliveryBannerDate: string | null = null;
+  if (showTracking) {
+    if (isDelivered) {
+      if (typedOrder.awb_code) {
+        try {
+          const { getTracking } = await import("@/lib/shiprocket/client");
+          const { isMockAwb } = await import("@/lib/shiprocket/mock");
+          const { getDeliveredAtFromTracking } = await import("@/lib/orders/shiprocket-status");
+          if (!isMockAwb(typedOrder.awb_code)) {
+            const tracking = await getTracking(typedOrder.awb_code);
+            const deliveredAt = getDeliveredAtFromTracking(tracking);
+            if (deliveredAt) {
+              deliveryBannerDate = formatDate(deliveredAt);
+            }
+          }
+        } catch {
+          // Non-blocking — fall back to updated_at
+        }
       }
-    } catch {
-      // Non-blocking — shipping estimate failure must not break the page
+      deliveryBannerDate ??= formatDate(typedOrder.updated_at);
+    } else if (addr?.pincode) {
+      try {
+        const firstProduct = typedOrder.order_items?.[0]?.product as Product | undefined;
+        const estimate = await getShiprocketDeliveryEstimate({
+          pincode: addr.pincode,
+          product: firstProduct ?? { customization_text: false, customization_image: false },
+          pickupPostcode: process.env.SHIPROCKET_PICKUP_PINCODE ?? "",
+          declaredValue: Number(typedOrder.total),
+        });
+        if (estimate.serviceable && estimate.formattedDate) {
+          deliveryBannerDate = estimate.formattedDate;
+        }
+      } catch {
+        // Non-blocking — shipping estimate failure must not break the page
+      }
     }
   }
 
@@ -110,15 +130,17 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
           </div>
         </div>
 
-        {/* Expected delivery date */}
-        {formattedDeliveryDate && showTracking && (
+        {/* Delivery date banner */}
+        {deliveryBannerDate && showTracking && (
           <div className="mb-6 flex items-center gap-3 rounded-2xl border border-gold/30 bg-gold/5 p-5">
             <CalendarDays className="h-5 w-5 text-gold shrink-0" />
             <div>
               <p className="text-xs text-warm-gray uppercase tracking-wide font-medium">
-                {DELIVERY_COPY.EXPECTED_DELIVERY_BY}
+                {isDelivered
+                  ? DELIVERY_COPY.DELIVERED_ON
+                  : DELIVERY_COPY.EXPECTED_DELIVERY_BY}
               </p>
-              <p className="text-lg font-bold text-dark mt-0.5">{formattedDeliveryDate}</p>
+              <p className="text-lg font-bold text-dark mt-0.5">{deliveryBannerDate}</p>
               {typedOrder.courier_name && (
                 <p className="text-xs text-warm-gray mt-0.5">via {typedOrder.courier_name}</p>
               )}

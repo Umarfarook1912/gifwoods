@@ -62,13 +62,13 @@ export interface ShiprocketTrackingActivity {
   date: string;
   activity: string;
   location: string;
-  sr_status?: string;
+  sr_status?: string | number;
 }
 
 export interface ShiprocketTrackingResponse {
   tracking_data: {
     track_status: number;
-    shipment_status: string;
+    shipment_status: string | number;
     shipment_track: ShiprocketTrackingActivity[];
     shipment_track_activities: ShiprocketTrackingActivity[];
   };
