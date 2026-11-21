@@ -7,6 +7,12 @@ export const SITE_TAGLINE = "A luxury gifting atelier";
 export const SITE_DESCRIPTION =
   "Premium personalized gifts crafted to celebrate every special moment — engraved, hand-packed, and delivered with intention.";
 
+export const DEVELOPER_CREDIT = {
+  prefix: "Design and development by",
+  name: "Tom Scope Digital Marketing",
+  href: "https://tomscope.com/",
+} as const;
+
 export const OCCASIONS = [
   { label: "Birthday", href: "/categories/birthdays" },
   { label: "Anniversary", href: "/categories/anniversary" },

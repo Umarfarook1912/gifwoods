@@ -4,6 +4,7 @@ import { InstagramIcon, YoutubeIcon } from "@/components/ui/SocialIcons";
 import {
   SITE_NAME,
   SITE_TAGLINE,
+  DEVELOPER_CREDIT,
   FOOTER_SHOP_LINKS,
   FOOTER_COMPANY_LINKS,
   FOOTER_SUPPORT_LINKS,
@@ -170,9 +171,20 @@ export async function Footer() {
             </div>
           </div>
 
-          <p className="text-xs text-white/50 text-center sm:text-right">
-            © {new Date().getFullYear()} {SITE_NAME}. Crafted with care in India.
-          </p>
+          <div className="text-xs text-white/50 text-center sm:text-right space-y-1">
+            <p>© {new Date().getFullYear()} {SITE_NAME}. Crafted with care in India.</p>
+            <p>
+              {DEVELOPER_CREDIT.prefix}{" "}
+              <a
+                href={DEVELOPER_CREDIT.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-gold hover:underline"
+              >
+                {DEVELOPER_CREDIT.name}
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>
