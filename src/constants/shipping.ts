@@ -17,6 +17,10 @@ export const DEFAULT_TRANSIT_DAYS = {
 /** Minimum calendar-day gap between Fast and Normal estimated dates. */
 export const MIN_FAST_NORMAL_GAP_DAYS = 2;
 
+/** Default per-product shipping amounts (INR) — admin can override. */
+export const DEFAULT_PRODUCT_SHIPPING_CHARGE = 60;
+export const DEFAULT_PRODUCT_FAST_SHIPPING_CHARGE = 60;
+
 /** Admin product form labels for per-product shipping charges. */
 export const PRODUCT_SHIPPING_FIELDS = {
   SHIPPING_CHARGE_LABEL: "Shipping charge (₹)",

@@ -1,3 +1,7 @@
+import {
+  DEFAULT_PRODUCT_FAST_SHIPPING_CHARGE,
+  DEFAULT_PRODUCT_SHIPPING_CHARGE,
+} from "@/constants/shipping";
 import { toDatetimeLocalValue } from "@/lib/utils/datetime-local";
 import type { Product, ProductFormState } from "@/types/product";
 
@@ -8,8 +12,8 @@ export const EMPTY_PRODUCT_FORM: ProductFormState = {
   description: "",
   price: 0,
   original_price: 0,
-  shipping_charge: 0,
-  fast_shipping_charge: 0,
+  shipping_charge: DEFAULT_PRODUCT_SHIPPING_CHARGE,
+  fast_shipping_charge: DEFAULT_PRODUCT_FAST_SHIPPING_CHARGE,
   category_id: "",
   images: [""],
   tags: [],
@@ -36,8 +40,12 @@ export function productToFormState(product: Product): ProductFormState {
     description: product.description,
     price: product.price,
     original_price: product.original_price ?? 0,
-    shipping_charge: Number(product.shipping_charge ?? 0),
-    fast_shipping_charge: Number(product.fast_shipping_charge ?? 0),
+    shipping_charge: Number(
+      product.shipping_charge ?? DEFAULT_PRODUCT_SHIPPING_CHARGE
+    ),
+    fast_shipping_charge: Number(
+      product.fast_shipping_charge ?? DEFAULT_PRODUCT_FAST_SHIPPING_CHARGE
+    ),
     category_id: product.category_id ?? "",
     images: product.images.length > 0 ? product.images : [""],
     tags: product.tags,
