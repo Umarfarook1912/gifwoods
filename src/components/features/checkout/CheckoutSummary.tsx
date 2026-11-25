@@ -7,9 +7,9 @@ import { formatPrice } from "@/lib/utils/formatters";
 import { getEffectiveProductPrice } from "@/lib/products/offer-price";
 import { cn } from "@/lib/utils/cn";
 import { useCartStore } from "@/hooks/useCartStore";
-import { FREE_SHIPPING_THRESHOLD, GST_LINE_LABEL } from "@/constants/ui";
+import { GST_LINE_LABEL } from "@/constants/ui";
 import { CHECKOUT_COPY } from "@/constants/checkout";
-import { DELIVERY_METHODS, FAST_DELIVERY_FEE } from "@/constants/shipping";
+import { DELIVERY_COPY, DELIVERY_METHODS } from "@/constants/shipping";
 import { ShippingMethodToggle } from "@/components/features/cart/ShippingMethodToggle";
 import { CheckoutDeliveryDate } from "@/components/features/checkout/CheckoutDeliveryDate";
 import { getFastDeliverySurcharge } from "@/lib/orders/pricing";
@@ -40,7 +40,17 @@ export function CheckoutSummary({
   isTestOrder = false,
 }: Props) {
   const { removeItem, updateQuantity } = useCartStore();
-  const fastFee = isTestOrder ? 0 : getFastDeliverySurcharge(shippingMethod);
+  const shippingLines = items.map((item) => ({
+    shipping_charge: item.product.shipping_charge,
+    fast_shipping_charge: item.product.fast_shipping_charge,
+    quantity: item.quantity,
+  }));
+  const fastFee = isTestOrder
+    ? 0
+    : getFastDeliverySurcharge(shippingLines, shippingMethod);
+  const fastSurchargePreview = isTestOrder
+    ? 0
+    : getFastDeliverySurcharge(shippingLines, DELIVERY_METHODS.FAST);
 
   return (
     <aside className="h-fit rounded-3xl border border-border bg-white p-5 shadow-sm lg:sticky lg:top-24">
@@ -122,6 +132,7 @@ export function CheckoutSummary({
             <ShippingMethodToggle
               selected={shippingMethod}
               onSelect={onShippingMethodChange}
+              fastSurcharge={fastSurchargePreview}
             />
             <CheckoutDeliveryDate
               pincode={pincode}
@@ -146,8 +157,9 @@ export function CheckoutSummary({
         </div>
         <div className="flex justify-between">
           <span className="text-warm-gray">
-            Shipping
-            {!isTestOrder && shippingMethod === DELIVERY_METHODS.FAST ? " (incl. Fast)" : ""}
+            {!isTestOrder && shippingMethod === DELIVERY_METHODS.FAST
+              ? DELIVERY_COPY.SHIPPING_INCL_FAST
+              : DELIVERY_COPY.SHIPPING_LABEL}
           </span>
           <span className={shipping === 0 ? "font-semibold text-emerald-600" : "font-medium text-dark"}>
             {shipping === 0 ? "Free" : formatPrice(shipping)}
@@ -155,7 +167,7 @@ export function CheckoutSummary({
         </div>
         {fastFee > 0 && (
           <p className="text-xs text-warm-gray">
-            Includes Fast surcharge of {formatPrice(FAST_DELIVERY_FEE)}
+            {DELIVERY_COPY.INCLUDES_FAST_SURCHARGE} {formatPrice(fastFee)}
           </p>
         )}
       </div>
@@ -170,10 +182,7 @@ export function CheckoutSummary({
       {!isTestOrder && (
         <div className="flex gap-2 rounded-xl bg-cream p-3 text-xs text-warm-gray">
           <Truck className="h-4 w-4 shrink-0 text-gold" />
-          <span>
-            Free base shipping above {formatPrice(FREE_SHIPPING_THRESHOLD)}. Fast adds{" "}
-            {formatPrice(FAST_DELIVERY_FEE)}.
-          </span>
+          <span>{DELIVERY_COPY.PER_PRODUCT_SHIPPING_NOTE}</span>
         </div>
       )}
     </aside>

@@ -1,4 +1,4 @@
--- Delivery speed chosen at checkout (normal | fast). Fast adds FAST_DELIVERY_FEE in app.
+-- Delivery speed chosen at checkout (normal | fast). Fast adds per-product fast_shipping_charge.
 ALTER TABLE orders
   ADD COLUMN IF NOT EXISTS shipping_method TEXT NOT NULL DEFAULT 'normal'
   CHECK (shipping_method IN ('normal', 'fast'));

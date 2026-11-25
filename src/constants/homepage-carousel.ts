@@ -66,7 +66,7 @@ export const HOMEPAGE_CAROUSEL_COPY = {
   HEADLINE_EXAMPLE: "Examples: New Arrivals · Anniversary Gifts · Made Just for Them",
   SUBHEADLINE_LABEL: "Subheadline (optional)",
   SUBHEADLINE_PLACEHOLDER: "Handcrafted keepsakes for every celebration",
-  SUBHEADLINE_EXAMPLE: "Examples: Free shipping over ₹1,500 · Engraved & gift-wrapped · Same-week dispatch",
+  SUBHEADLINE_EXAMPLE: "Examples: Handcrafted gifts · Engraved & gift-wrapped · Same-week dispatch",
   CTA_LABEL: "Button text (optional)",
   CTA_PLACEHOLDER: "Shop now",
   CTA_EXAMPLE: "Examples: Shop now · Explore · View collection · Buy gift",

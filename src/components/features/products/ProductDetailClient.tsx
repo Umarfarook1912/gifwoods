@@ -283,8 +283,8 @@ export function ProductDetailClient({ product: initialProduct }: Props) {
 
         <div className="grid grid-cols-2 gap-3">
           {[
-            { icon: Truck, text: "Free shipping above ₹1,500 · Insured delivery" },
-            { icon: Shield, text: "Secure payment · Easy returns" },
+            { icon: Truck, text: PRODUCT_DETAIL_COPY.TRUST_SHIPPING },
+            { icon: Shield, text: PRODUCT_DETAIL_COPY.TRUST_PAYMENT },
           ].map(({ icon: Icon, text }) => (
             <div key={text} className="flex items-center gap-2 text-xs text-warm-gray">
               <Icon className="h-4 w-4 text-gold flex-shrink-0" />

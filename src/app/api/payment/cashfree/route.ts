@@ -101,7 +101,15 @@ export async function POST(request: Request) {
   const isTestOrder = hasTest && !hasNormal;
   const subtotal = pricedItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
   const shippingMethod = parsed.data.shipping_method;
-  const shippingCost = calculateShipping(subtotal, shippingMethod, { isTestOrder });
+  const shippingCost = calculateShipping(
+    pricedItems.map((item) => ({
+      shipping_charge: item.product.shipping_charge,
+      fast_shipping_charge: item.product.fast_shipping_charge,
+      quantity: item.quantity,
+    })),
+    shippingMethod,
+    { isTestOrder }
+  );
   const gstAmount = calculateGst(subtotal);
   const total = calculateOrderTotal(subtotal, shippingCost, gstAmount);
   const cashfreeMode = resolveCashfreeMode(isTestOrder);

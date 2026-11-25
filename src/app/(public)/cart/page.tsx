@@ -11,8 +11,8 @@ import { formatPrice } from "@/lib/utils/formatters";
 import { getEffectiveProductPrice } from "@/lib/products/offer-price";
 import { calculateShipping, calculateGst, calculateOrderTotal, getFastDeliverySurcharge } from "@/lib/orders/pricing";
 import { ROUTES } from "@/constants/routes";
-import { FREE_SHIPPING_THRESHOLD, GST_LINE_LABEL } from "@/constants/ui";
-import { FAST_DELIVERY_FEE, DELIVERY_METHODS } from "@/constants/shipping";
+import { GST_LINE_LABEL } from "@/constants/ui";
+import { DELIVERY_COPY, DELIVERY_METHODS } from "@/constants/shipping";
 import { CONFIRMATIONS } from "@/constants/confirmations";
 import { useConfirm } from "@/hooks/useConfirm";
 import { ShippingMethodToggle } from "@/components/features/cart/ShippingMethodToggle";
@@ -38,7 +38,17 @@ export default function CartPage() {
   const subtotal = getSubtotal();
   const testOrder = isTestCart(items);
   const mixedCart = isMixedTestCart(items);
-  const shipping = calculateShipping(subtotal, shippingMethod, { isTestOrder: testOrder });
+  const shippingLines = items.map((item) => ({
+    shipping_charge: item.product.shipping_charge,
+    fast_shipping_charge: item.product.fast_shipping_charge,
+    quantity: item.quantity,
+  }));
+  const shipping = calculateShipping(shippingLines, shippingMethod, {
+    isTestOrder: testOrder,
+  });
+  const fastSurcharge = testOrder
+    ? 0
+    : getFastDeliverySurcharge(shippingLines, shippingMethod);
   const gst = calculateGst(subtotal);
   const total = calculateOrderTotal(subtotal, shipping, gst);
 
@@ -161,6 +171,10 @@ export default function CartPage() {
                   <ShippingMethodToggle
                     selected={shippingMethod}
                     onSelect={setShippingMethod}
+                    fastSurcharge={getFastDeliverySurcharge(
+                      shippingLines,
+                      DELIVERY_METHODS.FAST
+                    )}
                   />
                 )}
                 {testOrder && (
@@ -183,8 +197,9 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-warm-gray">
-                    Shipping
-                    {!testOrder && shippingMethod === DELIVERY_METHODS.FAST ? " (incl. Fast)" : ""}
+                    {!testOrder && shippingMethod === DELIVERY_METHODS.FAST
+                      ? DELIVERY_COPY.SHIPPING_INCL_FAST
+                      : DELIVERY_COPY.SHIPPING_LABEL}
                   </span>
                   <span className="font-medium text-dark">
                     {shipping === 0 ? (
@@ -194,9 +209,10 @@ export default function CartPage() {
                     )}
                   </span>
                 </div>
-                {!testOrder && getFastDeliverySurcharge(shippingMethod) > 0 && (
+                {!testOrder && fastSurcharge > 0 && (
                   <p className="text-xs text-warm-gray">
-                    Includes Fast delivery surcharge of {formatPrice(FAST_DELIVERY_FEE)}
+                    {DELIVERY_COPY.INCLUDES_FAST_SURCHARGE}{" "}
+                    {formatPrice(fastSurcharge)}
                   </p>
                 )}
               </div>
@@ -205,11 +221,6 @@ export default function CartPage() {
                 <span>Total</span>
                 <span className="text-xl">{formatPrice(total)}</span>
               </div>
-              {!testOrder && subtotal < FREE_SHIPPING_THRESHOLD && (
-                <p className="text-xs text-warm-gray mb-4 p-3 rounded-lg bg-cream border border-gold/20">
-                  Add {formatPrice(FREE_SHIPPING_THRESHOLD - subtotal)} more to get free shipping!
-                </p>
-              )}
               {mixedCart ? (
                 <Button
                   className="w-full bg-gold text-dark hover:bg-gold-dark font-semibold h-12"

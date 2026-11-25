@@ -1,20 +1,31 @@
 "use client";
 
 import { cn } from "@/lib/utils/cn";
-import { DELIVERY_COPY, DELIVERY_METHODS, FAST_DELIVERY_FEE } from "@/constants/shipping";
+import { DELIVERY_COPY, DELIVERY_METHODS } from "@/constants/shipping";
 import { formatPrice } from "@/lib/utils/formatters";
 import type { DeliveryMethod } from "@/types/shipping";
 
 interface Props {
   selected: DeliveryMethod;
   onSelect: (method: DeliveryMethod) => void;
+  /** Cart-level Fast surcharge total (sum of product fast_shipping_charge × qty). */
+  fastSurcharge?: number;
   className?: string;
 }
 
 /** Compact Normal / Fast toggle for cart & checkout (dates shown on product page). */
-export function ShippingMethodToggle({ selected, onSelect, className }: Props) {
+export function ShippingMethodToggle({
+  selected,
+  onSelect,
+  fastSurcharge = 0,
+  className,
+}: Props) {
   return (
-    <div className={cn("space-y-2", className)} role="radiogroup" aria-label={DELIVERY_COPY.CHOOSE_METHOD}>
+    <div
+      className={cn("space-y-2", className)}
+      role="radiogroup"
+      aria-label={DELIVERY_COPY.CHOOSE_METHOD}
+    >
       <p className="text-xs font-medium text-dark">{DELIVERY_COPY.CHOOSE_METHOD}</p>
       <div className="grid grid-cols-2 gap-2">
         <button
@@ -44,9 +55,11 @@ export function ShippingMethodToggle({ selected, onSelect, className }: Props) {
           )}
         >
           <span className="block">{DELIVERY_COPY.FAST_LABEL}</span>
-          <span className="mt-0.5 block text-[10px] font-bold uppercase text-gold">
-            +{formatPrice(FAST_DELIVERY_FEE)}
-          </span>
+          {fastSurcharge > 0 && (
+            <span className="mt-0.5 block text-[10px] font-bold uppercase text-gold">
+              +{formatPrice(fastSurcharge)}
+            </span>
+          )}
         </button>
       </div>
     </div>

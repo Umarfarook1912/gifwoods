@@ -1,9 +1,4 @@
-import {
-  FREE_SHIPPING_THRESHOLD,
-  STANDARD_SHIPPING_FEE,
-  GST_RATE,
-} from "@/constants/ui";
-import { FAST_DELIVERY_FEE } from "@/constants/shipping";
+import { GST_RATE } from "@/constants/ui";
 import type { DeliveryMethod } from "@/types/shipping";
 
 /** Round money to 2 decimal places (INR paise). */
@@ -17,21 +12,55 @@ export function calculateGst(subtotal: number): number {
   return roundMoney(subtotal * GST_RATE);
 }
 
-/** Base shipping (free above threshold) + optional Fast delivery surcharge.
- *  Test-product orders skip shipping entirely (product price only). */
+/** One cart/checkout line used to compute per-product shipping. */
+export interface ShippingLineInput {
+  shipping_charge?: number | null;
+  fast_shipping_charge?: number | null;
+  quantity: number;
+}
+
+function unitShipping(
+  line: ShippingLineInput,
+  method: DeliveryMethod
+): number {
+  const base = Number(line.shipping_charge ?? 0);
+  const fast =
+    method === "fast" ? Number(line.fast_shipping_charge ?? 0) : 0;
+  return base + fast;
+}
+
+/**
+ * Sum of per-product shipping × qty.
+ * Normal = shipping_charge; Fast = shipping_charge + fast_shipping_charge.
+ * Test-product orders skip shipping entirely.
+ */
 export function calculateShipping(
-  subtotal: number,
+  lines: ShippingLineInput[],
   method: DeliveryMethod = "normal",
   options?: { isTestOrder?: boolean }
 ): number {
   if (options?.isTestOrder) return 0;
-  const base = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_FEE;
-  const express = method === "fast" ? FAST_DELIVERY_FEE : 0;
-  return base + express;
+  return roundMoney(
+    lines.reduce(
+      (sum, line) => sum + unitShipping(line, method) * line.quantity,
+      0
+    )
+  );
 }
 
-export function getFastDeliverySurcharge(method: DeliveryMethod): number {
-  return method === "fast" ? FAST_DELIVERY_FEE : 0;
+/** Fast surcharge portion only (sum of fast_shipping_charge × qty). */
+export function getFastDeliverySurcharge(
+  lines: ShippingLineInput[],
+  method: DeliveryMethod
+): number {
+  if (method !== "fast") return 0;
+  return roundMoney(
+    lines.reduce(
+      (sum, line) =>
+        sum + Number(line.fast_shipping_charge ?? 0) * line.quantity,
+      0
+    )
+  );
 }
 
 /** Order total = products + GST (on products) + shipping (untaxed). */

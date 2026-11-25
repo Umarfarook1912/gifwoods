@@ -1,15 +1,10 @@
 import type { PolicyDocument } from "@/types/support";
-import {
-  FREE_SHIPPING_THRESHOLD,
-  STANDARD_SHIPPING_FEE,
-} from "@/constants/ui";
-import { formatPrice } from "@/lib/utils/formatters";
 
 export const SHIPPING_POLICY: PolicyDocument = {
   title: "Shipping Policy",
   description:
     "Clear timelines, costs, and coverage details for every Gifwoods delivery across India.",
-  lastUpdated: "January 1, 2026",
+  lastUpdated: "November 25, 2026",
   sections: [
     {
       title: "Delivery Timelines",
@@ -24,10 +19,13 @@ export const SHIPPING_POLICY: PolicyDocument = {
     },
     {
       title: "Shipping Costs",
+      paragraphs: [
+        "Shipping is calculated per product and multiplied by quantity in your cart.",
+      ],
       bullets: [
-        `Orders of ${formatPrice(FREE_SHIPPING_THRESHOLD)} or more: Free shipping`,
-        `Orders below ${formatPrice(FREE_SHIPPING_THRESHOLD)}: ${formatPrice(STANDARD_SHIPPING_FEE)} flat fee`,
-        "Corporate orders: Free shipping on all bulk orders",
+        "Normal delivery: each product’s shipping charge × quantity",
+        "Fast delivery: (shipping charge + Fast surcharge) × quantity for each product",
+        "Corporate bulk orders: shipping terms confirmed at quote time",
       ],
     },
     {

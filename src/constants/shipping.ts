@@ -14,12 +14,15 @@ export const DEFAULT_TRANSIT_DAYS = {
   MAX: 5,
 } as const;
 
-/** Extra fee when customer chooses Fast delivery (on top of standard shipping).
- *  App markup — not from Shiprocket courier rates. */
-export const FAST_DELIVERY_FEE = 60;
-
 /** Minimum calendar-day gap between Fast and Normal estimated dates. */
 export const MIN_FAST_NORMAL_GAP_DAYS = 2;
+
+/** Admin product form labels for per-product shipping charges. */
+export const PRODUCT_SHIPPING_FIELDS = {
+  SHIPPING_CHARGE_LABEL: "Shipping charge (₹)",
+  FAST_SHIPPING_CHARGE_LABEL: "Fast surcharge (₹)",
+  FAST_SHIPPING_HINT: "Added on top of shipping charge when Fast is selected",
+} as const;
 
 export const DELIVERY_METHODS = {
   NORMAL: "normal",
@@ -41,9 +44,13 @@ export const DELIVERY_COPY = {
   INVALID_PINCODE: "Enter a valid 6-digit pincode",
   NORMAL_LABEL: "Normal delivery",
   FAST_LABEL: "Fast delivery",
-  FAST_FEE_NOTE: `+₹${FAST_DELIVERY_FEE}`,
-  FAST_FEE_HINT: `Extra ₹${FAST_DELIVERY_FEE} for quicker courier transit`,
+  FAST_FEE_HINT: "Extra charge for quicker courier transit",
   CHOOSE_METHOD: "Choose delivery speed",
+  SHIPPING_INCL_FAST: "Shipping (incl. Fast)",
+  SHIPPING_LABEL: "Shipping",
+  INCLUDES_FAST_SURCHARGE: "Includes Fast surcharge of",
+  PER_PRODUCT_SHIPPING_NOTE:
+    "Shipping is calculated from each product’s shipping charge. Fast adds that product’s Fast surcharge.",
   /** Prefix before the date, e.g. "Estimated delivery on or before 10 Sept 2026" */
   ESTIMATED_ON_OR_BEFORE: "Estimated delivery on or before",
 } as const;
@@ -52,6 +59,8 @@ export const PRODUCT_DETAIL_COPY = {
   ADD_TO_CART: "Add to Cart",
   BUY_NOW: "Buy Now",
   OUT_OF_STOCK: "Out of Stock",
+  TRUST_SHIPPING: "Per-product shipping · Insured delivery",
+  TRUST_PAYMENT: "Secure payment · Easy returns",
 } as const;
 
 export const SHIPROCKET_MOCK = {

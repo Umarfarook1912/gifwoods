@@ -32,7 +32,15 @@ export default function CheckoutPage() {
   const subtotal = getSubtotal();
   const mixedCart = isMixedTestCart(items);
   const testOrder = isTestCart(items);
-  const shipping = calculateShipping(subtotal, shippingMethod, { isTestOrder: testOrder });
+  const shipping = calculateShipping(
+    items.map((item) => ({
+      shipping_charge: item.product.shipping_charge,
+      fast_shipping_charge: item.product.fast_shipping_charge,
+      quantity: item.quantity,
+    })),
+    shippingMethod,
+    { isTestOrder: testOrder }
+  );
   const gst = calculateGst(subtotal);
   const total = calculateOrderTotal(subtotal, shipping, gst);
 

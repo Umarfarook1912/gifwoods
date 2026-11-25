@@ -55,6 +55,8 @@ CREATE TABLE products (
   description TEXT NOT NULL DEFAULT '',
   price NUMERIC(10,2) NOT NULL,
   original_price NUMERIC(10,2),
+  shipping_charge NUMERIC(10,2) NOT NULL DEFAULT 0,
+  fast_shipping_charge NUMERIC(10,2) NOT NULL DEFAULT 0,
   category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
   images TEXT[] DEFAULT '{}',
   tags TEXT[] DEFAULT '{}',

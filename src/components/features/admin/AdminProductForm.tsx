@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { ProductFormFields } from "./ProductFormFields";
 import { ProductOfferFields } from "./ProductOfferFields";
+import { ProductShippingFields } from "./ProductShippingFields";
 import { ImageListField, SpecificationListField } from "./ProductFormLists";
 import { EMPTY_PRODUCT_FORM, productToFormState } from "./product-form-state";
 import { API_ENDPOINTS } from "@/constants/api";
@@ -109,6 +110,7 @@ export function AdminProductForm({ open, onOpenChange, editing, categories, onSa
               setNewCategoryName={setNewCategoryName}
             />
 
+            <ProductShippingFields form={form} setForm={setForm} />
             <ProductOfferFields form={form} setForm={setForm} />
 
             <ImageListField

@@ -3,12 +3,15 @@
 import { Calendar } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { DELIVERY_COPY, DELIVERY_METHODS } from "@/constants/shipping";
+import { formatPrice } from "@/lib/utils/formatters";
 import type { DeliveryEstimateResult, DeliveryMethod } from "@/types/shipping";
 
 interface Props {
   estimate: DeliveryEstimateResult;
   selected: DeliveryMethod;
   onSelect: (method: DeliveryMethod) => void;
+  /** Per-unit Fast surcharge for this product. */
+  fastShippingCharge?: number;
 }
 
 function EstimateDateLine({ date }: { date: string }) {
@@ -23,7 +26,12 @@ function EstimateDateLine({ date }: { date: string }) {
   );
 }
 
-export function DeliveryMethodOptions({ estimate, selected, onSelect }: Props) {
+export function DeliveryMethodOptions({
+  estimate,
+  selected,
+  onSelect,
+  fastShippingCharge = 0,
+}: Props) {
   const { normal, fast } = estimate.options;
 
   return (
@@ -83,9 +91,11 @@ export function DeliveryMethodOptions({ estimate, selected, onSelect }: Props) {
             <span className="text-sm font-semibold text-dark">
               {DELIVERY_COPY.FAST_LABEL}
             </span>
-            <span className="rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-dark">
-              {DELIVERY_COPY.FAST_FEE_NOTE}
-            </span>
+            {fastShippingCharge > 0 && (
+              <span className="rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-dark">
+                +{formatPrice(fastShippingCharge)}
+              </span>
+            )}
           </span>
           <EstimateDateLine date={fast.formattedDate} />
           <span className="mt-0.5 block text-xs text-warm-gray">

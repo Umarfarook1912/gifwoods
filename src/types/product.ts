@@ -19,6 +19,8 @@ export interface Product {
   description: string;
   price: number;
   original_price: number | null;
+  shipping_charge?: number;
+  fast_shipping_charge?: number;
   category_id: string;
   category?: Category;
   images: string[];
@@ -61,6 +63,8 @@ export interface ProductFormData {
   description: string;
   price: number;
   original_price?: number;
+  shipping_charge?: number;
+  fast_shipping_charge?: number;
   category_id?: string | null;
   images: string[];
   tags: string[];
@@ -91,6 +95,8 @@ export interface ProductFormState {
   description: string;
   price: number;
   original_price: number;
+  shipping_charge: number;
+  fast_shipping_charge: number;
   category_id: string;
   images: string[];
   tags: string[];

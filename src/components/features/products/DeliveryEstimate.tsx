@@ -11,7 +11,14 @@ import { useCartStore } from "@/hooks/useCartStore";
 import type { Product } from "@/types/product";
 
 interface Props {
-  product: Pick<Product, "customization_text" | "customization_image" | "price">;
+  product: Pick<
+    Product,
+    | "customization_text"
+    | "customization_image"
+    | "price"
+    | "shipping_charge"
+    | "fast_shipping_charge"
+  >;
 }
 
 export function DeliveryEstimate({ product }: Props) {
@@ -82,6 +89,7 @@ export function DeliveryEstimate({ product }: Props) {
                 estimate={data}
                 selected={shippingMethod}
                 onSelect={setShippingMethod}
+                fastShippingCharge={Number(product.fast_shipping_charge ?? 0)}
               />
               <p className="text-xs text-warm-gray">{DELIVERY_COPY.ESTIMATE_FOOTNOTE}</p>
             </div>

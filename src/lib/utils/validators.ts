@@ -37,6 +37,8 @@ export const productFieldsSchema = z.object({
   description: z.string().min(10),
   price: z.number().positive(),
   original_price: z.number().positive().optional(),
+  shipping_charge: z.number().min(0).optional(),
+  fast_shipping_charge: z.number().min(0).optional(),
   category_id: z.string().uuid().optional().nullable(),
   new_category_name: z.string().optional(),
   images: z.array(z.string().url()).min(1),

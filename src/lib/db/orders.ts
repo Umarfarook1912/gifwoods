@@ -267,6 +267,8 @@ export interface CheckoutProduct {
   stock: number;
   status: string;
   is_test: boolean;
+  shipping_charge: number;
+  fast_shipping_charge: number;
   offer_type: "percent" | "amount" | null;
   offer_value: number | null;
   offer_starts_at: string | null;
@@ -278,7 +280,7 @@ export async function getProductsForCheckout(productIds: string[]): Promise<Chec
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id, price, stock, status, is_test, offer_type, offer_value, offer_starts_at, offer_ends_at"
+      "id, price, stock, status, is_test, shipping_charge, fast_shipping_charge, offer_type, offer_value, offer_starts_at, offer_ends_at"
     )
     .in("id", productIds);
   if (error) throw error;
